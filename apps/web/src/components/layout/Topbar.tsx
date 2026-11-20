@@ -26,45 +26,232 @@ const PATH_LABELS: Record<string, string> = {
   compare: 'Compare',
 }
 
+interface BreadcrumbItem {
+  label: string
+  href?: string
+  isId?: boolean
+}
+
+function getBreadcrumbItems(pathname: string): BreadcrumbItem[] {
+  const rootItem: BreadcrumbItem = { label: 'Workspace', href: '/dashboard' }
+  const segments = pathname.split('/').filter(Boolean)
+
+  if (segments.length === 0 || (segments.length === 1 && segments[0] === 'dashboard')) {
+    return [rootItem, { label: 'Dashboard' }]
+  }
+
+  const module = segments[0]
+
+  // Module 1: Websites
+  // - /websites -> Workspace / Websites
+  // - /websites/new -> Workspace / Websites / New Website
+  // - /websites/[id] -> Workspace / Websites / [id]
+  // - /websites/[id]/config -> Workspace / Websites / [id] / Configuration
+  if (module === 'websites') {
+    const items: BreadcrumbItem[] = [rootItem]
+    items.push({ label: 'Websites', href: segments.length > 1 ? '/websites' : undefined })
+
+    if (segments[1]) {
+      if (segments[1] === 'new') {
+        items.push({ label: 'New Website' })
+      } else {
+        const websiteId = segments[1]
+        const hasSub = segments.length > 2
+        items.push({
+          label: websiteId,
+          href: hasSub ? `/websites/${websiteId}` : undefined,
+          isId: true,
+        })
+
+        if (segments[2]) {
+          const subLabel = PATH_LABELS[segments[2]] || segments[2]
+          items.push({ label: subLabel })
+        }
+      }
+    }
+    return items
+  }
+
+  // Module 2: Tasks
+  // - /tasks -> Workspace / Tasks
+  // - /tasks/new -> Workspace / Tasks / New Task
+  // - /tasks/[id] -> Workspace / Tasks / [id]
+  if (module === 'tasks') {
+    const items: BreadcrumbItem[] = [rootItem]
+    items.push({ label: 'Tasks', href: segments.length > 1 ? '/tasks' : undefined })
+
+    if (segments[1]) {
+      if (segments[1] === 'new') {
+        items.push({ label: 'New Task' })
+      } else {
+        const taskId = segments[1]
+        const hasSub = segments.length > 2
+        items.push({
+          label: taskId,
+          href: hasSub ? `/tasks/${taskId}` : undefined,
+          isId: true,
+        })
+
+        if (segments[2]) {
+          const subLabel = PATH_LABELS[segments[2]] || segments[2]
+          items.push({
+            label: subLabel,
+            isId: segments[2].startsWith('pln') || segments[2].startsWith('plan'),
+          })
+        }
+      }
+    }
+    return items
+  }
+
+  // Module 3: Plans (/plans/[id]) -> Workspace / Tasks / Task-id / plan-id
+  if (module === 'plans' && segments[1]) {
+    const planId = segments[1]
+    const taskId = 'tsk-201'
+    return [
+      rootItem,
+      { label: 'Tasks', href: '/tasks' },
+      { label: taskId, href: `/tasks/${taskId}`, isId: true },
+      { label: planId, isId: true },
+    ]
+  }
+
+  // Module 4: Runs (/runs/[id]) -> Workspace / Tasks / Task-id / run-id
+  if (module === 'runs' && segments[1]) {
+    const runId = segments[1]
+    const taskId = 'tsk-201'
+    return [
+      rootItem,
+      { label: 'Tasks', href: '/tasks' },
+      { label: taskId, href: `/tasks/${taskId}`, isId: true },
+      { label: runId, isId: true },
+    ]
+  }
+
+  // Module 5: Reports (/reports, /reports/compare, /reports/[id])
+  if (module === 'reports') {
+    const items: BreadcrumbItem[] = [rootItem]
+    items.push({ label: 'Reports', href: segments.length > 1 ? '/reports' : undefined })
+
+    if (segments[1]) {
+      if (segments[1] === 'compare') {
+        items.push({ label: 'Compare' })
+      } else {
+        items.push({ label: segments[1], isId: true })
+      }
+    }
+    return items
+  }
+
+  // Module 6: Settings (/settings, /settings/general, /settings/providers, etc.)
+  if (module === 'settings') {
+    const items: BreadcrumbItem[] = [rootItem]
+    items.push({ label: 'Settings', href: segments.length > 1 ? '/settings/general' : undefined })
+
+    if (segments[1]) {
+      const subLabel = PATH_LABELS[segments[1]] || segments[1]
+      items.push({ label: subLabel })
+    }
+    return items
+  }
+
+  // Module 7: Users (/users)
+  if (module === 'users') {
+    return [rootItem, { label: 'Users' }]
+  }
+
+  // Module 8: Notifications (/notifications)
+  if (module === 'notifications') {
+    return [rootItem, { label: 'Notifications' }]
+  }
+
+  // Generic fallback for any other nested route
+  const items: BreadcrumbItem[] = [rootItem]
+  let currentPath = ''
+  segments.forEach((seg, i) => {
+    currentPath += `/${seg}`
+    const isLast = i === segments.length - 1
+    const label = PATH_LABELS[seg] || seg
+    const isId = /^[a-z]+-[0-9]+$/i.test(seg)
+    items.push({
+      label,
+      href: isLast ? undefined : currentPath,
+      isId,
+    })
+  })
+  return items
+}
+
 export function Topbar() {
   const pathname = usePathname()
-  const segments = pathname.split('/').filter(Boolean)
   const { toggleSidebar, setCommandMenuOpen } = useUIStore()
-
-  const currentLabel =
-    segments.length > 0
-      ? PATH_LABELS[segments[segments.length - 1]] || segments[segments.length - 1]
-      : 'Dashboard'
+  const breadcrumbs = getBreadcrumbItems(pathname)
 
   return (
     <header
-      className="sticky top-0 z-20 h-14 flex items-center justify-between px-6 border-b border-[var(--border)] shrink-0"
+      className="sticky top-0 z-20 h-14 flex items-center justify-between px-6 border-b border-[var(--border)] shrink-0 gap-4"
       style={{ background: 'var(--topbar-bg)', backdropFilter: 'blur(10px)' }}
     >
-      {/* Left: Breadcrumbs */}
+      {/* Left: Breadcrumbs with Links */}
       <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={toggleSidebar}
-          className="h-8 w-8 rounded-[6px] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-elevated)] transition-colors"
+          className="h-8 w-8 rounded-[6px] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-elevated)] transition-colors shrink-0"
           title="Toggle sidebar"
           aria-label="Toggle sidebar"
         >
           <PanelLeft className="h-4 w-4" />
         </button>
 
-        <nav className="flex items-center gap-1.5 text-[13px]" aria-label="breadcrumb">
-          <span className="text-[var(--text-muted)]">Workspace</span>
-          <span className="text-[var(--border-hover)]">/</span>
-          <span className="text-[var(--text)] font-semibold">{currentLabel}</span>
+        <nav
+          className="flex items-center gap-1.5 text-[13px] overflow-hidden whitespace-nowrap"
+          aria-label="breadcrumb"
+        >
+          {breadcrumbs.map((crumb, idx) => {
+            const isLast = idx === breadcrumbs.length - 1
+
+            return (
+              <React.Fragment key={idx}>
+                {idx > 0 && (
+                  <span className="text-[var(--border-hover)] select-none shrink-0">/</span>
+                )}
+
+                {crumb.href && !isLast ? (
+                  <Link
+                    href={crumb.href}
+                    className="text-[var(--text-muted)] hover:text-[var(--primary)] hover:underline transition-colors shrink-0 flex items-center"
+                  >
+                    {crumb.isId ? (
+                      <span className="font-mono text-[11px] bg-[var(--surface-elevated)] border border-[var(--border)] px-1.5 py-0.5 rounded text-[var(--text-muted)] hover:text-[var(--text)] hover:border-[var(--primary)]/40 transition-colors">
+                        {crumb.label}
+                      </span>
+                    ) : (
+                      <span>{crumb.label}</span>
+                    )}
+                  </Link>
+                ) : (
+                  <span className="text-[var(--text)] font-semibold shrink-0 flex items-center">
+                    {crumb.isId ? (
+                      <span className="font-mono text-[11px] bg-[var(--primary-tint)] border border-[var(--primary)]/30 px-1.5 py-0.5 rounded text-[var(--primary)] font-bold">
+                        {crumb.label}
+                      </span>
+                    ) : (
+                      <span>{crumb.label}</span>
+                    )}
+                  </span>
+                )}
+              </React.Fragment>
+            )
+          })}
         </nav>
       </div>
 
-      {/* Right: Search Input (⌘K) + Engine Pill + Notification Bell */}
+      {/* Right: Search Input (⌘K) + Engine Pill + Notification Bell + User Role Menu */}
       <div className="flex items-center gap-3 shrink-0">
         <button
           type="button"
           onClick={() => setCommandMenuOpen(true)}
-          className="relative hidden sm:flex items-center h-8 w-64 pl-8 pr-8 text-[12px] bg-[var(--surface)] border border-[var(--border)] rounded-[6px] text-[var(--text-muted)] hover:border-[var(--border-hover)] hover:text-[var(--text)] transition-colors text-left select-none cursor-pointer"
+          className="relative hidden md:flex items-center h-8 w-56 lg:w-64 pl-8 pr-8 text-[12px] bg-[var(--surface)] border border-[var(--border)] rounded-[6px] text-[var(--text-muted)] hover:border-[var(--border-hover)] hover:text-[var(--text)] transition-colors text-left select-none cursor-pointer"
         >
           <Search className="absolute left-2.5 h-3.5 w-3.5 text-[var(--text-muted)] pointer-events-none" />
           <span className="truncate">Search websites, tasks...</span>
@@ -74,7 +261,7 @@ export function Topbar() {
         </button>
 
         {/* Engine status pill */}
-        <div className="flex items-center gap-2 h-8 px-3 rounded-[6px] bg-[var(--surface)] border border-[var(--border)] text-[12px] select-none">
+        <div className="hidden sm:flex items-center gap-2 h-8 px-3 rounded-[6px] bg-[var(--surface)] border border-[var(--border)] text-[12px] select-none">
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-[var(--text)] font-medium">Ollama</span>
           <span className="text-[var(--text-muted)]">·</span>

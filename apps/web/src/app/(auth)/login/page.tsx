@@ -40,8 +40,8 @@ const DEMO_CREDENTIALS: Record<UserRole, RoleCardInfo> = {
     role: 'qa_lead',
     icon: UserCheck,
     title: 'QA Lead',
-    subtitle: 'Aarav Mehta',
-    email: 'lead@testingagent.ai',
+    subtitle: 'Riya Sharma',
+    email: 'riya@company.com',
     password: 'lead',
     permissionsSummary: 'Manage websites, create tasks, approve & finalize plans, trigger runs, invite QA employees',
     border: 'border-indigo-200 dark:border-indigo-900/60 hover:border-indigo-500',
@@ -52,8 +52,8 @@ const DEMO_CREDENTIALS: Record<UserRole, RoleCardInfo> = {
     role: 'qa_engineer',
     icon: Wrench,
     title: 'QA Employee',
-    subtitle: 'Elena Rostova',
-    email: 'employee@testingagent.ai',
+    subtitle: 'Karan Verma',
+    email: 'karan@company.com',
     password: 'employee',
     permissionsSummary: 'Create tasks, write test cases & trigger runs (cannot approve plans or manage team)',
     border: 'border-emerald-200 dark:border-emerald-900/60 hover:border-emerald-500',
@@ -160,10 +160,14 @@ export default function LoginPage() {
       return
     }
 
-    // 2. Match with demo roles
-    const matchedRole = (Object.keys(MOCK_USERS) as UserRole[]).find(
+    // 2. Match with demo roles (including alias emails)
+    let matchedRole = (Object.keys(MOCK_USERS) as UserRole[]).find(
       (r) => MOCK_USERS[r].email.toLowerCase() === email.trim().toLowerCase()
     )
+    if (!matchedRole) {
+      if (email.trim().toLowerCase() === 'lead@testingagent.ai') matchedRole = 'qa_lead'
+      if (email.trim().toLowerCase() === 'employee@testingagent.ai') matchedRole = 'qa_engineer'
+    }
 
     if (matchedRole) {
       instantLogin(matchedRole)

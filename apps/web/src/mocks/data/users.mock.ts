@@ -33,16 +33,6 @@ export const INITIAL_MEMBERS: Member[] = [
   },
   {
     id: 'm3',
-    name: 'Vikram Patel',
-    email: 'vikram@company.com',
-    role: 'qa_lead',
-    status: 'active',
-    lastLogin: '2h ago',
-    assignedLead: 'Alex Chen (Admin)',
-    password: 'lead',
-  },
-  {
-    id: 'm4',
     name: 'Karan Verma',
     email: 'karan@company.com',
     role: 'qa_engineer',
@@ -51,16 +41,4 @@ export const INITIAL_MEMBERS: Member[] = [
     assignedLead: 'Riya Sharma',
     password: 'employee',
   },
-  {
-    id: 'm5',
-    name: 'Elena Rostova',
-    email: 'employee@testingagent.ai',
-    role: 'qa_engineer',
-    status: 'active',
-    lastLogin: '1h ago',
-    assignedLead: 'Vikram Patel',
-    password: 'employee',
-  },
-  
 ]
-

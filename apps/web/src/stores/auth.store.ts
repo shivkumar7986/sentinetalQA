@@ -12,21 +12,21 @@ export interface AuthUser {
 
 export const MOCK_USERS: Record<UserRole, AuthUser> = {
   admin: {
-    id: 'u-admin',
+    id: 'm1',
     name: 'Alex Chen',
     email: 'admin@testingagent.ai',
     role: 'admin',
   },
   qa_lead: {
-    id: 'u-lead',
-    name: 'Aarav Mehta',
-    email: 'lead@testingagent.ai',
+    id: 'm2',
+    name: 'Riya Sharma',
+    email: 'riya@company.com',
     role: 'qa_lead',
   },
   qa_engineer: {
-    id: 'u-eng',
-    name: 'Elena Rostova',
-    email: 'employee@testingagent.ai',
+    id: 'm3',
+    name: 'Karan Verma',
+    email: 'karan@company.com',
     role: 'qa_engineer',
   },
 }

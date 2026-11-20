@@ -13,7 +13,7 @@ const STORAGE_KEYS = {
   tasks: 'testing_agent_mock_tasks',
   plans: 'testing_agent_mock_plans',
   runs: 'testing_agent_mock_runs',
-  members: 'testing_agent_mock_members',
+  members: 'testing_agent_mock_members_v3',
   auditLogs: 'testing_agent_mock_audit_logs',
 }
 

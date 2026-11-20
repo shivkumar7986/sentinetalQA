@@ -15,13 +15,12 @@ export function SettingsNav({ action }: SettingsNavProps) {
   const { user } = useAuthStore()
 
   // RBAC Tab Visibility:
-  // Admin -> all tabs
-  // QA Lead -> only General & Audit Log
+  // Admin -> General, AI Providers, Audit Log
+  // QA Lead -> General, Audit Log
   // QA Employee -> none
   const allTabs = [
     { label: 'General', href: '/settings/general', admin: false, roles: ['admin', 'qa_lead'] },
     { label: 'AI Providers', href: '/settings/providers', admin: true, roles: ['admin'] },
-    { label: 'Users', href: '/settings/users', admin: true, roles: ['admin'] },
     { label: 'Audit Log', href: '/settings/audit', admin: false, roles: ['admin', 'qa_lead'] },
   ]
 
@@ -38,7 +37,7 @@ export function SettingsNav({ action }: SettingsNavProps) {
             Settings
           </h1>
           <p className="text-[13px] text-gray-500 dark:text-neutral-400 mt-0.5">
-            Workspace execution guardrails, AI engine connections, user access, and immutable audit trail.
+            Workspace execution guardrails, AI engine connections, and immutable audit trail.
           </p>
         </div>
         {action && <div className="shrink-0">{action}</div>}

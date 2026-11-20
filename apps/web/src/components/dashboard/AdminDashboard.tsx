@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   ChevronDown,
@@ -18,7 +18,8 @@ import type { Website } from "@/mocks/data/websites.mock";
 import type { Task } from "@/mocks/data/tasks.mock";
 import type { Run } from "@/mocks/data/runs.mock";
 import type { TestPlan } from "@/mocks/data/plans.mock";
-import { INITIAL_MEMBERS } from "@/mocks/data/users.mock";
+import { INITIAL_MEMBERS, type Member } from "@/mocks/data/users.mock";
+import { mockClient } from "@/mocks/mockClient";
 import { toast } from "sonner";
 
 const ENV_OPTIONS = [
@@ -140,6 +141,21 @@ export function AdminDashboard({
   const [roleFilter, setRoleFilter] = useState("All roles");
   const [roleOpen, setRoleOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"team" | "runs">("team");
+  const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS);
+
+  useEffect(() => {
+    async function loadMembers() {
+      const list = await mockClient.getMembers();
+      setMembers(list);
+    }
+    loadMembers();
+
+    const handleUpdate = () => {
+      loadMembers();
+    };
+    window.addEventListener("testing_agent_members_changed", handleUpdate);
+    return () => window.removeEventListener("testing_agent_members_changed", handleUpdate);
+  }, []);
 
   // Metrics
   const activeWebsites = websites.filter((w) => w.status !== "archived");
@@ -148,12 +164,12 @@ export function AdminDashboard({
   const passRate =
     totalRuns > 0 ? ((passedRuns / totalRuns) * 100).toFixed(1) : "91.5";
 
-  const leads = INITIAL_MEMBERS.filter((m) => m.role === "qa_lead");
-  const employees = INITIAL_MEMBERS.filter((m) => m.role === "qa_engineer");
+  const leads = members.filter((m) => m.role === "qa_lead");
+  const employees = members.filter((m) => m.role === "qa_engineer");
   const totalTeam = leads.length + employees.length;
 
   // Filter members by role
-  const filteredMembers = INITIAL_MEMBERS.filter((m) => {
+  const filteredMembers = members.filter((m) => {
     if (roleFilter === "All roles") return true;
     if (roleFilter === "Admin") return m.role === "admin";
     if (roleFilter === "QA Lead") return m.role === "qa_lead";
@@ -181,14 +197,12 @@ export function AdminDashboard({
     );
   }
 
-  function getLeadScope(role: string, name: string) {
-    if (role === "admin") return <span className="text-[var(--text-muted)]">—</span>;
-    if (role === "qa_lead") return <span className="text-[12px] text-[var(--text-muted)]">Alex Chen (Admin)</span>;
-    // Find lead for this employee (simple assignment)
-    const lead = leads.length > 0 ? leads[0] : null;
+  function getLeadScope(m: Member) {
+    if (m.role === "admin") return <span className="text-[var(--text-muted)]">—</span>;
+    if (m.role === "qa_lead") return <span className="text-[12px] text-[var(--text-muted)]">Alex Chen (Admin)</span>;
     return (
       <span className="text-[12px] text-[var(--text-muted)]">
-        {lead ? `${lead.name} (QA Lead)` : "—"}
+        {m.assignedLead ? m.assignedLead : leads.length > 0 ? `${leads[0].name} (QA Lead)` : "—"}
       </span>
     );
   }
@@ -588,7 +602,7 @@ export function AdminDashboard({
                         <td className="py-3 px-4">{getRoleBadge(m.role)}</td>
                         {/* LEAD / SCOPE */}
                         <td className="py-3 px-4">
-                          {getLeadScope(m.role, m.name)}
+                          {getLeadScope(m)}
                         </td>
                         {/* ADDED BY */}
                         <td className="py-3 px-4 text-[12px] text-[var(--text-muted)]">

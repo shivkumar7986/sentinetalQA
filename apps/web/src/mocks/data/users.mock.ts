@@ -7,6 +7,7 @@ export interface Member {
   role: UserRole
   status: 'active' | 'invited' | 'disabled'
   lastLogin: string
+  assignedLead?: string
 }
 
 export const INITIAL_MEMBERS: Member[] = [
@@ -20,35 +21,48 @@ export const INITIAL_MEMBERS: Member[] = [
   },
   {
     id: 'm2',
-    name: 'Aarav Mehta',
-    email: 'lead@testingagent.ai',
+    name: 'Riya Sharma',
+    email: 'riya@company.com',
     role: 'qa_lead',
     status: 'active',
     lastLogin: '14m ago',
+    assignedLead: 'Alex Chen (Admin)',
   },
   {
     id: 'm3',
+    name: 'Vikram Patel',
+    email: 'vikram@company.com',
+    role: 'qa_lead',
+    status: 'active',
+    lastLogin: '2h ago',
+    assignedLead: 'Alex Chen (Admin)',
+  },
+  {
+    id: 'm4',
+    name: 'Karan Verma',
+    email: 'karan@company.com',
+    role: 'qa_engineer',
+    status: 'active',
+    lastLogin: '3h ago',
+    assignedLead: 'Riya Sharma',
+  },
+  {
+    id: 'm5',
     name: 'Elena Rostova',
     email: 'employee@testingagent.ai',
     role: 'qa_engineer',
     status: 'active',
     lastLogin: '1h ago',
+    assignedLead: 'Vikram Patel',
   },
   {
-    id: 'm4',
-    name: 'Karan Verma',
-    email: 'karan@testingagent.ai',
-    role: 'qa_engineer',
-    status: 'active',
-    lastLogin: '3h ago',
-  },
-  {
-    id: 'm5',
+    id: 'm6',
     name: 'Neha Kapoor',
     email: 'neha@testingagent.ai',
     role: 'qa_engineer',
     status: 'invited',
     lastLogin: '—',
+    assignedLead: 'Riya Sharma',
   },
 ]
 

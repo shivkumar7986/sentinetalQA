@@ -3,6 +3,7 @@ import { INITIAL_CONFIGS, type FullWebsiteConfig } from './data/configs.mock'
 import { INITIAL_TASKS, type Task } from './data/tasks.mock'
 import { INITIAL_PLANS, type TestPlan, type TestCase, type TestStep } from './data/plans.mock'
 import { INITIAL_RUNS, type Run, type StepLog } from './data/runs.mock'
+import { INITIAL_MEMBERS, type Member } from './data/users.mock'
 
 const STORAGE_KEYS = {
   websites: 'testing_agent_mock_websites',
@@ -10,6 +11,7 @@ const STORAGE_KEYS = {
   tasks: 'testing_agent_mock_tasks',
   plans: 'testing_agent_mock_plans',
   runs: 'testing_agent_mock_runs',
+  members: 'testing_agent_mock_members',
 }
 
 function loadState<T>(key: string, fallback: T): T {
@@ -362,6 +364,38 @@ export const mockClient = {
     runsMap[runId] = run
     saveState(STORAGE_KEYS.runs, runsMap)
     return run
+  },
+
+  // Members
+  getMembers: async (): Promise<Member[]> => {
+    return loadState(STORAGE_KEYS.members, INITIAL_MEMBERS)
+  },
+
+  createMember: async (data: Omit<Member, 'id' | 'lastLogin'>): Promise<Member> => {
+    const all = await mockClient.getMembers()
+    const newMember: Member = {
+      ...data,
+      id: `m-${Date.now()}`,
+      lastLogin: 'Just now',
+    }
+    const updated = [newMember, ...all]
+    saveState(STORAGE_KEYS.members, updated)
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('testing_agent_members_changed'))
+    }
+    return newMember
+  },
+
+  updateMember: async (id: string, updates: Partial<Member>): Promise<Member> => {
+    const all = await mockClient.getMembers()
+    const idx = all.findIndex((m) => m.id === id)
+    if (idx === -1) throw new Error('Member not found')
+    all[idx] = { ...all[idx], ...updates }
+    saveState(STORAGE_KEYS.members, all)
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('testing_agent_members_changed'))
+    }
+    return all[idx]
   },
 }
 

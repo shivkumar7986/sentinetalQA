@@ -1,38 +1,18 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { X, ChevronDown, Check } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { X, ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
 import { useUIStore } from '@/stores/ui.store'
 import { useAuthStore, type UserRole } from '@/stores/auth.store'
-import { INITIAL_MEMBERS } from '@/mocks/data/users.mock'
+import { type Member } from '@/mocks/data/users.mock'
+import { mockClient } from '@/mocks/mockClient'
 import { canAddRole } from '@/lib/permissions'
-
-const ROLE_OPTIONS = [
-  {
-    value: 'qa_engineer' as UserRole,
-    label: 'QA Employee',
-    description: 'Create tasks, edit plans, run tests',
-  },
-  {
-    value: 'qa_lead' as UserRole,
-    label: 'QA Lead',
-    description: 'Approve plans, manage team, configure websites',
-  },
-  {
-    value: 'admin' as UserRole,
-    label: 'Admin',
-    description: 'Full system control, governance & settings',
-  },
-]
-
-const STATUS_OPTIONS = ['Active', 'Invited'] as const
 
 interface AddUserDrawerProps {
   open?: boolean
   onClose?: () => void
-  onSuccess?: (user: { name: string; email: string; role: UserRole; lead: string; status: string }) => void
+  onSuccess?: (user: Member) => void
 }
 
 export function AddUserDrawer({
@@ -49,21 +29,22 @@ export function AddUserDrawer({
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<UserRole>('qa_engineer')
   const [assignedLead, setAssignedLead] = useState('')
-  const [status, setStatus] = useState<'Active' | 'Invited'>('Active')
+  const [status, setStatus] = useState<'active' | 'invited'>('active')
+  const [availableLeads, setAvailableLeads] = useState<Member[]>([])
   const [loading, setLoading] = useState(false)
 
-  // Dropdown open states
-  const [roleOpen, setRoleOpen] = useState(false)
-  const [leadOpen, setLeadOpen] = useState(false)
-  const [statusOpen, setStatusOpen] = useState(false)
-
-  // Get available QA Leads for assignment
-  const availableLeads = INITIAL_MEMBERS.filter((m) => m.role === 'qa_lead')
-
-  // Set default lead when drawer opens
+  // Load available QA Leads
   useEffect(() => {
-    if (isOpen && availableLeads.length > 0 && !assignedLead) {
-      setAssignedLead(availableLeads[0].name)
+    async function loadLeads() {
+      const all = await mockClient.getMembers()
+      const leads = all.filter((m) => m.role === 'qa_lead' && m.status !== 'disabled')
+      setAvailableLeads(leads)
+      if (leads.length > 0 && !assignedLead) {
+        setAssignedLead(leads[0].name)
+      }
+    }
+    if (isOpen) {
+      loadLeads()
     }
   }, [isOpen])
 
@@ -80,56 +61,55 @@ export function AddUserDrawer({
 
   if (!isOpen) return null
 
-  // Filter role options based on current user's permissions
-  const allowedRoles = ROLE_OPTIONS.filter((r) => canAddRole(user?.role, r.value))
-
-  const selectedRoleOption = ROLE_OPTIONS.find((r) => r.value === role)
-
   function resetForm() {
     setFullName('')
     setEmail('')
     setRole('qa_engineer')
     setAssignedLead(availableLeads.length > 0 ? availableLeads[0].name : '')
-    setStatus('Active')
+    setStatus('active')
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!fullName.trim() || !email.trim()) return
 
     if (!canAddRole(user?.role, role)) {
       toast.error('Permission Denied', {
-        description: `You cannot add a user with the ${selectedRoleOption?.label} role.`,
+        description: `You do not have permission to add a user with the ${role} role.`,
       })
       return
     }
 
     setLoading(true)
-
-    // Simulate async
-    setTimeout(() => {
-      const newUser = {
+    try {
+      const newMember = await mockClient.createMember({
         name: fullName.trim(),
         email: email.trim(),
         role,
-        lead: assignedLead,
-        status: status.toLowerCase(),
-      }
+        status,
+        assignedLead: role === 'qa_engineer' ? (assignedLead || availableLeads[0]?.name || 'Alex Chen') : undefined,
+      })
 
-      if (onSuccess) onSuccess(newUser)
+      if (onSuccess) onSuccess(newMember)
 
-      toast.success(`${newUser.name} added as ${selectedRoleOption?.label}`, {
-        description: `Invitation sent to ${newUser.email}`,
+      toast.success(`${newMember.name} added successfully!`, {
+        description: `Role: ${role === 'admin' ? 'Admin' : role === 'qa_lead' ? 'QA Lead' : 'QA Employee'} (${status})`,
       })
 
       resetForm()
-      setLoading(false)
       handleClose()
-    }, 400)
+    } catch (err: any) {
+      toast.error('Failed to add user', { description: err.message || 'An error occurred' })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const inputClasses =
     'w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all'
+
+  const selectClasses =
+    'w-full h-11 px-3.5 pr-10 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white appearance-none focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all cursor-pointer'
 
   return (
     <div className="fixed inset-0 z-[100] flex justify-end">
@@ -147,8 +127,8 @@ export function AddUserDrawer({
         aria-modal="true"
       >
         <form onSubmit={handleSubmit} className="h-full flex flex-col justify-between">
-          {/* Header & Fields */}
-          <div className="px-8 pt-8 pb-4 space-y-5 overflow-y-auto">
+          {/* Header & Fields container */}
+          <div className="px-8 pt-8 pb-4 space-y-5 overflow-y-auto flex-1">
             {/* Header */}
             <div className="flex items-start justify-between pb-1">
               <div>
@@ -200,121 +180,60 @@ export function AddUserDrawer({
               />
             </div>
 
-            {/* Field 3: Platform role (custom dropdown) */}
+            {/* Field 3: Platform role */}
             <div className="space-y-1.5">
               <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
                 Platform role
               </label>
               <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => { setRoleOpen((v) => !v); setLeadOpen(false); setStatusOpen(false); }}
-                  className={cn(
-                    'w-full h-11 px-3.5 text-[14px] rounded-lg border bg-white dark:bg-neutral-800 text-gray-900 dark:text-white flex items-center justify-between transition-all text-left',
-                    roleOpen
-                      ? 'border-[#6366F1] ring-2 ring-[#6366F1]/20'
-                      : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300 dark:hover:border-neutral-600',
-                  )}
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value as UserRole)}
+                  className={selectClasses}
                 >
-                  <span>
-                    {selectedRoleOption?.label}
-                    <span className="text-gray-400 dark:text-neutral-500 ml-1">
-                      ({selectedRoleOption?.description})
-                    </span>
-                  </span>
-                  <ChevronDown className={cn('h-4 w-4 text-gray-400 transition-transform shrink-0', roleOpen && 'rotate-180')} />
-                </button>
-
-                {roleOpen && (
-                  <>
-                    <div className="fixed inset-0 z-20" onClick={() => setRoleOpen(false)} />
-                    <div
-                      className="absolute left-0 right-0 top-full mt-1.5 rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 py-1 z-30 shadow-lg"
-                    >
-                      {allowedRoles.map((opt) => (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          onClick={() => { setRole(opt.value); setRoleOpen(false); }}
-                          className={cn(
-                            'w-full text-left px-3.5 py-2.5 text-[13px] flex items-center justify-between transition-colors',
-                            role === opt.value
-                              ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 font-semibold'
-                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-700',
-                          )}
-                        >
-                          <div>
-                            <span className="font-medium">{opt.label}</span>
-                            <span className="text-gray-400 dark:text-neutral-500 ml-1 text-[12px]">
-                              ({opt.description})
-                            </span>
-                          </div>
-                          {role === opt.value && <Check className="h-4 w-4 text-indigo-600 dark:text-indigo-400 shrink-0" />}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
+                  <option value="qa_engineer">
+                    QA Employee (Create tasks, edit plans, run tests)
+                  </option>
+                  {canAddRole(user?.role, 'qa_lead') && (
+                    <option value="qa_lead">
+                      QA Lead (Approve plans, manage team, configure websites)
+                    </option>
+                  )}
+                  {canAddRole(user?.role, 'admin') && (
+                    <option value="admin">
+                      Admin (Full system control, governance &amp; settings)
+                    </option>
+                  )}
+                </select>
+                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
               </div>
             </div>
 
-            {/* Field 4: Assigned QA Lead */}
-            <div className="space-y-1.5">
-              <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                Assigned QA Lead
-              </label>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => { setLeadOpen((v) => !v); setRoleOpen(false); setStatusOpen(false); }}
-                  className={cn(
-                    'w-full h-11 px-3.5 text-[14px] rounded-lg border bg-white dark:bg-neutral-800 text-gray-900 dark:text-white flex items-center justify-between transition-all text-left',
-                    leadOpen
-                      ? 'border-[#6366F1] ring-2 ring-[#6366F1]/20'
-                      : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300 dark:hover:border-neutral-600',
-                  )}
-                >
-                  <span>{assignedLead || 'Select a QA Lead'}</span>
-                  <ChevronDown className={cn('h-4 w-4 text-gray-400 transition-transform shrink-0', leadOpen && 'rotate-180')} />
-                </button>
-
-                {leadOpen && (
-                  <>
-                    <div className="fixed inset-0 z-20" onClick={() => setLeadOpen(false)} />
-                    <div
-                      className="absolute left-0 right-0 top-full mt-1.5 rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 py-1 z-30 shadow-lg"
-                    >
-                      {availableLeads.map((lead) => (
-                        <button
-                          key={lead.id}
-                          type="button"
-                          onClick={() => { setAssignedLead(lead.name); setLeadOpen(false); }}
-                          className={cn(
-                            'w-full text-left px-3.5 py-2.5 text-[13px] flex items-center justify-between transition-colors',
-                            assignedLead === lead.name
-                              ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 font-semibold'
-                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-700',
-                          )}
-                        >
-                          <div>
-                            <span className="font-medium">{lead.name}</span>
-                            <span className="text-gray-400 dark:text-neutral-500 ml-1.5 text-[12px]">
-                              {lead.email}
-                            </span>
-                          </div>
-                          {assignedLead === lead.name && <Check className="h-4 w-4 text-indigo-600 dark:text-indigo-400 shrink-0" />}
-                        </button>
-                      ))}
-                      {availableLeads.length === 0 && (
-                        <div className="px-3.5 py-3 text-[12px] text-gray-400 dark:text-neutral-500 text-center">
-                          No QA Leads available
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
+            {/* Field 4: Assigned QA Lead (ONLY shown when role is QA Employee) */}
+            {role === 'qa_engineer' && (
+              <div className="space-y-1.5 animate-enter">
+                <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+                  Assigned QA Lead
+                </label>
+                <div className="relative">
+                  <select
+                    value={assignedLead}
+                    onChange={(e) => setAssignedLead(e.target.value)}
+                    className={selectClasses}
+                  >
+                    {availableLeads.map((lead) => (
+                      <option key={lead.id} value={lead.name}>
+                        {lead.name}
+                      </option>
+                    ))}
+                    {availableLeads.length === 0 && (
+                      <option value="">No QA Leads available</option>
+                    )}
+                  </select>
+                  <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Field 5: Account status */}
             <div className="space-y-1.5">
@@ -322,54 +241,27 @@ export function AddUserDrawer({
                 Account status
               </label>
               <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => { setStatusOpen((v) => !v); setRoleOpen(false); setLeadOpen(false); }}
-                  className={cn(
-                    'w-full h-11 px-3.5 text-[14px] rounded-lg border bg-white dark:bg-neutral-800 text-gray-900 dark:text-white flex items-center justify-between transition-all text-left',
-                    statusOpen
-                      ? 'border-[#6366F1] ring-2 ring-[#6366F1]/20'
-                      : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300 dark:hover:border-neutral-600',
-                  )}
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as 'active' | 'invited')}
+                  className={selectClasses}
                 >
-                  <span>{status}</span>
-                  <ChevronDown className={cn('h-4 w-4 text-gray-400 transition-transform shrink-0', statusOpen && 'rotate-180')} />
-                </button>
-
-                {statusOpen && (
-                  <>
-                    <div className="fixed inset-0 z-20" onClick={() => setStatusOpen(false)} />
-                    <div
-                      className="absolute left-0 right-0 top-full mt-1.5 rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 py-1 z-30 shadow-lg"
-                    >
-                      {STATUS_OPTIONS.map((opt) => (
-                        <button
-                          key={opt}
-                          type="button"
-                          onClick={() => { setStatus(opt); setStatusOpen(false); }}
-                          className={cn(
-                            'w-full text-left px-3.5 py-2.5 text-[13px] flex items-center justify-between transition-colors',
-                            status === opt
-                              ? 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 font-semibold'
-                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-700',
-                          )}
-                        >
-                          {opt}
-                          {status === opt && <Check className="h-4 w-4 text-indigo-600 dark:text-indigo-400 shrink-0" />}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
+                  <option value="active">Active</option>
+                  <option value="invited">Invited</option>
+                </select>
+                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
               </div>
             </div>
           </div>
 
           {/* Bottom Actions */}
-          <div className="px-8 py-6 flex items-center justify-end gap-3 bg-white dark:bg-[#12151F] shrink-0">
+          <div className="px-8 py-6 flex items-center justify-end gap-3 bg-white dark:bg-[#12151F] shrink-0 border-t border-gray-100 dark:border-neutral-800">
             <button
               type="button"
-              onClick={() => { resetForm(); handleClose(); }}
+              onClick={() => {
+                resetForm()
+                handleClose()
+              }}
               className="h-10 px-5 rounded-lg border border-gray-200 dark:border-neutral-700 text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-[13px] font-medium transition-colors"
             >
               Cancel

@@ -8,6 +8,7 @@ import { usePermissions, canManageUser, canAddRole } from '@/lib/permissions'
 import { useAuthStore, type UserRole } from '@/stores/auth.store'
 import { useUIStore } from '@/stores/ui.store'
 import { INITIAL_MEMBERS, type Member } from '@/mocks/data/users.mock'
+import { mockClient } from '@/mocks/mockClient'
 import { toast } from 'sonner'
 
 export default function UsersPage() {
@@ -27,6 +28,20 @@ export default function UsersPage() {
   const { openFormDrawer } = useUIStore()
 
   const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS)
+
+  useEffect(() => {
+    async function loadMembers() {
+      const list = await mockClient.getMembers()
+      setMembers(list)
+    }
+    loadMembers()
+
+    const handleUpdate = () => {
+      loadMembers()
+    }
+    window.addEventListener('testing_agent_members_changed', handleUpdate)
+    return () => window.removeEventListener('testing_agent_members_changed', handleUpdate)
+  }, [])
 
   // Filter members based on role:
   // Admin: sees ALL users (Admin, QA Lead, QA Employee)
@@ -49,8 +64,7 @@ export default function UsersPage() {
     openFormDrawer('add-user')
   }
 
-
-  function handleRoleChange(memberId: string, targetMemberRole: UserRole, newRole: UserRole) {
+  async function handleRoleChange(memberId: string, targetMemberRole: UserRole, newRole: UserRole) {
     if (!canManageUser(user?.role, targetMemberRole)) {
       toast.error('Permission Denied', {
         description: `You do not have permission to change the role of a ${targetMemberRole === 'admin' ? 'Admin' : 'QA Lead'}.`,
@@ -64,13 +78,15 @@ export default function UsersPage() {
       return
     }
 
-    setMembers((prev) =>
-      prev.map((m) => (m.id === memberId ? { ...m, role: newRole } : m))
-    )
-    toast.success('Updated role successfully')
+    try {
+      await mockClient.updateMember(memberId, { role: newRole })
+      toast.success('Updated role successfully')
+    } catch (err: any) {
+      toast.error('Failed to update role', { description: err.message })
+    }
   }
 
-  function handleToggleDisable(member: Member) {
+  async function handleToggleDisable(member: Member) {
     if (member.id === user?.id) {
       toast.error('Action not allowed', {
         description: 'You cannot disable your own active account.',
@@ -85,16 +101,12 @@ export default function UsersPage() {
       return
     }
 
-    if (member.status === 'disabled') {
-      setMembers((prev) =>
-        prev.map((m) => (m.id === member.id ? { ...m, status: 'active' } : m))
-      )
-      toast.success(`Enabled account for ${member.name}`)
-    } else {
-      setMembers((prev) =>
-        prev.map((m) => (m.id === member.id ? { ...m, status: 'disabled' } : m))
-      )
-      toast.success(`Disabled access for ${member.name}`)
+    const newStatus = member.status === 'disabled' ? 'active' : 'disabled'
+    try {
+      await mockClient.updateMember(member.id, { status: newStatus })
+      toast.success(newStatus === 'active' ? `Enabled account for ${member.name}` : `Disabled access for ${member.name}`)
+    } catch (err: any) {
+      toast.error('Failed to update user status', { description: err.message })
     }
   }
 

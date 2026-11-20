@@ -152,6 +152,11 @@ export const mockClient = {
   },
 
   // Plans
+  getPlans: async (): Promise<TestPlan[]> => {
+    const all = loadState<Record<string, TestPlan>>(STORAGE_KEYS.plans, INITIAL_PLANS)
+    return Object.values(all)
+  },
+
   getPlanById: async (planId: string): Promise<TestPlan | null> => {
     const all = loadState(STORAGE_KEYS.plans, INITIAL_PLANS)
     return all[planId] || null

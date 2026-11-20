@@ -1,14 +1,20 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Plus, ChevronDown, RefreshCw, ArrowUpRight, ArrowRight, Check } from 'lucide-react'
+import { Plus, ChevronDown, RefreshCw, ArrowUpRight, ArrowRight, Check, CheckCircle2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { EnvBadge, type EnvValue } from '@/components/domain/EnvBadge'
 import { StatusBadge, type StatusValue } from '@/components/domain/StatusBadge'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/stores/ui.store'
+import { mockClient } from '@/mocks/mockClient'
+import type { Website } from '@/mocks/data/websites.mock'
+import type { Task } from '@/mocks/data/tasks.mock'
+import type { Run } from '@/mocks/data/runs.mock'
+import type { TestPlan } from '@/mocks/data/plans.mock'
+import { toast } from 'sonner'
 
 const ENV_OPTIONS = [
   { label: 'All environments', value: 'all', dot: null },
@@ -18,92 +24,106 @@ const ENV_OPTIONS = [
   { label: 'Dev', value: 'dev', dot: 'bg-neutral-400' },
 ]
 
-interface RecentRunItem {
-  id: string
-  status: 'running' | 'passed' | 'failed' | 'error'
-  title: string
-  website: string
-  env: EnvValue
-  engine: string
-  duration: string
-  started: string
-}
-
-const ALL_RECENT_RUNS: RecentRunItem[] = [
-  {
-    id: 'r1',
-    status: 'running',
-    title: 'Verify login & open Tracking',
-    website: 'Logistics Portal',
-    env: 'staging',
-    engine: 'ollama/qwen2.5',
-    duration: '12.4s',
-    started: 'Just now',
-  },
-  {
-    id: 'r2',
-    status: 'passed',
-    title: 'Auth token refresh & session timeout',
-    website: 'TruckHub Production',
-    env: 'production',
-    engine: 'gemini-1.5-pro',
-    duration: '22.1s',
-    started: '1h ago',
-  },
-  {
-    id: 'r3',
-    status: 'failed',
-    title: 'Tracking page map container loading',
-    website: 'Dev E-Commerce',
-    env: 'dev',
-    engine: 'ollama/llama3.2',
-    duration: '8.9s',
-    started: '3h ago',
-  },
-  {
-    id: 'r4',
-    status: 'passed',
-    title: 'Admin RBAC role enforcement matrix',
-    website: 'QA Portal',
-    env: 'qa',
-    engine: 'ollama/qwen2.5',
-    duration: '15.8s',
-    started: '5h ago',
-  },
-]
-
-// 14 bars matching the 30-day trend chart in screenshot
-const TREND_BARS = [
-  { height: 58 },
-  { height: 64 },
-  { height: 60 },
-  { height: 72 },
-  { height: 78 },
-  { height: 70 },
-  { height: 85 },
-  { height: 88 },
-  { height: 75 },
-  { height: 82 },
-  { height: 92 },
-  { height: 80 },
-  { height: 86 },
-  { height: 74 },
-  { height: 88 },
-]
-
 export default function DashboardPage() {
   const { openFormDrawer } = useUIStore()
   const [selectedEnv, setSelectedEnv] = useState('All environments')
   const [envOpen, setEnvOpen] = useState(false)
 
-  const filteredRuns = ALL_RECENT_RUNS.filter((run) => {
+  // Dynamic state loaded from mockClient (shared across tasks, runs, websites, plans)
+  const [websites, setWebsites] = useState<Website[]>([])
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [runs, setRuns] = useState<Run[]>([])
+  const [plans, setPlans] = useState<TestPlan[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadDashboardData()
+  }, [])
+
+  async function loadDashboardData() {
+    try {
+      setLoading(true)
+      const [fetchedWebsites, fetchedTasks, fetchedRuns, fetchedPlans] = await Promise.all([
+        mockClient.getWebsites(),
+        mockClient.getTasks(),
+        mockClient.getRuns(),
+        mockClient.getPlans(),
+      ])
+      setWebsites(fetchedWebsites)
+      setTasks(fetchedTasks)
+      setRuns(fetchedRuns)
+      setPlans(fetchedPlans)
+    } catch {
+      toast.error('Failed to load dashboard metrics')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Filter runs by selected environment
+  const filteredRuns = runs.filter((run) => {
     if (selectedEnv === 'All environments') return true
-    return run.env.toLowerCase() === selectedEnv.toLowerCase()
+    return run.environment.toLowerCase() === selectedEnv.toLowerCase()
   })
+
+  // Dynamic Metrics
+  const totalWebsites = websites.length
+  const activeTasks = tasks.filter((t) => t.status !== 'archived').length
+  const totalRuns = runs.length
+  const passedRunsCount = runs.filter((r) => r.status === 'passed').length
+  const failedRunsCount = runs.filter((r) => r.status === 'failed').length
+  const otherRunsCount = totalRuns - passedRunsCount - failedRunsCount
+
+  const passRate = totalRuns > 0
+    ? ((passedRunsCount / totalRuns) * 100).toFixed(1) + '%'
+    : '100%'
+
+  const passedPct = totalRuns > 0 ? ((passedRunsCount / totalRuns) * 100).toFixed(1) : '100'
+  const failedPct = totalRuns > 0 ? ((failedRunsCount / totalRuns) * 100).toFixed(1) : '0'
+  const otherPct = totalRuns > 0 ? ((otherRunsCount / totalRuns) * 100).toFixed(1) : '0'
+
+  // Dynamic "Needs Approval" plans: Only plans in 'in_review' or 'draft' status
+  const pendingPlans = plans.filter(
+    (plan) => plan.status === 'in_review' || plan.status === 'draft'
+  )
+
+  const taskMap = new Map(tasks.map((t) => [t.id, t]))
+
+  // 14 bars for stability trend chart
+  const TREND_BARS = [
+    { height: 60 },
+    { height: 65 },
+    { height: 62 },
+    { height: 75 },
+    { height: 80 },
+    { height: 72 },
+    { height: 85 },
+    { height: 88 },
+    { height: 76 },
+    { height: 84 },
+    { height: 92 },
+    { height: 82 },
+    { height: 88 },
+    { height: Math.min(100, Math.max(40, Math.round(parseFloat(passRate)))) },
+  ]
+
+  async function handleRerunLastTask() {
+    if (tasks.length === 0) return
+    const targetTask = tasks[0]
+    toast.info(`Triggered test run for: ${targetTask.title}`)
+    try {
+      if (targetTask.currentPlanId) {
+        await mockClient.triggerRun(targetTask.currentPlanId)
+        await loadDashboardData()
+      }
+    } catch {
+      // fallback notification
+    }
+  }
 
   return (
     <div className="space-y-5 animate-enter">
-      {/* Header matching screenshot */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-[22px] font-bold text-[var(--text)] tracking-tight">Dashboard</h1>
@@ -139,10 +159,7 @@ export default function DashboardPage() {
             {/* Dropdown Menu */}
             {envOpen && (
               <>
-                <div
-                  className="fixed inset-0 z-20"
-                  onClick={() => setEnvOpen(false)}
-                />
+                <div className="fixed inset-0 z-20" onClick={() => setEnvOpen(false)} />
                 <div
                   role="listbox"
                   className="absolute left-0 sm:right-0 sm:left-auto top-full mt-1.5 w-48 rounded-[8px] bg-[var(--surface)] border border-[var(--border)] py-1 z-30 animate-enter"
@@ -208,44 +225,56 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Row 1: 4 KPI Cards matching screenshot */}
+      {/* Row 1: 4 KPI Cards (Now 100% Dynamic from Mock Stores) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1 */}
+        {/* Card 1: Registered websites */}
         <Card className="p-4 flex flex-col justify-between h-[105px]">
           <span className="text-[12px] font-medium text-[var(--text-muted)]">Registered websites</span>
           <div className="flex items-baseline justify-between mt-2">
-            <span className="mono-data text-[28px] font-bold text-[var(--text)] leading-none">12</span>
-            <span className="text-[12px] text-[var(--text-muted)]">+2 this month</span>
-          </div>
-        </Card>
-
-        {/* Card 2 */}
-        <Card className="p-4 flex flex-col justify-between h-[105px]">
-          <span className="text-[12px] font-medium text-[var(--text-muted)]">Active tasks</span>
-          <div className="flex items-baseline justify-between mt-2">
-            <span className="mono-data text-[28px] font-bold text-[var(--text)] leading-none">38</span>
-            <span className="text-[12px] text-[var(--text-muted)]">6 in review</span>
-          </div>
-        </Card>
-
-        {/* Card 3 */}
-        <Card className="p-4 flex flex-col justify-between h-[105px]">
-          <span className="text-[12px] font-medium text-[var(--text-muted)]">Runs (7 days)</span>
-          <div className="flex items-baseline justify-between mt-2">
-            <span className="mono-data text-[28px] font-bold text-[var(--text)] leading-none">142</span>
-            <span className="mono-data text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">
-              +18.4%
+            <span className="mono-data text-[28px] font-bold text-[var(--text)] leading-none">
+              {loading ? '—' : totalWebsites}
+            </span>
+            <span className="text-[12px] text-[var(--text-muted)]">
+              {totalWebsites === 1 ? '1 active app' : `${totalWebsites} active apps`}
             </span>
           </div>
         </Card>
 
-        {/* Card 4 */}
+        {/* Card 2: Active tasks */}
+        <Card className="p-4 flex flex-col justify-between h-[105px]">
+          <span className="text-[12px] font-medium text-[var(--text-muted)]">Active tasks</span>
+          <div className="flex items-baseline justify-between mt-2">
+            <span className="mono-data text-[28px] font-bold text-[var(--text)] leading-none">
+              {loading ? '—' : activeTasks}
+            </span>
+            <span className="text-[12px] text-[var(--text-muted)]">
+              {pendingPlans.length > 0 ? `${pendingPlans.length} in review` : 'All ready'}
+            </span>
+          </div>
+        </Card>
+
+        {/* Card 3: Total Runs */}
+        <Card className="p-4 flex flex-col justify-between h-[105px]">
+          <span className="text-[12px] font-medium text-[var(--text-muted)]">Total test runs</span>
+          <div className="flex items-baseline justify-between mt-2">
+            <span className="mono-data text-[28px] font-bold text-[var(--text)] leading-none">
+              {loading ? '—' : totalRuns}
+            </span>
+            <span className="mono-data text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">
+              {passedRunsCount} passed
+            </span>
+          </div>
+        </Card>
+
+        {/* Card 4: Overall pass rate */}
         <Card className="p-4 flex flex-col justify-between h-[105px]">
           <span className="text-[12px] font-medium text-[var(--text-muted)]">Overall pass rate</span>
           <div className="flex items-baseline justify-between mt-2">
-            <span className="mono-data text-[28px] font-bold text-[var(--text)] leading-none">91.6%</span>
+            <span className="mono-data text-[28px] font-bold text-[var(--text)] leading-none">
+              {loading ? '—' : passRate}
+            </span>
             <span className="mono-data text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">
-              +2.1% vs prev
+              {failedRunsCount === 0 ? 'Zero failures' : `${failedRunsCount} failures`}
             </span>
           </div>
         </Card>
@@ -260,7 +289,9 @@ export default function DashboardPage() {
               <span className="text-[13px] font-semibold text-[var(--text)]">
                 Pass / Fail trend (30 days)
               </span>
-              <span className="mono-data text-[12px] text-[var(--text-muted)]">142 runs</span>
+              <span className="mono-data text-[12px] text-[var(--text-muted)]">
+                {totalRuns} total runs recorded
+              </span>
             </div>
 
             {/* Lavender Bar Chart */}
@@ -270,7 +301,7 @@ export default function DashboardPage() {
                   <div
                     className="w-full rounded-t-[4px] bg-[#D4D7F8] dark:bg-[#3E4378] group-hover:bg-[var(--primary)] transition-colors duration-150"
                     style={{ height: `${bar.height}%` }}
-                    title={`Day ${i + 1}: ${bar.height}% stability`}
+                    title={`Interval ${i + 1}: ${bar.height}% stability`}
                   />
                 </div>
               ))}
@@ -298,10 +329,15 @@ export default function DashboardPage() {
                 <div>
                   <div className="flex justify-between text-[12px] mb-1.5">
                     <span className="text-[var(--text-muted)]">Passed</span>
-                    <span className="mono-data font-semibold text-[var(--text)]">128 (90.1%)</span>
+                    <span className="mono-data font-semibold text-[var(--text)]">
+                      {passedRunsCount} ({passedPct}%)
+                    </span>
                   </div>
                   <div className="h-1.5 w-full bg-[var(--track-bg)] rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: '90.1%' }} />
+                    <div
+                      className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                      style={{ width: `${passedPct}%` }}
+                    />
                   </div>
                 </div>
 
@@ -309,21 +345,31 @@ export default function DashboardPage() {
                 <div>
                   <div className="flex justify-between text-[12px] mb-1.5">
                     <span className="text-[var(--text-muted)]">Failed</span>
-                    <span className="mono-data font-semibold text-[var(--text)]">10 (7.0%)</span>
+                    <span className="mono-data font-semibold text-[var(--text)]">
+                      {failedRunsCount} ({failedPct}%)
+                    </span>
                   </div>
                   <div className="h-1.5 w-full bg-[var(--track-bg)] rounded-full overflow-hidden">
-                    <div className="h-full bg-red-500 rounded-full" style={{ width: '7.0%' }} />
+                    <div
+                      className="h-full bg-red-500 rounded-full transition-all duration-300"
+                      style={{ width: `${failedPct}%` }}
+                    />
                   </div>
                 </div>
 
-                {/* Error */}
+                {/* Running / Other */}
                 <div>
                   <div className="flex justify-between text-[12px] mb-1.5">
-                    <span className="text-[var(--text-muted)]">Error</span>
-                    <span className="mono-data font-semibold text-[var(--text)]">4 (2.8%)</span>
+                    <span className="text-[var(--text-muted)]">Running / Other</span>
+                    <span className="mono-data font-semibold text-[var(--text)]">
+                      {otherRunsCount} ({otherPct}%)
+                    </span>
                   </div>
                   <div className="h-1.5 w-full bg-[var(--track-bg)] rounded-full overflow-hidden">
-                    <div className="h-full bg-amber-500 rounded-full" style={{ width: '2.8%' }} />
+                    <div
+                      className="h-full bg-sky-500 rounded-full transition-all duration-300"
+                      style={{ width: `${otherPct}%` }}
+                    />
                   </div>
                 </div>
               </div>
@@ -333,7 +379,8 @@ export default function DashboardPage() {
             <div className="pt-3 border-t border-[var(--border)] flex justify-center">
               <button
                 type="button"
-                className="text-[12px] font-medium text-[var(--text)] hover:text-[var(--primary)] flex items-center gap-1.5 transition-colors py-1 px-3 rounded-[6px] hover:bg-[var(--hover-subtle)]"
+                onClick={handleRerunLastTask}
+                className="text-[12px] font-medium text-[var(--text)] hover:text-[var(--primary)] flex items-center gap-1.5 transition-colors py-1 px-3 rounded-[6px] hover:bg-[var(--hover-subtle)] cursor-pointer"
               >
                 <RefreshCw className="h-3.5 w-3.5" /> Re-run last task
               </button>
@@ -344,16 +391,21 @@ export default function DashboardPage() {
 
       {/* Row 3: Recent runs (8 cols) & Needs approval (4 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Recent runs */}
+        {/* Recent runs (Connected 100% to mockClient & Tasks) */}
         <div className="lg:col-span-8">
           <Card className="p-0 overflow-hidden">
             <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
-              <span className="text-[13px] font-semibold text-[var(--text)]">Recent runs</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[13px] font-semibold text-[var(--text)]">Recent runs</span>
+                <span className="text-[11px] text-[var(--text-muted)]">
+                  ({filteredRuns.length} recorded)
+                </span>
+              </div>
               <Link
                 href="/reports"
                 className="text-[12px] text-[var(--text-muted)] hover:text-[var(--text)] flex items-center gap-1 font-medium transition-colors"
               >
-                View all <ArrowRight className="h-3 w-3" />
+                View all reports <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
 
@@ -362,8 +414,8 @@ export default function DashboardPage() {
                 <thead>
                   <tr className="border-b border-[var(--border)] text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                     <th className="text-left py-2.5 px-4 w-28">Status</th>
-                    <th className="text-left py-2.5 px-4">Website / Task</th>
-                    <th className="text-left py-2.5 px-4">Engine</th>
+                    <th className="text-left py-2.5 px-4">Task / Website</th>
+                    <th className="text-left py-2.5 px-4">Trigger</th>
                     <th className="text-left py-2.5 px-4">Duration</th>
                     <th className="text-right py-2.5 px-4">Started</th>
                   </tr>
@@ -372,11 +424,11 @@ export default function DashboardPage() {
                   {filteredRuns.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="py-8 text-center text-[var(--text-muted)] text-[12px]">
-                        No runs recorded for {selectedEnv}.
+                        No test runs recorded for {selectedEnv}.
                       </td>
                     </tr>
                   ) : (
-                    filteredRuns.map((run) => (
+                    filteredRuns.slice(0, 6).map((run) => (
                       <tr key={run.id} className="hover:bg-[var(--hover-row)] transition-colors">
                         <td className="py-3 px-4">
                           {run.status === 'running' ? (
@@ -393,21 +445,23 @@ export default function DashboardPage() {
                             href={`/runs/${run.id}`}
                             className="font-medium text-[var(--text)] hover:text-[var(--primary)] transition-colors block leading-snug"
                           >
-                            {run.title}
+                            {run.taskTitle}
                           </Link>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[11px] text-[var(--text-muted)]">{run.website}</span>
-                            <EnvBadge env={run.env} />
+                            <span className="text-[11px] text-[var(--text-muted)]">
+                              {run.websiteName}
+                            </span>
+                            <EnvBadge env={run.environment as EnvValue} />
                           </div>
                         </td>
-                        <td className="py-3 px-4 mono-data text-[12px] text-[var(--text-muted)]">
-                          {run.engine}
+                        <td className="py-3 px-4 mono-data text-[12px] text-[var(--text-muted)] capitalize">
+                          {run.trigger || 'manual'}
                         </td>
                         <td className="py-3 px-4 mono-data text-[12px] text-[var(--text)]">
-                          {run.duration}
+                          {run.durationMs ? `${(run.durationMs / 1000).toFixed(1)}s` : '—'}
                         </td>
                         <td className="py-3 px-4 text-right mono-data text-[12px] text-[var(--text-muted)]">
-                          {run.started}
+                          {run.dateLabel || 'Today'}
                         </td>
                       </tr>
                     ))
@@ -418,49 +472,58 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Needs approval (matches screenshot exactly) */}
+        {/* Needs approval (Now 100% Dynamic - only shows unapproved plans!) */}
         <div className="lg:col-span-4">
           <Card className="p-4 space-y-3">
             <div className="flex items-center justify-between pb-1">
               <span className="text-[13px] font-semibold text-[var(--text)]">Needs approval</span>
-              <span className="h-5 min-w-[20px] px-1.5 rounded-full bg-[#FDF3E1] text-[#D97706] dark:bg-amber-950/40 dark:text-amber-400 text-[11px] font-semibold mono-data flex items-center justify-center">
-                2
+              <span
+                className={cn(
+                  'h-5 min-w-[20px] px-1.5 rounded-full text-[11px] font-semibold mono-data flex items-center justify-center',
+                  pendingPlans.length > 0
+                    ? 'bg-[#FDF3E1] text-[#D97706] dark:bg-amber-950/40 dark:text-amber-400'
+                    : 'bg-[#DCFCE7] text-[#16A34A] dark:bg-emerald-950/40 dark:text-emerald-400'
+                )}
+              >
+                {pendingPlans.length}
               </span>
             </div>
 
-            {/* Approval Item 1 */}
-            <div className="p-3 rounded-[6px] border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--border-hover)] transition-colors flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[13px] font-semibold text-[var(--text)] truncate">
-                  Verify login & Tracking page (v2)
-                </p>
-                <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
-                  Riya S. · 5 cases · 18m ago
+            {pendingPlans.length === 0 ? (
+              <div className="py-8 text-center space-y-2">
+                <CheckCircle2 className="h-8 w-8 text-emerald-500 mx-auto opacity-80" />
+                <p className="text-[13px] font-medium text-[var(--text)]">All plans approved</p>
+                <p className="text-[11px] text-[var(--text-muted)] max-w-[200px] mx-auto">
+                  No test plans currently awaiting review. All tasks are ready for execution.
                 </p>
               </div>
-              <Button variant="secondary" size="sm" asChild className="shrink-0 gap-1 text-[12px] h-8">
-                <Link href="/plans/plan-1">
-                  Review <ArrowUpRight className="h-3.5 w-3.5" />
-                </Link>
-              </Button>
-            </div>
+            ) : (
+              pendingPlans.map((plan) => {
+                const associatedTask = taskMap.get(plan.taskId)
+                const planTitle = associatedTask?.title || associatedTask?.prompt || plan.summary || 'Test Plan'
 
-            {/* Approval Item 2 */}
-            <div className="p-3 rounded-[6px] border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--border-hover)] transition-colors flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[13px] font-semibold text-[var(--text)] truncate">
-                  SSO callback failure recovery (v1)
-                </p>
-                <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
-                  Alex M. · 3 cases · 1h ago
-                </p>
-              </div>
-              <Button variant="secondary" size="sm" asChild className="shrink-0 gap-1 text-[12px] h-8">
-                <Link href="/plans/plan-1">
-                  Review <ArrowUpRight className="h-3.5 w-3.5" />
-                </Link>
-              </Button>
-            </div>
+                return (
+                  <div
+                    key={plan.id}
+                    className="p-3 rounded-[6px] border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--border-hover)] transition-colors flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-semibold text-[var(--text)] truncate">
+                        {planTitle} <span className="text-[var(--primary)] font-mono text-[11px]">(v{plan.version})</span>
+                      </p>
+                      <p className="text-[11px] text-[var(--text-muted)] mt-0.5 truncate">
+                        {plan.cases.length} cases · Status: In Review
+                      </p>
+                    </div>
+                    <Button variant="secondary" size="sm" asChild className="shrink-0 gap-1 text-[12px] h-8">
+                      <Link href={`/plans/${plan.id}`}>
+                        Review <ArrowUpRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </Button>
+                  </div>
+                )
+              })
+            )}
           </Card>
         </div>
       </div>

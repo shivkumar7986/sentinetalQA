@@ -29,18 +29,24 @@ import { useUIStore } from '@/stores/ui.store'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
-// Reusable Slide-over Side Drawer for configuration forms
+// Reusable Slide-over Side Drawer for configuration forms matching AddWebsiteDrawer & CreateTaskDrawer
 function ConfigSideDrawer({
   open,
   onClose,
+  onSubmit,
   title,
   description,
+  submitLabel = 'Save',
+  loading = false,
   children,
 }: {
   open: boolean
   onClose: () => void
+  onSubmit: (e: React.FormEvent) => void
   title: string
   description?: string
+  submitLabel?: string
+  loading?: boolean
   children: React.ReactNode
 }) {
   useEffect(() => {
@@ -55,7 +61,7 @@ function ConfigSideDrawer({
 
   return (
     <div className="fixed inset-0 z-[100] flex justify-end">
-      {/* Blurred Backdrop */}
+      {/* Blurred Backdrop covering entire screen */}
       <div
         className="fixed inset-0 bg-black/45 backdrop-blur-[7px] transition-opacity animate-fade-in"
         onClick={onClose}
@@ -68,36 +74,64 @@ function ConfigSideDrawer({
         role="dialog"
         aria-modal="true"
       >
-        <div className="h-full flex flex-col justify-between">
-          {/* Header */}
-          <div className="px-8 pt-8 pb-4 border-b border-gray-100 dark:border-neutral-800">
-            <div className="flex items-start justify-between pb-1">
-              <div>
-                <h2 className="text-[20px] font-bold text-gray-900 dark:text-white tracking-tight leading-snug">
-                  {title}
-                </h2>
-                {description && (
-                  <p className="text-[13px] text-gray-500 dark:text-neutral-400 mt-0.5">
-                    {description}
-                  </p>
-                )}
+        <form onSubmit={onSubmit} className="h-full flex flex-col justify-between">
+          {/* Scrollable area for Header & Fields */}
+          <div className="flex-1 overflow-y-auto">
+            {/* Header */}
+            <div className="px-8 pt-8 pb-4 border-b border-gray-100 dark:border-neutral-800">
+              <div className="flex items-start justify-between pb-1">
+                <div>
+                  <h2 className="text-[20px] font-bold text-gray-900 dark:text-white tracking-tight leading-snug">
+                    {title}
+                  </h2>
+                  {description && (
+                    <p className="text-[13px] text-gray-500 dark:text-neutral-400 mt-0.5">
+                      {description}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-[6px] p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer"
+                  aria-label="Close drawer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-[6px] p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer"
-                aria-label="Close"
-              >
-                <X className="h-4 w-4" />
-              </button>
+            </div>
+
+            {/* Form Fields Body */}
+            <div className="px-8 py-6 space-y-5">
+              {children}
             </div>
           </div>
 
-          {/* Form Body */}
-          <div className="px-8 py-6 flex-1 overflow-y-auto">
-            {children}
+          {/* Sticky Bottom Footer Action Bar */}
+          <div className="px-8 py-5 border-t border-gray-100 dark:border-neutral-800 flex items-center justify-end gap-3 bg-white dark:bg-[#12151F]">
+            <button
+              type="button"
+              onClick={onClose}
+              className="h-10 px-4 text-[13px] font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800 rounded-lg transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="h-10 px-5 text-[13px] font-medium text-white bg-[#4F46E5] hover:bg-[#4338CA] disabled:opacity-50 rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                submitLabel
+              )}
+            </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   )
@@ -529,7 +563,7 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
             variant="primary"
             size="md"
             type="button"
-            onClick={() => openFormDrawer('create-task')}
+            onClick={() => openFormDrawer('create-task', { websiteId: website?.id || params.id })}
             className="gap-1.5 font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg px-4 py-2 text-[13px] shadow-none h-9"
           >
             <Sparkles className="h-4 w-4" /> Create task
@@ -1286,319 +1320,243 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
       <ConfigSideDrawer
         open={roleModalOpen}
         onClose={() => setRoleModalOpen(false)}
+        onSubmit={handleSaveRoleModal}
         title={editingRole ? 'Edit Role' : 'Add Website User Role'}
         description="Define application persona, landing URL, and allowed test modules."
+        submitLabel={editingRole ? 'Update Role' : 'Add Role'}
       >
-        <form onSubmit={handleSaveRoleModal} className="space-y-5">
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-              Role name *
-            </label>
-            <input
-              type="text"
-              required
-              value={roleForm.name}
-              onChange={(e) => setRoleForm((p) => ({ ...p, name: e.target.value }))}
-              placeholder="e.g. Dispatcher, Billing Specialist, Auditor"
-              className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
-            />
-          </div>
+        <div className="space-y-1.5">
+          <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+            Role name *
+          </label>
+          <input
+            type="text"
+            required
+            value={roleForm.name}
+            onChange={(e) => setRoleForm((p) => ({ ...p, name: e.target.value }))}
+            placeholder="e.g. Dispatcher, Billing Specialist, Auditor"
+            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
+          />
+        </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-              Description
-            </label>
-            <input
-              type="text"
-              value={roleForm.description}
-              onChange={(e) => setRoleForm((p) => ({ ...p, description: e.target.value }))}
-              placeholder="e.g. Operates dispatch orders and fleet assign"
-              className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
-            />
-          </div>
+        <div className="space-y-1.5">
+          <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+            Description
+          </label>
+          <input
+            type="text"
+            value={roleForm.description}
+            onChange={(e) => setRoleForm((p) => ({ ...p, description: e.target.value }))}
+            placeholder="e.g. Operates dispatch orders and fleet assign"
+            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
+          />
+        </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-              Landing path
-            </label>
-            <input
-              type="text"
-              value={roleForm.landingPath}
-              onChange={(e) => setRoleForm((p) => ({ ...p, landingPath: e.target.value }))}
-              placeholder="e.g. /dashboard or /orders"
-              className="w-full h-11 px-3.5 text-[14px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
-            />
-          </div>
+        <div className="space-y-1.5">
+          <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+            Landing path
+          </label>
+          <input
+            type="text"
+            value={roleForm.landingPath}
+            onChange={(e) => setRoleForm((p) => ({ ...p, landingPath: e.target.value }))}
+            placeholder="e.g. /dashboard or /orders"
+            className="w-full h-11 px-3.5 text-[14px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
+          />
+        </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-              Allowed modules (comma-separated)
-            </label>
-            <input
-              type="text"
-              value={roleForm.allowedModules}
-              onChange={(e) => setRoleForm((p) => ({ ...p, allowedModules: e.target.value }))}
-              placeholder="e.g. Dashboard, Orders, Tracking"
-              className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
-            />
-          </div>
-
-          <div className="pt-6 border-t border-gray-100 dark:border-neutral-800 flex items-center justify-end gap-3">
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              onClick={() => setRoleModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              size="md"
-              className="bg-[#4F46E5] hover:bg-[#4338CA] text-white"
-            >
-              {editingRole ? 'Update Role' : 'Add Role'}
-            </Button>
-          </div>
-        </form>
+        <div className="space-y-1.5">
+          <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+            Allowed modules (comma-separated)
+          </label>
+          <input
+            type="text"
+            value={roleForm.allowedModules}
+            onChange={(e) => setRoleForm((p) => ({ ...p, allowedModules: e.target.value }))}
+            placeholder="e.g. Dashboard, Orders, Tracking"
+            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
+          />
+        </div>
       </ConfigSideDrawer>
 
       {/* Module Add/Edit Side Drawer */}
       <ConfigSideDrawer
         open={moduleModalOpen}
         onClose={() => setModuleModalOpen(false)}
+        onSubmit={handleSaveModuleModal}
         title={editingModule ? 'Edit Module' : 'Add Application Module'}
         description="Target route, expected page heading, and navigation path for AI exploration."
+        submitLabel={editingModule ? 'Update Module' : 'Add Module'}
       >
-        <form onSubmit={handleSaveModuleModal} className="space-y-5">
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-              Module name *
-            </label>
-            <input
-              type="text"
-              required
-              value={moduleForm.name}
-              onChange={(e) => setModuleForm((p) => ({ ...p, name: e.target.value }))}
-              placeholder="e.g. Tracking, Orders, Invoices"
-              className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
-            />
-          </div>
+        <div className="space-y-1.5">
+          <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+            Module name *
+          </label>
+          <input
+            type="text"
+            required
+            value={moduleForm.name}
+            onChange={(e) => setModuleForm((p) => ({ ...p, name: e.target.value }))}
+            placeholder="e.g. Tracking, Orders, Invoices"
+            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
+          />
+        </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-              Target route path *
-            </label>
-            <input
-              type="text"
-              required
-              value={moduleForm.path}
-              onChange={(e) => setModuleForm((p) => ({ ...p, path: e.target.value }))}
-              placeholder="e.g. /tracking or /invoices"
-              className="w-full h-11 px-3.5 text-[14px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
-            />
-          </div>
+        <div className="space-y-1.5">
+          <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+            Target route path *
+          </label>
+          <input
+            type="text"
+            required
+            value={moduleForm.path}
+            onChange={(e) => setModuleForm((p) => ({ ...p, path: e.target.value }))}
+            placeholder="e.g. /tracking or /invoices"
+            className="w-full h-11 px-3.5 text-[14px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
+          />
+        </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-              Expected heading
-            </label>
-            <input
-              type="text"
-              value={moduleForm.expectedHeading}
-              onChange={(e) => setModuleForm((p) => ({ ...p, expectedHeading: e.target.value }))}
-              placeholder="e.g. Live Shipment Tracking"
-              className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
-            />
-          </div>
+        <div className="space-y-1.5">
+          <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+            Expected heading
+          </label>
+          <input
+            type="text"
+            value={moduleForm.expectedHeading}
+            onChange={(e) => setModuleForm((p) => ({ ...p, expectedHeading: e.target.value }))}
+            placeholder="e.g. Live Shipment Tracking"
+            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
+          />
+        </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-              Navigation path
-            </label>
-            <input
-              type="text"
-              value={moduleForm.navigationPath}
-              onChange={(e) => setModuleForm((p) => ({ ...p, navigationPath: e.target.value }))}
-              placeholder="e.g. Sidebar → Logistics → Tracking"
-              className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
-            />
-          </div>
-
-          <div className="pt-6 border-t border-gray-100 dark:border-neutral-800 flex items-center justify-end gap-3">
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              onClick={() => setModuleModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              size="md"
-              className="bg-[#4F46E5] hover:bg-[#4338CA] text-white"
-            >
-              {editingModule ? 'Update Module' : 'Add Module'}
-            </Button>
-          </div>
-        </form>
+        <div className="space-y-1.5">
+          <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+            Navigation path
+          </label>
+          <input
+            type="text"
+            value={moduleForm.navigationPath}
+            onChange={(e) => setModuleForm((p) => ({ ...p, navigationPath: e.target.value }))}
+            placeholder="e.g. Sidebar → Logistics → Tracking"
+            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
+          />
+        </div>
       </ConfigSideDrawer>
 
       {/* Rule Add/Edit Side Drawer */}
       <ConfigSideDrawer
         open={ruleModalOpen}
         onClose={() => setRuleModalOpen(false)}
+        onSubmit={handleSaveRuleModal}
         title={editingRule ? 'Edit Business Rule' : 'Add Business Rule'}
         description="Invariants verified during test plan generation and AI execution assertions."
+        submitLabel={editingRule ? 'Update Rule' : 'Add Rule'}
       >
-        <form onSubmit={handleSaveRuleModal} className="space-y-5">
+        <div className="space-y-1.5">
+          <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+            Rule description *
+          </label>
+          <textarea
+            required
+            rows={4}
+            value={ruleForm.text}
+            onChange={(e) => setRuleForm((p) => ({ ...p, text: e.target.value }))}
+            placeholder="e.g. Dispatcher role cannot access /billing/invoices without OTP"
+            className="w-full p-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 resize-none leading-relaxed transition-all"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-              Rule description *
+              Priority
             </label>
-            <textarea
-              required
-              rows={4}
-              value={ruleForm.text}
-              onChange={(e) => setRuleForm((p) => ({ ...p, text: e.target.value }))}
-              placeholder="e.g. Dispatcher role cannot access /billing/invoices without OTP"
-              className="w-full p-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 resize-none leading-relaxed transition-all"
+            <select
+              value={ruleForm.priority}
+              onChange={(e) => setRuleForm((p) => ({ ...p, priority: e.target.value as 'P1' | 'P2' }))}
+              className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all cursor-pointer"
+            >
+              <option value="P1">P1 (Critical Assertion)</option>
+              <option value="P2">P2 (Standard Invariant)</option>
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+              Category tag
+            </label>
+            <input
+              type="text"
+              value={ruleForm.tag}
+              onChange={(e) => setRuleForm((p) => ({ ...p, tag: e.target.value }))}
+              placeholder="e.g. Auth, Routing, Data"
+              className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
             />
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                Priority
-              </label>
-              <select
-                value={ruleForm.priority}
-                onChange={(e) => setRuleForm((p) => ({ ...p, priority: e.target.value as 'P1' | 'P2' }))}
-                className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all cursor-pointer"
-              >
-                <option value="P1">P1 (Critical Assertion)</option>
-                <option value="P2">P2 (Standard Invariant)</option>
-              </select>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                Category tag
-              </label>
-              <input
-                type="text"
-                value={ruleForm.tag}
-                onChange={(e) => setRuleForm((p) => ({ ...p, tag: e.target.value }))}
-                placeholder="e.g. Auth, Routing, Data"
-                className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
-              />
-            </div>
-          </div>
-
-          <div className="pt-6 border-t border-gray-100 dark:border-neutral-800 flex items-center justify-end gap-3">
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              onClick={() => setRuleModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              size="md"
-              className="bg-[#4F46E5] hover:bg-[#4338CA] text-white"
-            >
-              {editingRule ? 'Update Rule' : 'Add Rule'}
-            </Button>
-          </div>
-        </form>
+        </div>
       </ConfigSideDrawer>
 
       {/* Credential Add/Edit Side Drawer */}
       <ConfigSideDrawer
         open={credModalOpen}
         onClose={() => setCredModalOpen(false)}
+        onSubmit={handleSaveCredModal}
         title={editingCred ? 'Replace Credential' : 'Add Role Credential'}
         description="Credentials are encrypted and masked; decrypted only in worker execution sandboxes."
+        submitLabel={editingCred ? 'Save Credential' : 'Add Credential'}
       >
-        <form onSubmit={handleSaveCredModal} className="space-y-5">
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-              Associated role
-            </label>
-            <select
-              value={credForm.roleName}
-              onChange={(e) => setCredForm((p) => ({ ...p, roleName: e.target.value }))}
-              className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all cursor-pointer"
-            >
-              {config.roles.length > 0 ? (
-                config.roles.map((r) => (
-                  <option key={r.id} value={r.name}>
-                    {r.name}
-                  </option>
-                ))
-              ) : (
-                <>
-                  <option value="Admin">Admin</option>
-                  <option value="Dispatcher">Dispatcher</option>
-                  <option value="Viewer">Viewer</option>
-                </>
-              )}
-            </select>
-          </div>
+        <div className="space-y-1.5">
+          <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+            Associated role
+          </label>
+          <select
+            value={credForm.roleName}
+            onChange={(e) => setCredForm((p) => ({ ...p, roleName: e.target.value }))}
+            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all cursor-pointer"
+          >
+            {config.roles.length > 0 ? (
+              config.roles.map((r) => (
+                <option key={r.id} value={r.name}>
+                  {r.name}
+                </option>
+              ))
+            ) : (
+              <>
+                <option value="Admin">Admin</option>
+                <option value="Dispatcher">Dispatcher</option>
+                <option value="Viewer">Viewer</option>
+              </>
+            )}
+          </select>
+        </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-              Username / Email *
-            </label>
-            <input
-              type="text"
-              required
-              value={credForm.usernameMasked}
-              onChange={(e) => setCredForm((p) => ({ ...p, usernameMasked: e.target.value }))}
-              placeholder="e.g. dispatcher@acme.internal"
-              className="w-full h-11 px-3.5 text-[14px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
-            />
-          </div>
+        <div className="space-y-1.5">
+          <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+            Username / Email *
+          </label>
+          <input
+            type="text"
+            required
+            value={credForm.usernameMasked}
+            onChange={(e) => setCredForm((p) => ({ ...p, usernameMasked: e.target.value }))}
+            placeholder="e.g. dispatcher@acme.internal"
+            className="w-full h-11 px-3.5 text-[14px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
+          />
+        </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-              Password / Secret token {editingCred ? '(Leave blank to keep existing)' : '*'}
-            </label>
-            <input
-              type="password"
-              required={!editingCred}
-              value={credForm.secretMasked}
-              onChange={(e) => setCredForm((p) => ({ ...p, secretMasked: e.target.value }))}
-              placeholder="••••••••••••"
-              className="w-full h-11 px-3.5 text-[14px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
-            />
-          </div>
-
-          <div className="pt-6 border-t border-gray-100 dark:border-neutral-800 flex items-center justify-end gap-3">
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              onClick={() => setCredModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              size="md"
-              className="bg-[#4F46E5] hover:bg-[#4338CA] text-white"
-            >
-              {editingCred ? 'Save Credential' : 'Add Credential'}
-            </Button>
-          </div>
-        </form>
+        <div className="space-y-1.5">
+          <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+            Password / Secret token {editingCred ? '(Leave blank to keep existing)' : '*'}
+          </label>
+          <input
+            type="password"
+            required={!editingCred}
+            value={credForm.secretMasked}
+            onChange={(e) => setCredForm((p) => ({ ...p, secretMasked: e.target.value }))}
+            placeholder="••••••••••••"
+            className="w-full h-11 px-3.5 text-[14px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all"
+          />
+        </div>
       </ConfigSideDrawer>
     </div>
   )

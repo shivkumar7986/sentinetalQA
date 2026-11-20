@@ -37,6 +37,9 @@ export function CreateTaskDrawer({
 
   useEffect(() => {
     if (isOpen) {
+      if (formDrawerData?.websiteId) {
+        setSelectedWebsiteId(formDrawerData.websiteId)
+      }
       mockClient.getWebsites().then((sites) => {
         setWebsites(sites)
         if (formDrawerData?.websiteId) {

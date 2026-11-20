@@ -298,7 +298,7 @@ export function AdminDashboard({
             variant="primary"
             size="md"
             type="button"
-            onClick={() => toast.info("Invite user: Coming soon")}
+            onClick={() => openFormDrawer("add-user")}
             className="gap-1.5 font-medium"
           >
             <Plus className="h-3.5 w-3.5" /> Add user
@@ -546,7 +546,7 @@ export function AdminDashboard({
                     variant="primary"
                     size="sm"
                     type="button"
-                    onClick={() => toast.info("Invite QA Lead / Employee: Coming soon")}
+                    onClick={() => openFormDrawer("add-user")}
                     className="gap-1.5 font-medium ml-auto"
                   >
                     <Users className="h-3.5 w-3.5" /> + Add QA Lead / Employee

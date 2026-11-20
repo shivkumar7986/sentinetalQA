@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 type Theme = 'light' | 'dark' | 'system'
-export type FormDrawerType = 'add-website' | 'create-task' | null
+export type FormDrawerType = 'add-website' | 'create-task' | 'add-user' | null
 
 export interface FormDrawerData {
   websiteId?: string

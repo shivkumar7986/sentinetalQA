@@ -2,19 +2,11 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Check, Clock, ShieldAlert, ShieldCheck, UserCheck, Wrench, AlertCircle } from 'lucide-react'
+import { Plus, Check, Clock, ShieldCheck, UserCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog'
 import { usePermissions, canManageUser, canAddRole } from '@/lib/permissions'
 import { useAuthStore, type UserRole } from '@/stores/auth.store'
+import { useUIStore } from '@/stores/ui.store'
 import { INITIAL_MEMBERS, type Member } from '@/mocks/data/users.mock'
 import { toast } from 'sonner'
 
@@ -32,11 +24,9 @@ export default function UsersPage() {
     }
   }, [user, router])
 
+  const { openFormDrawer } = useUIStore()
+
   const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS)
-  const [inviteOpen, setInviteOpen] = useState(false)
-  const [inviteName, setInviteName] = useState('')
-  const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteRole, setInviteRole] = useState<UserRole>('qa_engineer')
 
   // Filter members based on role:
   // Admin: sees ALL users (Admin, QA Lead, QA Employee)
@@ -56,44 +46,9 @@ export default function UsersPage() {
       })
       return
     }
-    if (isLead) {
-      setInviteRole('qa_engineer')
-    } else {
-      setInviteRole('qa_engineer')
-    }
-    setInviteName('')
-    setInviteEmail('')
-    setInviteOpen(true)
+    openFormDrawer('add-user')
   }
 
-  function handleSendInvite(e: React.FormEvent) {
-    e.preventDefault()
-    if (!inviteEmail.trim()) return
-
-    // Permission validation
-    if (!canAddRole(user?.role, inviteRole)) {
-      toast.error('Permission Denied', {
-        description: `As a ${meta.label}, you are not authorized to invite an ${inviteRole === 'admin' ? 'Admin' : 'QA Lead'}.`,
-      })
-      return
-    }
-
-    const name = inviteName.trim() || inviteEmail.split('@')[0]
-    const newMember: Member = {
-      id: `m-${Date.now()}`,
-      name: name.charAt(0).toUpperCase() + name.slice(1),
-      email: inviteEmail.trim(),
-      role: inviteRole,
-      status: 'active',
-      lastLogin: 'Just now',
-    }
-
-    setMembers((prev) => [...prev, newMember])
-    setInviteOpen(false)
-    toast.success(`User ${newMember.name} added successfully!`, {
-      description: `Role assigned: ${inviteRole === 'admin' ? 'Admin' : inviteRole === 'qa_lead' ? 'QA Lead' : 'QA Employee'}`,
-    })
-  }
 
   function handleRoleChange(memberId: string, targetMemberRole: UserRole, newRole: UserRole) {
     if (!canManageUser(user?.role, targetMemberRole)) {
@@ -319,84 +274,6 @@ export default function UsersPage() {
           </table>
         </div>
       </div>
-
-      {/* Invite User Dialog */}
-      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-[17px] font-bold text-gray-900 dark:text-white">
-              Invite Team Member
-            </DialogTitle>
-            <DialogDescription className="text-[13px] text-gray-500 dark:text-neutral-400">
-              {isAdmin
-                ? 'Assign appropriate platform role and send access invitation.'
-                : 'Add a new QA Employee to your testing squad.'}
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleSendInvite} className="space-y-4 py-2">
-            <Input
-              label="Full Name"
-              placeholder="e.g. Rahul Sharma"
-              value={inviteName}
-              onChange={(e) => setInviteName(e.target.value)}
-              required
-              autoFocus
-            />
-
-            <Input
-              label="Work Email Address"
-              type="email"
-              placeholder="rahul@testingagent.ai"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              required
-            />
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-[0.05em]">
-                Platform Role
-              </label>
-
-              {isAdmin ? (
-                <select
-                  value={inviteRole}
-                  onChange={(e) => setInviteRole(e.target.value as UserRole)}
-                  className="h-10 px-3 text-[13px] rounded-[6px] border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] focus:outline-none focus:border-[var(--primary)]"
-                >
-                  <option value="qa_engineer">⚡ QA Employee (Tests & Execution)</option>
-                  <option value="qa_lead">🎯 QA Lead (Plan Approvals & Websites)</option>
-                  <option value="admin">👑 Admin (Full System Control)</option>
-                </select>
-              ) : (
-                <div className="space-y-1.5">
-                  <div className="h-10 px-3 flex items-center rounded-[6px] border border-[var(--border)] bg-gray-50 dark:bg-neutral-800 text-[13px] font-medium text-gray-800 dark:text-neutral-200">
-                    ⚡ QA Employee (Locked to your team)
-                  </div>
-                  <p className="text-[11px] text-gray-500 dark:text-neutral-400 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3 text-indigo-500 shrink-0" />
-                    As QA Lead, you can invite QA Employees. Admins can invite Leads.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <DialogFooter className="pt-3">
-              <Button
-                type="button"
-                variant="secondary"
-                size="md"
-                onClick={() => setInviteOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" variant="primary" size="md">
-                Send Invitation
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

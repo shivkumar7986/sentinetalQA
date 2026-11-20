@@ -6,6 +6,7 @@ import { Topbar } from './Topbar'
 import { CommandMenu } from './CommandMenu'
 import { AddWebsiteDrawer } from '@/components/forms/AddWebsiteDrawer'
 import { CreateTaskDrawer } from '@/components/forms/CreateTaskDrawer'
+import { AddUserDrawer } from '@/components/forms/AddUserDrawer'
 import { useUIStore } from '@/stores/ui.store'
 import { cn } from '@/lib/utils'
 
@@ -41,6 +42,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Global Slide-over Form Drawers (Full 100vh height, top-0 to bottom-0) */}
       <AddWebsiteDrawer />
       <CreateTaskDrawer />
+      <AddUserDrawer />
     </div>
   )
 }

@@ -1,0 +1,6 @@
+node_modules
+.next
+*.zip
+logs
+.DS_Store
+*.log

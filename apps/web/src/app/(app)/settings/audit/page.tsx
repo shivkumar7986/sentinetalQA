@@ -1,6 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/stores/auth.store'
 import { ChevronDown, Download } from 'lucide-react'
 import { SettingsNav } from '@/components/layout/SettingsNav'
 import { Button } from '@/components/ui/button'
@@ -52,6 +54,16 @@ const INITIAL_AUDIT_LOGS: AuditItem[] = [
 ]
 
 export default function AuditSettingsPage() {
+  const router = useRouter()
+  const { user } = useAuthStore()
+
+  useEffect(() => {
+    if (user?.role === 'qa_engineer') {
+      toast.error('Access Denied: Settings are not available for QA Employees.')
+      router.replace('/dashboard')
+    }
+  }, [user, router])
+
   const [logs] = useState<AuditItem[]>(INITIAL_AUDIT_LOGS)
   const [search, setSearch] = useState('')
   const [actionFilter, setActionFilter] = useState('all')

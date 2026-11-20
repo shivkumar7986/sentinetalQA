@@ -1,12 +1,31 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/stores/auth.store'
 import { SettingsNav } from '@/components/layout/SettingsNav'
 import { Check, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
 export default function ProvidersSettingsPage() {
+  const router = useRouter()
+  const { user } = useAuthStore()
+
+  useEffect(() => {
+    if (user?.role === 'qa_engineer') {
+      toast.error('Access Denied', {
+        description: 'Settings are not available for QA Employees.',
+      })
+      router.replace('/dashboard')
+    } else if (user?.role === 'qa_lead') {
+      toast.error('Access Denied', {
+        description: 'AI Providers configuration requires Administrator privileges.',
+      })
+      router.replace('/settings/general')
+    }
+  }, [user, router])
+
   const [defaultEngine, setDefaultEngine] = useState<'ollama' | 'gemini'>('ollama')
 
   // Ollama state

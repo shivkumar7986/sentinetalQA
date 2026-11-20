@@ -7,6 +7,7 @@ import type { Website } from '@/mocks/data/websites.mock'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { useUIStore } from '@/stores/ui.store'
+import { useAuthStore } from '@/stores/auth.store'
 
 interface AddWebsiteDrawerProps {
   open?: boolean
@@ -41,12 +42,21 @@ export function AddWebsiteDrawer({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, handleClose])
 
-  if (!isOpen) return null
+  const { user } = useAuthStore()
+
+  if (!isOpen || user?.role === 'qa_engineer') return null
 
   const isHttpOnProduction = environment === 'production' && baseUrl.startsWith('http://')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (user?.role === 'qa_engineer') {
+      toast.error('Permission Denied', {
+        description: 'QA Employees cannot register new websites.',
+      })
+      handleClose()
+      return
+    }
     setError('')
 
     if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {

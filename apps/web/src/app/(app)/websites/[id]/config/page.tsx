@@ -27,6 +27,7 @@ import type {
   ConfigVersion,
 } from "@/mocks/data/configs.mock";
 import { useUIStore } from "@/stores/ui.store";
+import { useAuthStore } from "@/stores/auth.store";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -156,6 +157,8 @@ export default function WebsiteConfigPage({
   params: { id: string };
 }) {
   const { openFormDrawer } = useUIStore();
+  const { user } = useAuthStore();
+  const canEditConfig = user?.role === 'admin' || user?.role === 'qa_lead';
   const [website, setWebsite] = useState<Website | null>(null);
   const [config, setConfig] = useState<FullWebsiteConfig | null>(null);
   const [loading, setLoading] = useState(true);
@@ -673,6 +676,21 @@ export default function WebsiteConfigPage({
         </div>
       </div>
 
+      {/* Read-Only Notice Banner for QA Employee */}
+      {!canEditConfig && (
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded-lg p-3.5 text-[12px] flex items-center justify-between">
+          <div className="flex items-center gap-2.5 text-amber-900 dark:text-amber-200">
+            <Shield className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+            <span>
+              <strong>Immutable Website Configuration:</strong> QA Employees have read-only access. You cannot create, modify, or delete website roles, modules, business rules, auth flows, or credentials.
+            </span>
+          </div>
+          <span className="text-[11px] font-semibold uppercase tracking-wider bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded shrink-0 ml-3">
+            Read-Only
+          </span>
+        </div>
+      )}
+
       {/* 7 Tabs Navigation Row matching screenshots */}
       <div className="flex items-center gap-6 border-b border-gray-200 dark:border-neutral-800 text-[13px] overflow-x-auto">
         {tabsList.map((t) => {
@@ -714,13 +732,15 @@ export default function WebsiteConfigPage({
                 roles).
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleOpenAddRole}
-              className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none cursor-pointer"
-            >
-              + Add role
-            </button>
+            {canEditConfig && (
+              <button
+                type="button"
+                onClick={handleOpenAddRole}
+                className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none cursor-pointer"
+              >
+                + Add role
+              </button>
+            )}
           </div>
 
           {/* Table */}
@@ -764,22 +784,28 @@ export default function WebsiteConfigPage({
                         : role.allowedModules}
                     </td>
                     <td className="py-3.5 px-6 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEditRole(role)}
-                          className="h-7 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteRole(role.id, role.name)}
-                          className="h-7 px-3 text-[12px] font-medium border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-neutral-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 rounded-[4px] cursor-pointer"
-                        >
-                          Delete
-                        </button>
-                      </div>
+                      {canEditConfig ? (
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditRole(role)}
+                            className="h-7 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteRole(role.id, role.name)}
+                            className="h-7 px-3 text-[12px] font-medium border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-neutral-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 rounded-[4px] cursor-pointer"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-[11px] text-gray-400 dark:text-neutral-500 font-medium italic">
+                          Locked
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -788,22 +814,24 @@ export default function WebsiteConfigPage({
           </div>
 
           {/* Bottom Version Note Bar */}
-          <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
-            <input
-              type="text"
-              placeholder="Version note (e.g. Updated roles mapping)..."
-              value={versionNote}
-              onChange={(e) => setVersionNote(e.target.value)}
-              className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
-            />
-            <button
-              type="button"
-              onClick={() => handleSaveSection("roles")}
-              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
-            >
-              Save roles
-            </button>
-          </div>
+          {canEditConfig && (
+            <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
+              <input
+                type="text"
+                placeholder="Version note (e.g. Updated roles mapping)..."
+                value={versionNote}
+                onChange={(e) => setVersionNote(e.target.value)}
+                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => handleSaveSection("roles")}
+                className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
+              >
+                Save roles
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -820,13 +848,15 @@ export default function WebsiteConfigPage({
                 Routes, expected headings, key selectors, and navigation paths.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleOpenAddModule}
-              className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none cursor-pointer"
-            >
-              + Add module
-            </button>
+            {canEditConfig && (
+              <button
+                type="button"
+                onClick={handleOpenAddModule}
+                className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none cursor-pointer"
+              >
+                + Add module
+              </button>
+            )}
           </div>
 
           {/* Table */}
@@ -869,22 +899,28 @@ export default function WebsiteConfigPage({
                         (mod.navPath ? mod.navPath.join(" → ") : "Direct URL")}
                     </td>
                     <td className="py-3.5 px-6 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEditModule(mod)}
-                          className="h-7 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteModule(mod.id, mod.name)}
-                          className="h-7 px-3 text-[12px] font-medium border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-neutral-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 rounded-[4px] cursor-pointer"
-                        >
-                          Delete
-                        </button>
-                      </div>
+                      {canEditConfig ? (
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditModule(mod)}
+                            className="h-7 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteModule(mod.id, mod.name)}
+                            className="h-7 px-3 text-[12px] font-medium border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-neutral-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 rounded-[4px] cursor-pointer"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-[11px] text-gray-400 dark:text-neutral-500 font-medium italic">
+                          Locked
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -893,22 +929,24 @@ export default function WebsiteConfigPage({
           </div>
 
           {/* Bottom Version Note Bar */}
-          <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
-            <input
-              type="text"
-              placeholder="Version note (e.g. Updated modules mapping)..."
-              value={versionNote}
-              onChange={(e) => setVersionNote(e.target.value)}
-              className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
-            />
-            <button
-              type="button"
-              onClick={() => handleSaveSection("modules")}
-              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
-            >
-              Save modules
-            </button>
-          </div>
+          {canEditConfig && (
+            <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
+              <input
+                type="text"
+                placeholder="Version note (e.g. Updated modules mapping)..."
+                value={versionNote}
+                onChange={(e) => setVersionNote(e.target.value)}
+                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => handleSaveSection("modules")}
+                className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
+              >
+                Save modules
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -936,11 +974,12 @@ export default function WebsiteConfigPage({
                 </label>
                 <div className="relative">
                   <select
+                    disabled={!canEditConfig}
                     value={authForm.authMethod}
                     onChange={(e) =>
                       setAuthForm((p) => ({ ...p, authMethod: e.target.value }))
                     }
-                    className="w-full h-10 px-3.5 pr-8 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] appearance-none cursor-pointer transition-colors"
+                    className="w-full h-10 px-3.5 pr-8 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] appearance-none cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <option value="Form login (Email / Password)">
                       Form login (Email / Password)
@@ -959,6 +998,7 @@ export default function WebsiteConfigPage({
                   Post-login redirect target
                 </label>
                 <input
+                  disabled={!canEditConfig}
                   type="text"
                   value={authForm.redirectTarget}
                   onChange={(e) =>
@@ -967,7 +1007,7 @@ export default function WebsiteConfigPage({
                       redirectTarget: e.target.value,
                     }))
                   }
-                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
+                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
@@ -979,6 +1019,7 @@ export default function WebsiteConfigPage({
                   Username field name / selector
                 </label>
                 <input
+                  disabled={!canEditConfig}
                   type="text"
                   value={authForm.usernameSelector}
                   onChange={(e) =>
@@ -987,7 +1028,7 @@ export default function WebsiteConfigPage({
                       usernameSelector: e.target.value,
                     }))
                   }
-                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
+                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -996,6 +1037,7 @@ export default function WebsiteConfigPage({
                   Password field name / selector
                 </label>
                 <input
+                  disabled={!canEditConfig}
                   type="text"
                   value={authForm.passwordSelector}
                   onChange={(e) =>
@@ -1004,7 +1046,7 @@ export default function WebsiteConfigPage({
                       passwordSelector: e.target.value,
                     }))
                   }
-                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
+                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
@@ -1016,6 +1058,7 @@ export default function WebsiteConfigPage({
                   Success indicator
                 </label>
                 <input
+                  disabled={!canEditConfig}
                   type="text"
                   value={authForm.successIndicatorSelector}
                   onChange={(e) =>
@@ -1024,7 +1067,7 @@ export default function WebsiteConfigPage({
                       successIndicatorSelector: e.target.value,
                     }))
                   }
-                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
+                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -1033,6 +1076,7 @@ export default function WebsiteConfigPage({
                   Expected failure message
                 </label>
                 <input
+                  disabled={!canEditConfig}
                   type="text"
                   value={authForm.failureMessageSelector}
                   onChange={(e) =>
@@ -1041,29 +1085,31 @@ export default function WebsiteConfigPage({
                       failureMessageSelector: e.target.value,
                     }))
                   }
-                  className="w-full h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
+                  className="w-full h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
           </div>
 
           {/* Bottom Version Note Bar */}
-          <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
-            <input
-              type="text"
-              placeholder="Version note (e.g. Updated auth flow mapping)..."
-              value={versionNote}
-              onChange={(e) => setVersionNote(e.target.value)}
-              className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
-            />
-            <button
-              type="button"
-              onClick={handleSaveAuthFlow}
-              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
-            >
-              Save auth flow
-            </button>
-          </div>
+          {canEditConfig && (
+            <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
+              <input
+                type="text"
+                placeholder="Version note (e.g. Updated auth flow mapping)..."
+                value={versionNote}
+                onChange={(e) => setVersionNote(e.target.value)}
+                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
+              />
+              <button
+                type="button"
+                onClick={handleSaveAuthFlow}
+                className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
+              >
+                Save auth flow
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -1081,13 +1127,15 @@ export default function WebsiteConfigPage({
                 assertions.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleOpenAddRule}
-              className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none cursor-pointer"
-            >
-              + Add rule
-            </button>
+            {canEditConfig && (
+              <button
+                type="button"
+                onClick={handleOpenAddRule}
+                className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none cursor-pointer"
+              >
+                + Add rule
+              </button>
+            )}
           </div>
 
           {/* Rules List Container */}
@@ -1134,50 +1182,58 @@ export default function WebsiteConfigPage({
                 </div>
 
                 {/* Right controls: Switch + Edit + Delete */}
-                <div className="flex items-center gap-2.5 shrink-0">
-                  <Switch
-                    checked={rule.isActive}
-                    onCheckedChange={() => toggleRule(rule.id)}
-                    className="data-[state=checked]:bg-[#4F46E5]"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleOpenEditRule(rule)}
-                    className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-1 cursor-pointer transition-colors"
-                    title="Edit rule"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteRule(rule.id)}
-                    className="text-gray-400 hover:text-rose-600 p-1 cursor-pointer transition-colors"
-                    title="Delete rule"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
+                {canEditConfig ? (
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <Switch
+                      checked={rule.isActive}
+                      onCheckedChange={() => toggleRule(rule.id)}
+                      className="data-[state=checked]:bg-[#4F46E5]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEditRule(rule)}
+                      className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-1 cursor-pointer transition-colors"
+                      title="Edit rule"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteRule(rule.id)}
+                      className="text-gray-400 hover:text-rose-600 p-1 cursor-pointer transition-colors"
+                      title="Delete rule"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <span className="text-[11px] text-gray-400 dark:text-neutral-500 font-medium italic">
+                    Locked
+                  </span>
+                )}
               </div>
             ))}
           </div>
 
           {/* Bottom Version Note Bar */}
-          <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
-            <input
-              type="text"
-              placeholder="Version note (e.g. Updated business rules mapping)..."
-              value={versionNote}
-              onChange={(e) => setVersionNote(e.target.value)}
-              className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
-            />
-            <button
-              type="button"
-              onClick={() => handleSaveSection("business rules")}
-              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
-            >
-              Save business rules
-            </button>
-          </div>
+          {canEditConfig && (
+            <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
+              <input
+                type="text"
+                placeholder="Version note (e.g. Updated business rules mapping)..."
+                value={versionNote}
+                onChange={(e) => setVersionNote(e.target.value)}
+                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => handleSaveSection("business rules")}
+                className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
+              >
+                Save business rules
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -1206,73 +1262,78 @@ export default function WebsiteConfigPage({
             </div>
 
             <textarea
+              disabled={!canEditConfig}
               rows={5}
               value={instructionsText}
               onChange={(e) => setInstructionsText(e.target.value)}
               placeholder="Enter instructions appended directly to all AI agent reasoning loops..."
-              className="w-full p-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors resize-none leading-relaxed"
+              className="w-full p-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors resize-none leading-relaxed disabled:opacity-60 disabled:cursor-not-allowed"
             />
 
             {/* Quick Insert Examples */}
-            <div className="flex flex-wrap items-center gap-2 pt-1 text-[12px]">
-              <span className="text-gray-500 dark:text-neutral-400">
-                Insert example:
-              </span>
-              <button
-                type="button"
-                onClick={() =>
-                  setInstructionsText(
-                    (prev) => prev + " Ignore cookie consent banners.",
-                  )
-                }
-                className="px-2.5 py-1 rounded-full border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
-              >
-                + Ignore cookie banners
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setInstructionsText(
-                    (prev) =>
-                      prev +
-                      " Wait for Tracking table hydration before asserting.",
-                  )
-                }
-                className="px-2.5 py-1 rounded-full border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
-              >
-                + Wait for async hydration
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setInstructionsText(
-                    (prev) => prev + " Read-only assertions only.",
-                  )
-                }
-                className="px-2.5 py-1 rounded-full border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
-              >
-                + Read-only assertions
-              </button>
-            </div>
+            {canEditConfig && (
+              <div className="flex flex-wrap items-center gap-2 pt-1 text-[12px]">
+                <span className="text-gray-500 dark:text-neutral-400">
+                  Insert example:
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setInstructionsText(
+                      (prev) => prev + " Ignore cookie consent banners.",
+                    )
+                  }
+                  className="px-2.5 py-1 rounded-full border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  + Ignore cookie banners
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setInstructionsText(
+                      (prev) =>
+                        prev +
+                        " Wait for Tracking table hydration before asserting.",
+                    )
+                  }
+                  className="px-2.5 py-1 rounded-full border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  + Wait for async hydration
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setInstructionsText(
+                      (prev) => prev + " Read-only assertions only.",
+                    )
+                  }
+                  className="px-2.5 py-1 rounded-full border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  + Read-only assertions
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Bottom Version Note Bar */}
-          <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
-            <input
-              type="text"
-              placeholder="Version note (e.g. Updated instructions mapping)..."
-              value={versionNote}
-              onChange={(e) => setVersionNote(e.target.value)}
-              className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
-            />
-            <button
-              type="button"
-              onClick={handleSaveInstructions}
-              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
-            >
-              Save instructions
-            </button>
-          </div>
+          {canEditConfig && (
+            <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
+              <input
+                type="text"
+                placeholder="Version note (e.g. Updated instructions mapping)..."
+                value={versionNote}
+                onChange={(e) => setVersionNote(e.target.value)}
+                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
+              />
+              <button
+                type="button"
+                onClick={handleSaveInstructions}
+                className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
+              >
+                Save instructions
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -1290,13 +1351,15 @@ export default function WebsiteConfigPage({
                 workers.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleOpenAddCredential}
-              className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none cursor-pointer"
-            >
-              + Add credential
-            </button>
+            {canEditConfig && (
+              <button
+                type="button"
+                onClick={handleOpenAddCredential}
+                className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none cursor-pointer"
+              >
+                + Add credential
+              </button>
+            )}
           </div>
 
           {/* Notice Banner */}
@@ -1350,24 +1413,30 @@ export default function WebsiteConfigPage({
                       {cred.lastUpdated}
                     </td>
                     <td className="py-3.5 px-6 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEditCredential(cred)}
-                          className="h-7 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
-                        >
-                          Replace
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleRemoveCredential(cred.roleId, cred.roleName)
-                          }
-                          className="h-7 px-3 text-[12px] font-medium border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-neutral-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 rounded-[4px] cursor-pointer"
-                        >
-                          Remove
-                        </button>
-                      </div>
+                      {canEditConfig ? (
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditCredential(cred)}
+                            className="h-7 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
+                          >
+                            Replace
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleRemoveCredential(cred.roleId, cred.roleName)
+                            }
+                            className="h-7 px-3 text-[12px] font-medium border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-neutral-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 rounded-[4px] cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-[11px] text-gray-400 dark:text-neutral-500 font-medium italic">
+                          Locked
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -1376,22 +1445,24 @@ export default function WebsiteConfigPage({
           </div>
 
           {/* Bottom Version Note Bar */}
-          <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
-            <input
-              type="text"
-              placeholder="Version note (e.g. Updated credentials mapping)..."
-              value={versionNote}
-              onChange={(e) => setVersionNote(e.target.value)}
-              className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
-            />
-            <button
-              type="button"
-              onClick={() => handleSaveSection("credentials")}
-              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
-            >
-              Save credentials
-            </button>
-          </div>
+          {canEditConfig && (
+            <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
+              <input
+                type="text"
+                placeholder="Version note (e.g. Updated credentials mapping)..."
+                value={versionNote}
+                onChange={(e) => setVersionNote(e.target.value)}
+                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => handleSaveSection("credentials")}
+                className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
+              >
+                Save credentials
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -1475,7 +1546,7 @@ export default function WebsiteConfigPage({
                           <span className="text-[13px] font-semibold text-emerald-600 dark:text-emerald-400 px-2">
                             Active
                           </span>
-                        ) : (
+                        ) : canEditConfig ? (
                           <button
                             type="button"
                             onClick={() => handleRestoreVersion(ver)}
@@ -1483,7 +1554,7 @@ export default function WebsiteConfigPage({
                           >
                             <RotateCcw className="h-3 w-3" /> Restore
                           </button>
-                        )}
+                        ) : null}
                       </div>
                     </div>
 

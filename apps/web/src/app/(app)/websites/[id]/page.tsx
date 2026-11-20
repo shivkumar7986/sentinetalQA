@@ -15,10 +15,13 @@ import type { Website } from '@/mocks/data/websites.mock'
 import type { Task } from '@/mocks/data/tasks.mock'
 import type { FullWebsiteConfig } from '@/mocks/data/configs.mock'
 import { useUIStore } from '@/stores/ui.store'
+import { useAuthStore } from '@/stores/auth.store'
 import { cn } from '@/lib/utils'
 
 export default function WebsiteDetailPage({ params }: { params: { id: string } }) {
   const { formDrawer, openFormDrawer } = useUIStore()
+  const { user } = useAuthStore()
+  const canManage = user?.role === 'admin' || user?.role === 'qa_lead'
   const [website, setWebsite] = useState<Website | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
   const [config, setConfig] = useState<FullWebsiteConfig | null>(null)
@@ -100,7 +103,7 @@ export default function WebsiteDetailPage({ params }: { params: { id: string } }
           <div className="flex gap-2">
             <Button variant="secondary" size="sm" asChild>
               <Link href={`/websites/${website.id}/config`}>
-                <Settings className="h-4 w-4" /> Configure
+                <Settings className="h-4 w-4" /> {canManage ? 'Configure' : 'View Config'}
               </Link>
             </Button>
             <Button

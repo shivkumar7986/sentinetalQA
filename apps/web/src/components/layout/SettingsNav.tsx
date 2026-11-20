@@ -14,15 +14,23 @@ interface SettingsNavProps {
 
 export function SettingsNav({ action }: SettingsNavProps) {
   const pathname = usePathname()
-  const { isAdmin, meta } = usePermissions()
-  const { switchRole } = useAuthStore()
+  const { isAdmin, isLead, meta } = usePermissions()
+  const { switchRole, user } = useAuthStore()
 
-  const tabs = [
-    { label: 'General', href: '/settings/general', admin: false },
-    { label: 'AI Providers', href: '/settings/providers', admin: true },
-    { label: 'Users', href: '/settings/users', admin: true },
-    { label: 'Audit Log', href: '/settings/audit', admin: false },
+  // RBAC Tab Visibility:
+  // Admin -> all tabs
+  // QA Lead -> only General & Audit Log
+  // QA Employee -> none
+  const allTabs = [
+    { label: 'General', href: '/settings/general', admin: false, roles: ['admin', 'qa_lead'] },
+    { label: 'AI Providers', href: '/settings/providers', admin: true, roles: ['admin'] },
+    { label: 'Users', href: '/settings/users', admin: true, roles: ['admin'] },
+    { label: 'Audit Log', href: '/settings/audit', admin: false, roles: ['admin', 'qa_lead'] },
   ]
+
+  const tabs = allTabs.filter((tab) =>
+    tab.roles.includes(user?.role || 'admin')
+  )
 
   return (
     <div className="space-y-4">

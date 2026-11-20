@@ -94,29 +94,18 @@ function WebsitesPageContent() {
           </p>
         </div>
 
-        {/* Clicking opens the slide-over drawer modal directly */}
-        <Button
-          variant="primary"
-          size="md"
-          type="button"
-          onClick={() => {
-            if (!canManage) {
-              toast.error('Permission Denied', {
-                description: `Role ${meta.label} cannot add websites. Requires QA Lead or Admin role.`,
-              })
-              return
-            }
-            openFormDrawer('add-website')
-          }}
-          className={`gap-1.5 font-medium shrink-0 self-start sm:self-auto rounded-[8px] px-4 py-2 text-[13px] shadow-none ${
-            canManage
-              ? 'bg-[#4F46E5] hover:bg-[#4338CA] text-white cursor-pointer'
-              : 'bg-gray-200 dark:bg-neutral-800 text-gray-400 dark:text-neutral-500 cursor-not-allowed opacity-80'
-          }`}
-          title={!canManage ? 'Adding websites requires QA Lead or Admin role' : undefined}
-        >
-          <Plus className="h-4 w-4" /> Add website {!canManage && '(Lead/Admin only)'}
-        </Button>
+        {/* Clicking opens the slide-over drawer modal directly (Admin/Lead only) */}
+        {canManage && (
+          <Button
+            variant="primary"
+            size="md"
+            type="button"
+            onClick={() => openFormDrawer('add-website')}
+            className="gap-1.5 font-medium shrink-0 self-start sm:self-auto rounded-[8px] px-4 py-2 text-[13px] shadow-none bg-[#4F46E5] hover:bg-[#4338CA] text-white cursor-pointer"
+          >
+            <Plus className="h-4 w-4" /> Add website
+          </Button>
+        )}
       </div>
 
       {/* Control Bar: [ Active | Archived ]  [ Search ]  [ All environments ▾ ]  -----  [ List | Grid ] */}
@@ -386,16 +375,18 @@ function WebsitesPageContent() {
                             asChild
                             className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px]"
                           >
-                            <Link href={`/websites/${site.id}/config`}>Configure</Link>
+                            <Link href={`/websites/${site.id}/config`}>{canManage ? 'Configure' : 'View config'}</Link>
                           </Button>
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => handleToggleArchive(site)}
-                            className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px]"
-                          >
-                            {site.status === 'archived' ? 'Restore' : 'Archive'}
-                          </Button>
+                          {canManage && (
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => handleToggleArchive(site)}
+                              className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px]"
+                            >
+                              {site.status === 'archived' ? 'Restore' : 'Archive'}
+                            </Button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -471,16 +462,18 @@ function WebsitesPageContent() {
                     asChild
                     className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 rounded-[6px]"
                   >
-                    <Link href={`/websites/${site.id}/config`}>Configure</Link>
+                    <Link href={`/websites/${site.id}/config`}>{canManage ? 'Configure' : 'View config'}</Link>
                   </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleToggleArchive(site)}
-                    className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 rounded-[6px]"
-                  >
-                    {site.status === 'archived' ? 'Restore' : 'Archive'}
-                  </Button>
+                  {canManage && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleToggleArchive(site)}
+                      className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 rounded-[6px]"
+                    >
+                      {site.status === 'archived' ? 'Restore' : 'Archive'}
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}

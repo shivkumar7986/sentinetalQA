@@ -15,7 +15,7 @@ export type Permission =
 
 const PERMISSIONS: Record<Permission, UserRole[]> = {
   'website.manage':     ['admin', 'qa_lead'],
-  'config.edit':        ['admin', 'qa_lead', 'qa_engineer'],
+  'config.edit':        ['admin', 'qa_lead'], // Immutable for QA Employee (cannot edit/add/archive)
   'credentials.manage': ['admin'],
   'task.create':        ['admin', 'qa_lead', 'qa_engineer'],
   'plan.approve':       ['admin', 'qa_lead'], // QA Employee cannot approve plans

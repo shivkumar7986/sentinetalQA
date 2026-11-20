@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Plus, Check, Clock, ShieldAlert, ShieldCheck, UserCheck, Wrench, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,14 +19,34 @@ import { INITIAL_MEMBERS, type Member } from '@/mocks/data/users.mock'
 import { toast } from 'sonner'
 
 export default function UsersPage() {
+  const router = useRouter()
   const { user } = useAuthStore()
   const { isAdmin, isLead, isEmployee, meta } = usePermissions()
+
+  useEffect(() => {
+    if (user?.role === 'qa_engineer') {
+      toast.error('Access Denied', {
+        description: 'QA Employees do not have permission to access the Users module.',
+      })
+      router.replace('/dashboard')
+    }
+  }, [user, router])
 
   const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS)
   const [inviteOpen, setInviteOpen] = useState(false)
   const [inviteName, setInviteName] = useState('')
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState<UserRole>('qa_engineer')
+
+  // Filter members based on role:
+  // Admin: sees ALL users (Admin, QA Lead, QA Employee)
+  // QA Lead: sees ONLY QA Lead and QA Employee accounts (Admin hidden)
+  // QA Employee: redirected out
+  const visibleMembers = members.filter((m) => {
+    if (isAdmin) return true
+    if (isLead) return m.role === 'qa_lead' || m.role === 'qa_engineer'
+    return false
+  })
 
   // When QA Lead opens invite, enforce QA Employee role
   function handleOpenInvite() {
@@ -194,7 +215,7 @@ export default function UsersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-neutral-800/80">
-              {members.map((member) => {
+              {visibleMembers.map((member) => {
                 const canEditThisRow = canManageUser(user?.role, member.role)
                 const isSelf = member.id === user?.id
 

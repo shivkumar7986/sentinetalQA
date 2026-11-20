@@ -1,35 +1,35 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import Link from 'next/link'
-import { Plus, ChevronDown, RefreshCw, Play, Sparkles } from 'lucide-react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { EnvBadge, type EnvValue } from '@/components/domain/EnvBadge'
-import { cn } from '@/lib/utils'
-import { useUIStore } from '@/stores/ui.store'
-import { mockClient } from '@/mocks/mockClient'
-import type { Website } from '@/mocks/data/websites.mock'
-import type { Task } from '@/mocks/data/tasks.mock'
-import type { Run } from '@/mocks/data/runs.mock'
-import type { TestPlan } from '@/mocks/data/plans.mock'
-import { toast } from 'sonner'
+import React, { useState } from "react";
+import Link from "next/link";
+import { Plus, ChevronDown, RefreshCw, Play, Sparkles } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { EnvBadge, type EnvValue } from "@/components/domain/EnvBadge";
+import { cn } from "@/lib/utils";
+import { useUIStore } from "@/stores/ui.store";
+import { mockClient } from "@/mocks/mockClient";
+import type { Website } from "@/mocks/data/websites.mock";
+import type { Task } from "@/mocks/data/tasks.mock";
+import type { Run } from "@/mocks/data/runs.mock";
+import type { TestPlan } from "@/mocks/data/plans.mock";
+import { toast } from "sonner";
 
 const ENV_OPTIONS = [
-  { label: 'All environments', value: 'all', dot: null },
-  { label: 'Production', value: 'production', dot: 'bg-rose-500' },
-  { label: 'Staging', value: 'staging', dot: 'bg-sky-500' },
-  { label: 'QA', value: 'qa', dot: 'bg-indigo-500' },
-  { label: 'Dev', value: 'dev', dot: 'bg-neutral-400' },
-]
+  { label: "All environments", value: "all", dot: null },
+  { label: "Production", value: "production", dot: "bg-rose-500" },
+  { label: "Staging", value: "staging", dot: "bg-sky-500" },
+  { label: "QA", value: "qa", dot: "bg-indigo-500" },
+  { label: "Dev", value: "dev", dot: "bg-neutral-400" },
+];
 
 interface QAEmployeeDashboardProps {
-  websites: Website[]
-  tasks: Task[]
-  runs: Run[]
-  plans: TestPlan[]
-  loading: boolean
-  onReload: () => void
+  websites: Website[];
+  tasks: Task[];
+  runs: Run[];
+  plans: TestPlan[];
+  loading: boolean;
+  onReload: () => void;
 }
 
 export function QAEmployeeDashboard({
@@ -40,113 +40,117 @@ export function QAEmployeeDashboard({
   loading,
   onReload,
 }: QAEmployeeDashboardProps) {
-  const { openFormDrawer } = useUIStore()
-  const [selectedEnv, setSelectedEnv] = useState('All environments')
-  const [envOpen, setEnvOpen] = useState(false)
+  const { openFormDrawer } = useUIStore();
+  const [selectedEnv, setSelectedEnv] = useState("All environments");
+  const [envOpen, setEnvOpen] = useState(false);
 
   // Employee tasks list matching Image 2
   const EMPLOYEE_TASKS = [
     {
-      id: 'tsk-sso',
-      title: 'SSO callback token expiry check',
-      statusBadge: '✕ Needs revision',
-      badgeClass: 'bg-[#FEE2E2] text-[#DC2626] dark:bg-rose-950/40 dark:text-rose-400',
-      website: 'Billing Admin',
-      environment: 'qa' as EnvValue,
-      planVersion: 'Plan v1',
-      leadNote: 'Lead note: Add invalid signature 401 assertion step.',
-      actionType: 'fix',
-      actionLabel: '✦ Fix & Regenerate',
-      planId: 'p-2',
+      id: "tsk-sso",
+      title: "SSO callback token expiry check",
+      statusBadge: "✕ Needs revision",
+      badgeClass:
+        "bg-[#FEE2E2] text-[#DC2626] dark:bg-rose-950/40 dark:text-rose-400",
+      website: "Billing Admin",
+      environment: "qa" as EnvValue,
+      planVersion: "Plan v1",
+      leadNote: "Lead note: Add invalid signature 401 assertion step.",
+      actionType: "fix",
+      actionLabel: "✦ Fix & Regenerate",
+      planId: "p-2",
     },
     {
-      id: 'tsk-tracking',
-      title: 'Verify login and open the Tracking page',
-      statusBadge: '✓ Approved',
-      badgeClass: 'bg-[#DCFCE7] text-[#16A34A] dark:bg-emerald-950/40 dark:text-emerald-400',
-      website: 'Logistics Portal',
-      environment: 'staging' as EnvValue,
-      planVersion: 'Plan v2',
+      id: "tsk-tracking",
+      title: "Verify login and open the Tracking page",
+      statusBadge: "✓ Approved",
+      badgeClass:
+        "bg-[#DCFCE7] text-[#16A34A] dark:bg-emerald-950/40 dark:text-emerald-400",
+      website: "Logistics Portal",
+      environment: "staging" as EnvValue,
+      planVersion: "Plan v2",
       leadNote: null,
-      actionType: 'run',
-      actionLabel: '▶ Run plan',
-      planId: 'p-1',
+      actionType: "run",
+      actionLabel: "▶ Run plan",
+      planId: "p-1",
     },
     {
-      id: 'tsk-filters',
-      title: 'Verify Dispatcher route filters',
-      statusBadge: '🕒 In review',
-      badgeClass: 'bg-[#FEF3C7] text-[#D97706] dark:bg-amber-950/40 dark:text-amber-400',
-      website: 'Logistics Portal',
-      environment: 'staging' as EnvValue,
-      planVersion: 'Plan v1',
-      leadNote: 'Submitted to Riya Sharma for approval',
-      actionType: 'open',
-      actionLabel: 'Open',
-      planId: 'p-3',
+      id: "tsk-filters",
+      title: "Verify Dispatcher route filters",
+      statusBadge: "🕒 In review",
+      badgeClass:
+        "bg-[#FEF3C7] text-[#D97706] dark:bg-amber-950/40 dark:text-amber-400",
+      website: "Logistics Portal",
+      environment: "staging" as EnvValue,
+      planVersion: "Plan v1",
+      leadNote: "Submitted to Riya Sharma for approval",
+      actionType: "open",
+      actionLabel: "Open",
+      planId: "p-3",
     },
     {
-      id: 'tsk-rounding',
-      title: 'Invoice GST rounding boundary check',
-      statusBadge: '✎ Draft',
-      badgeClass: 'bg-gray-100 text-gray-600 dark:bg-neutral-800 dark:text-neutral-400',
-      website: 'Billing Admin',
-      environment: 'qa' as EnvValue,
-      planVersion: 'Plan —',
+      id: "tsk-rounding",
+      title: "Invoice GST rounding boundary check",
+      statusBadge: "✎ Draft",
+      badgeClass:
+        "bg-gray-100 text-gray-600 dark:bg-neutral-800 dark:text-neutral-400",
+      website: "Billing Admin",
+      environment: "qa" as EnvValue,
+      planVersion: "Plan —",
       leadNote: null,
-      actionType: 'open',
-      actionLabel: 'Open',
-      planId: 'p-4',
+      actionType: "open",
+      actionLabel: "Open",
+      planId: "p-4",
     },
-  ]
+  ];
 
   // Employee recent runs matching Image 2
   const EMPLOYEE_RUNS = [
     {
-      id: 'run-941',
-      status: 'failed',
-      taskTitle: 'Dispatcher role redirect',
-      websiteName: 'Logistics Portal',
-      environment: 'staging' as EnvValue,
-      planVersion: 'v2',
-      duration: '19.3s',
-      started: '1h ago',
+      id: "run-941",
+      status: "failed",
+      taskTitle: "Dispatcher role redirect",
+      websiteName: "Logistics Portal",
+      environment: "staging" as EnvValue,
+      planVersion: "v2",
+      duration: "19.3s",
+      started: "1h ago",
     },
     {
-      id: 'run-940',
-      status: 'passed',
-      taskTitle: 'Invoice export CSV rules',
-      websiteName: 'Billing Admin',
-      environment: 'qa' as EnvValue,
-      planVersion: 'v1',
-      duration: '8.1s',
-      started: '3h ago',
+      id: "run-940",
+      status: "passed",
+      taskTitle: "Invoice export CSV rules",
+      websiteName: "Billing Admin",
+      environment: "qa" as EnvValue,
+      planVersion: "v1",
+      duration: "8.1s",
+      started: "3h ago",
     },
-  ]
+  ];
 
   // Assigned websites matching Image 2
   const ASSIGNED_WEBSITES = [
     {
-      id: 'web-1',
-      name: 'Logistics Portal',
-      environment: 'staging' as EnvValue,
-      configVersion: 'Config v4',
-      rolesCount: '3 roles',
+      id: "web-1",
+      name: "Logistics Portal",
+      environment: "staging" as EnvValue,
+      configVersion: "Config v4",
+      rolesCount: "3 roles",
     },
     {
-      id: 'web-2',
-      name: 'Billing Admin',
-      environment: 'qa' as EnvValue,
-      configVersion: 'Config v2',
-      rolesCount: '2 roles',
+      id: "web-2",
+      name: "Billing Admin",
+      environment: "qa" as EnvValue,
+      configVersion: "Config v2",
+      rolesCount: "2 roles",
     },
-  ]
+  ];
 
   async function handleRunApprovedPlan(taskTitle: string, planId: string) {
-    toast.success(`Started autonomous execution: ${taskTitle}`)
+    toast.success(`Started autonomous execution: ${taskTitle}`);
     try {
-      await mockClient.triggerRun(planId)
-      onReload()
+      await mockClient.triggerRun(planId);
+      onReload();
     } catch {
       // fallback
     }
@@ -154,8 +158,8 @@ export function QAEmployeeDashboard({
 
   function handleTriageClick(taskTitle: string) {
     toast.info(`Opening triage notes drawer for: ${taskTitle}`, {
-      description: 'You can attach assertion logs and assign to developer.',
-    })
+      description: "You can attach assertion logs and assign to developer.",
+    });
   }
 
   return (
@@ -167,7 +171,8 @@ export function QAEmployeeDashboard({
             My QA Workspace
           </h1>
           <p className="text-[13px] text-gray-500 dark:text-neutral-400 mt-0.5">
-            Author testing tasks, address QA Lead plan feedback, execute approved runs, and triage failures.
+            Author testing tasks, address QA Lead plan feedback, execute
+            approved runs, and triage failures.
           </p>
         </div>
 
@@ -178,54 +183,60 @@ export function QAEmployeeDashboard({
               type="button"
               onClick={() => setEnvOpen((v) => !v)}
               className={cn(
-                'h-9 px-3.5 rounded-[6px] bg-white dark:bg-neutral-900 border text-[13px] font-medium text-gray-700 dark:text-gray-200 flex items-center gap-2 transition-colors select-none',
+                "h-9 px-3.5 rounded-[6px] bg-white dark:bg-neutral-900 border text-[13px] font-medium text-gray-700 dark:text-gray-200 flex items-center gap-2 transition-colors select-none",
                 envOpen
-                  ? 'border-[#4F46E5] ring-2 ring-[#4F46E5]/20'
-                  : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300'
+                  ? "border-[#4F46E5] ring-2 ring-[#4F46E5]/20"
+                  : "border-gray-200 dark:border-neutral-700 hover:border-gray-300",
               )}
             >
               <span>{selectedEnv}</span>
               <ChevronDown
                 className={cn(
-                  'h-3.5 w-3.5 text-gray-400 transition-transform duration-150',
-                  envOpen && 'rotate-180'
+                  "h-3.5 w-3.5 text-gray-400 transition-transform duration-150",
+                  envOpen && "rotate-180",
                 )}
               />
             </button>
 
             {envOpen && (
               <>
-                <div className="fixed inset-0 z-20" onClick={() => setEnvOpen(false)} />
                 <div
-                  className="absolute left-0 sm:right-0 sm:left-auto top-full mt-1.5 w-48 rounded-[8px] bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 py-1 z-30 shadow-lg animate-enter"
-                >
+                  className="fixed inset-0 z-20"
+                  onClick={() => setEnvOpen(false)}
+                />
+                <div className="absolute left-0 sm:right-0 sm:left-auto top-full mt-1.5 w-48 rounded-[8px] bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 py-1 z-30 shadow-lg animate-enter">
                   {ENV_OPTIONS.map((opt) => {
-                    const isSelected = selectedEnv === opt.label
+                    const isSelected = selectedEnv === opt.label;
                     return (
                       <button
                         key={opt.value}
                         type="button"
                         onClick={() => {
-                          setSelectedEnv(opt.label)
-                          setEnvOpen(false)
+                          setSelectedEnv(opt.label);
+                          setEnvOpen(false);
                         }}
                         className={cn(
-                          'w-full text-left px-3.5 py-2 text-[12px] flex items-center justify-between transition-colors',
+                          "w-full text-left px-3.5 py-2 text-[12px] flex items-center justify-between transition-colors",
                           isSelected
-                            ? 'bg-[#EEF2FF] dark:bg-indigo-950/40 text-[#4F46E5] font-semibold'
-                            : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-800'
+                            ? "bg-[#EEF2FF] dark:bg-indigo-950/40 text-[#4F46E5] font-semibold"
+                            : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-800",
                         )}
                       >
                         <div className="flex items-center gap-2">
                           {opt.dot ? (
-                            <span className={cn('h-2 w-2 rounded-full shrink-0', opt.dot)} />
+                            <span
+                              className={cn(
+                                "h-2 w-2 rounded-full shrink-0",
+                                opt.dot,
+                              )}
+                            />
                           ) : (
                             <span className="h-2 w-2 rounded-full border border-gray-300 shrink-0" />
                           )}
                           <span>{opt.label}</span>
                         </div>
                       </button>
-                    )
+                    );
                   })}
                 </div>
               </>
@@ -237,7 +248,7 @@ export function QAEmployeeDashboard({
             variant="primary"
             size="md"
             type="button"
-            onClick={() => openFormDrawer('create-task')}
+            onClick={() => openFormDrawer("create-task")}
             className="gap-1.5 font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white"
           >
             <Plus className="h-3.5 w-3.5" /> Create task
@@ -337,8 +348,8 @@ export function QAEmployeeDashboard({
                         </h3>
                         <span
                           className={cn(
-                            'px-2 py-0.5 rounded-full text-[11px] font-semibold shrink-0',
-                            task.badgeClass
+                            "px-2 py-0.5 rounded-full text-[11px] font-semibold shrink-0",
+                            task.badgeClass,
                           )}
                         >
                           {task.statusBadge}
@@ -355,10 +366,14 @@ export function QAEmployeeDashboard({
                         {task.leadNote && (
                           <>
                             <span>·</span>
-                            <span className={cn(
-                              'font-medium',
-                              task.actionType === 'fix' ? 'text-rose-600 dark:text-rose-400' : 'text-gray-500'
-                            )}>
+                            <span
+                              className={cn(
+                                "font-medium",
+                                task.actionType === "fix"
+                                  ? "text-rose-600 dark:text-rose-400"
+                                  : "text-gray-500",
+                              )}
+                            >
                               {task.leadNote}
                             </span>
                           </>
@@ -367,16 +382,18 @@ export function QAEmployeeDashboard({
                     </div>
 
                     {/* Action button */}
-                    {task.actionType === 'run' ? (
+                    {task.actionType === "run" ? (
                       <Button
                         variant="primary"
                         size="sm"
-                        onClick={() => handleRunApprovedPlan(task.title, task.planId)}
+                        onClick={() =>
+                          handleRunApprovedPlan(task.title, task.planId)
+                        }
                         className="shrink-0 h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white gap-1"
                       >
                         <Play className="h-3 w-3 fill-current" /> Run plan
                       </Button>
-                    ) : task.actionType === 'fix' ? (
+                    ) : task.actionType === "fix" ? (
                       <Button
                         variant="secondary"
                         size="sm"
@@ -384,7 +401,8 @@ export function QAEmployeeDashboard({
                         className="shrink-0 h-8 px-3 text-[12px] gap-1 font-medium border-gray-200"
                       >
                         <Link href={`/plans/${task.planId}`}>
-                          <Sparkles className="h-3.5 w-3.5 text-[#4F46E5]" /> Fix & Regenerate
+                          <Sparkles className="h-3.5 w-3.5 text-[#4F46E5]" />{" "}
+                          Fix & Regenerate
                         </Link>
                       </Button>
                     ) : (
@@ -394,9 +412,7 @@ export function QAEmployeeDashboard({
                         asChild
                         className="shrink-0 h-8 px-3 text-[12px]"
                       >
-                        <Link href={`/plans/${task.planId}`}>
-                          Open
-                        </Link>
+                        <Link href={`/plans/${task.planId}`}>Open</Link>
                       </Button>
                     )}
                   </div>
@@ -418,7 +434,9 @@ export function QAEmployeeDashboard({
                 {/* Passed */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-[12px]">
-                    <span className="text-gray-600 dark:text-gray-300">Passed</span>
+                    <span className="text-gray-600 dark:text-gray-300">
+                      Passed
+                    </span>
                     <span className="mono-data font-semibold text-gray-900 dark:text-white">
                       16 (84.2%)
                     </span>
@@ -426,7 +444,7 @@ export function QAEmployeeDashboard({
                   <div className="h-1.5 w-full bg-gray-100 dark:bg-neutral-800 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-emerald-500 rounded-full"
-                      style={{ width: '84.2%' }}
+                      style={{ width: "84.2%" }}
                     />
                   </div>
                 </div>
@@ -434,7 +452,9 @@ export function QAEmployeeDashboard({
                 {/* Failed */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-[12px]">
-                    <span className="text-gray-600 dark:text-gray-300">Failed</span>
+                    <span className="text-gray-600 dark:text-gray-300">
+                      Failed
+                    </span>
                     <span className="mono-data font-semibold text-gray-900 dark:text-white">
                       2 (10.5%)
                     </span>
@@ -442,7 +462,7 @@ export function QAEmployeeDashboard({
                   <div className="h-1.5 w-full bg-gray-100 dark:bg-neutral-800 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-rose-500 rounded-full"
-                      style={{ width: '10.5%' }}
+                      style={{ width: "10.5%" }}
                     />
                   </div>
                 </div>
@@ -450,7 +470,9 @@ export function QAEmployeeDashboard({
                 {/* Error / Skipped */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-[12px]">
-                    <span className="text-gray-600 dark:text-gray-300">Error / Skipped</span>
+                    <span className="text-gray-600 dark:text-gray-300">
+                      Error / Skipped
+                    </span>
                     <span className="mono-data font-semibold text-gray-900 dark:text-white">
                       1 (5.3%)
                     </span>
@@ -458,7 +480,7 @@ export function QAEmployeeDashboard({
                   <div className="h-1.5 w-full bg-gray-100 dark:bg-neutral-800 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-amber-500 rounded-full"
-                      style={{ width: '5.3%' }}
+                      style={{ width: "5.3%" }}
                     />
                   </div>
                 </div>
@@ -469,10 +491,13 @@ export function QAEmployeeDashboard({
             <div className="pt-4 mt-4 border-t border-gray-100 dark:border-neutral-800">
               <button
                 type="button"
-                onClick={() => toast.info('Re-running my last task: Verify login & Tracking')}
+                onClick={() =>
+                  toast.info("Re-running my last task: Verify login & Tracking")
+                }
                 className="w-full h-9 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 text-[12px] font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <RefreshCw className="h-3.5 w-3.5 text-gray-500" /> Re-run my last task
+                <RefreshCw className="h-3.5 w-3.5 text-gray-500" /> Re-run my
+                last task
               </button>
             </div>
           </Card>
@@ -512,7 +537,7 @@ export function QAEmployeeDashboard({
                       className="hover:bg-gray-50/70 dark:hover:bg-neutral-800/40 transition-colors"
                     >
                       <td className="py-3 px-4">
-                        {run.status === 'passed' ? (
+                        {run.status === "passed" ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#DCFCE7] text-[#16A34A] dark:bg-emerald-950/40 dark:text-emerald-400">
                             ✓ Passed
                           </span>
@@ -546,7 +571,7 @@ export function QAEmployeeDashboard({
                         {run.started}
                       </td>
                       <td className="py-3 px-4 text-right">
-                        {run.status === 'failed' ? (
+                        {run.status === "failed" ? (
                           <Button
                             variant="secondary"
                             size="sm"
@@ -559,7 +584,9 @@ export function QAEmployeeDashboard({
                           <Button
                             variant="secondary"
                             size="sm"
-                            onClick={() => toast.success(`Re-triggering ${run.taskTitle}`)}
+                            onClick={() =>
+                              toast.success(`Re-triggering ${run.taskTitle}`)
+                            }
                             className="h-7 px-3 text-[12px] font-medium border-gray-200 gap-1"
                           >
                             <RefreshCw className="h-3 w-3" /> Re-run
@@ -612,7 +639,7 @@ export function QAEmployeeDashboard({
                       className="h-7 px-2.5 text-[12px] font-medium border-gray-200 shrink-0"
                     >
                       <Link href={`/websites/${site.id}/config`}>
-                        Edit rules
+                        View rules
                       </Link>
                     </Button>
                   </div>
@@ -623,5 +650,5 @@ export function QAEmployeeDashboard({
         </div>
       </div>
     </div>
-  )
+  );
 }

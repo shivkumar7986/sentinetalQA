@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Plus, Check, Clock, AlertCircle } from 'lucide-react'
 import { SettingsNav } from '@/components/layout/SettingsNav'
 import { Button } from '@/components/ui/button'
@@ -19,8 +20,23 @@ import { INITIAL_MEMBERS, type Member } from '@/mocks/data/users.mock'
 import { toast } from 'sonner'
 
 export default function UsersSettingsPage() {
+  const router = useRouter()
   const { user } = useAuthStore()
   const { isAdmin, isLead, isEmployee, meta } = usePermissions()
+
+  useEffect(() => {
+    if (user?.role === 'qa_engineer') {
+      toast.error('Access Denied', {
+        description: 'Settings are not available for QA Employees.',
+      })
+      router.replace('/dashboard')
+    } else if (user?.role === 'qa_lead') {
+      toast.error('Access Denied', {
+        description: 'User Management settings require Administrator privileges.',
+      })
+      router.replace('/settings/general')
+    }
+  }, [user, router])
 
   const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS)
   const [inviteOpen, setInviteOpen] = useState(false)

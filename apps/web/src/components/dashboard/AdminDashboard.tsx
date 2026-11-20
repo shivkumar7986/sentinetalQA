@@ -1,36 +1,44 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import Link from 'next/link'
-import { Plus, ChevronDown, RefreshCw, ArrowUpRight, ArrowRight, Check, CheckCircle2 } from 'lucide-react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { EnvBadge, type EnvValue } from '@/components/domain/EnvBadge'
-import { StatusBadge, type StatusValue } from '@/components/domain/StatusBadge'
-import { cn } from '@/lib/utils'
-import { useUIStore } from '@/stores/ui.store'
-import { mockClient } from '@/mocks/mockClient'
-import type { Website } from '@/mocks/data/websites.mock'
-import type { Task } from '@/mocks/data/tasks.mock'
-import type { Run } from '@/mocks/data/runs.mock'
-import type { TestPlan } from '@/mocks/data/plans.mock'
-import { toast } from 'sonner'
+import React, { useState } from "react";
+import Link from "next/link";
+import {
+  Plus,
+  ChevronDown,
+  RefreshCw,
+  ArrowUpRight,
+  ArrowRight,
+  Check,
+  CheckCircle2,
+} from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { EnvBadge, type EnvValue } from "@/components/domain/EnvBadge";
+import { StatusBadge, type StatusValue } from "@/components/domain/StatusBadge";
+import { cn } from "@/lib/utils";
+import { useUIStore } from "@/stores/ui.store";
+import { mockClient } from "@/mocks/mockClient";
+import type { Website } from "@/mocks/data/websites.mock";
+import type { Task } from "@/mocks/data/tasks.mock";
+import type { Run } from "@/mocks/data/runs.mock";
+import type { TestPlan } from "@/mocks/data/plans.mock";
+import { toast } from "sonner";
 
 const ENV_OPTIONS = [
-  { label: 'All environments', value: 'all', dot: null },
-  { label: 'Production', value: 'production', dot: 'bg-rose-500' },
-  { label: 'Staging', value: 'staging', dot: 'bg-sky-500' },
-  { label: 'QA', value: 'qa', dot: 'bg-indigo-500' },
-  { label: 'Dev', value: 'dev', dot: 'bg-neutral-400' },
-]
+  { label: "All environments", value: "all", dot: null },
+  { label: "Production", value: "production", dot: "bg-rose-500" },
+  { label: "Staging", value: "staging", dot: "bg-sky-500" },
+  { label: "QA", value: "qa", dot: "bg-indigo-500" },
+  { label: "Dev", value: "dev", dot: "bg-neutral-400" },
+];
 
 interface AdminDashboardProps {
-  websites: Website[]
-  tasks: Task[]
-  runs: Run[]
-  plans: TestPlan[]
-  loading: boolean
-  onReload: () => void
+  websites: Website[];
+  tasks: Task[];
+  runs: Run[];
+  plans: TestPlan[];
+  loading: boolean;
+  onReload: () => void;
 }
 
 export function AdminDashboard({
@@ -41,38 +49,42 @@ export function AdminDashboard({
   loading,
   onReload,
 }: AdminDashboardProps) {
-  const { openFormDrawer } = useUIStore()
-  const [selectedEnv, setSelectedEnv] = useState('All environments')
-  const [envOpen, setEnvOpen] = useState(false)
+  const { openFormDrawer } = useUIStore();
+  const [selectedEnv, setSelectedEnv] = useState("All environments");
+  const [envOpen, setEnvOpen] = useState(false);
 
   // Filter runs by selected environment
   const filteredRuns = runs.filter((run) => {
-    if (selectedEnv === 'All environments') return true
-    return run.environment.toLowerCase() === selectedEnv.toLowerCase()
-  })
+    if (selectedEnv === "All environments") return true;
+    return run.environment.toLowerCase() === selectedEnv.toLowerCase();
+  });
 
   // Dynamic Metrics
-  const activeWebsites = websites.filter((w) => w.status !== 'archived')
-  const archivedWebsitesCount = websites.length - activeWebsites.length
-  const activeTasks = tasks.filter((t) => t.status !== 'archived').length
-  const totalRuns = runs.length
-  const passedRunsCount = runs.filter((r) => r.status === 'passed').length
-  const failedRunsCount = runs.filter((r) => r.status === 'failed').length
-  const otherRunsCount = totalRuns - passedRunsCount - failedRunsCount
+  const activeWebsites = websites.filter((w) => w.status !== "archived");
+  const archivedWebsitesCount = websites.length - activeWebsites.length;
+  const activeTasks = tasks.filter((t) => t.status !== "archived").length;
+  const totalRuns = runs.length;
+  const passedRunsCount = runs.filter((r) => r.status === "passed").length;
+  const failedRunsCount = runs.filter((r) => r.status === "failed").length;
+  const otherRunsCount = totalRuns - passedRunsCount - failedRunsCount;
 
-  const passRate = totalRuns > 0
-    ? ((passedRunsCount / totalRuns) * 100).toFixed(1) + '%'
-    : '100%'
+  const passRate =
+    totalRuns > 0
+      ? ((passedRunsCount / totalRuns) * 100).toFixed(1) + "%"
+      : "100%";
 
-  const passedPct = totalRuns > 0 ? ((passedRunsCount / totalRuns) * 100).toFixed(1) : '100'
-  const failedPct = totalRuns > 0 ? ((failedRunsCount / totalRuns) * 100).toFixed(1) : '0'
-  const otherPct = totalRuns > 0 ? ((otherRunsCount / totalRuns) * 100).toFixed(1) : '0'
+  const passedPct =
+    totalRuns > 0 ? ((passedRunsCount / totalRuns) * 100).toFixed(1) : "100";
+  const failedPct =
+    totalRuns > 0 ? ((failedRunsCount / totalRuns) * 100).toFixed(1) : "0";
+  const otherPct =
+    totalRuns > 0 ? ((otherRunsCount / totalRuns) * 100).toFixed(1) : "0";
 
   const pendingPlans = plans.filter(
-    (plan) => plan.status === 'in_review' || plan.status === 'draft'
-  )
+    (plan) => plan.status === "in_review" || plan.status === "draft",
+  );
 
-  const taskMap = new Map(tasks.map((t) => [t.id, t]))
+  const taskMap = new Map(tasks.map((t) => [t.id, t]));
 
   const TREND_BARS = [
     { height: 60 },
@@ -89,16 +101,16 @@ export function AdminDashboard({
     { height: 82 },
     { height: 88 },
     { height: Math.min(100, Math.max(40, Math.round(parseFloat(passRate)))) },
-  ]
+  ];
 
   async function handleRerunLastTask() {
-    if (tasks.length === 0) return
-    const targetTask = tasks[0]
-    toast.info(`Triggered test run for: ${targetTask.title}`)
+    if (tasks.length === 0) return;
+    const targetTask = tasks[0];
+    toast.info(`Triggered test run for: ${targetTask.title}`);
     try {
       if (targetTask.currentPlanId) {
-        await mockClient.triggerRun(targetTask.currentPlanId)
-        onReload()
+        await mockClient.triggerRun(targetTask.currentPlanId);
+        onReload();
       }
     } catch {
       // fallback
@@ -110,9 +122,12 @@ export function AdminDashboard({
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[22px] font-bold text-[var(--text)] tracking-tight">Dashboard</h1>
+          <h1 className="text-[22px] font-bold text-[var(--text)] tracking-tight">
+            Dashboard
+          </h1>
           <p className="text-[13px] text-[var(--text-muted)] mt-0.5">
-            Test plans awaiting approval, live execution runs, and 30-day pass stability.
+            Test plans awaiting approval, live execution runs, and 30-day pass
+            stability.
           </p>
         </div>
 
@@ -123,10 +138,10 @@ export function AdminDashboard({
               type="button"
               onClick={() => setEnvOpen((v) => !v)}
               className={cn(
-                'h-9 px-3.5 rounded-[6px] bg-[var(--surface)] border text-[13px] font-medium text-[var(--text)] flex items-center gap-2 transition-colors select-none',
+                "h-9 px-3.5 rounded-[6px] bg-[var(--surface)] border text-[13px] font-medium text-[var(--text)] flex items-center gap-2 transition-colors select-none",
                 envOpen
-                  ? 'border-[var(--primary)] ring-2 ring-[var(--ai-ring)]'
-                  : 'border-[var(--border)] hover:border-[var(--border-hover)]'
+                  ? "border-[var(--primary)] ring-2 ring-[var(--ai-ring)]"
+                  : "border-[var(--border)] hover:border-[var(--border-hover)]",
               )}
               aria-haspopup="listbox"
               aria-expanded={envOpen}
@@ -134,22 +149,25 @@ export function AdminDashboard({
               <span>{selectedEnv}</span>
               <ChevronDown
                 className={cn(
-                  'h-3.5 w-3.5 text-[var(--text-muted)] transition-transform duration-150',
-                  envOpen && 'rotate-180'
+                  "h-3.5 w-3.5 text-[var(--text-muted)] transition-transform duration-150",
+                  envOpen && "rotate-180",
                 )}
               />
             </button>
 
             {envOpen && (
               <>
-                <div className="fixed inset-0 z-20" onClick={() => setEnvOpen(false)} />
+                <div
+                  className="fixed inset-0 z-20"
+                  onClick={() => setEnvOpen(false)}
+                />
                 <div
                   role="listbox"
                   className="absolute left-0 sm:right-0 sm:left-auto top-full mt-1.5 w-48 rounded-[8px] bg-[var(--surface)] border border-[var(--border)] py-1 z-30 animate-enter"
-                  style={{ boxShadow: '0 4px 16px rgba(15, 23, 42, 0.08)' }}
+                  style={{ boxShadow: "0 4px 16px rgba(15, 23, 42, 0.08)" }}
                 >
                   {ENV_OPTIONS.map((opt) => {
-                    const isSelected = selectedEnv === opt.label
+                    const isSelected = selectedEnv === opt.label;
                     return (
                       <button
                         key={opt.value}
@@ -157,27 +175,34 @@ export function AdminDashboard({
                         aria-selected={isSelected}
                         type="button"
                         onClick={() => {
-                          setSelectedEnv(opt.label)
-                          setEnvOpen(false)
+                          setSelectedEnv(opt.label);
+                          setEnvOpen(false);
                         }}
                         className={cn(
-                          'w-full text-left px-3.5 py-2 text-[12px] flex items-center justify-between transition-colors',
+                          "w-full text-left px-3.5 py-2 text-[12px] flex items-center justify-between transition-colors",
                           isSelected
-                            ? 'bg-[var(--primary-tint)] text-[var(--primary)] font-semibold'
-                            : 'text-[var(--text)] hover:bg-[var(--hover-subtle)]'
+                            ? "bg-[var(--primary-tint)] text-[var(--primary)] font-semibold"
+                            : "text-[var(--text)] hover:bg-[var(--hover-subtle)]",
                         )}
                       >
                         <div className="flex items-center gap-2">
                           {opt.dot ? (
-                            <span className={cn('h-2 w-2 rounded-full shrink-0', opt.dot)} />
+                            <span
+                              className={cn(
+                                "h-2 w-2 rounded-full shrink-0",
+                                opt.dot,
+                              )}
+                            />
                           ) : (
                             <span className="h-2 w-2 rounded-full border border-[var(--border-hover)] shrink-0" />
                           )}
                           <span>{opt.label}</span>
                         </div>
-                        {isSelected && <Check className="h-3.5 w-3.5 text-[var(--primary)]" />}
+                        {isSelected && (
+                          <Check className="h-3.5 w-3.5 text-[var(--primary)]" />
+                        )}
                       </button>
-                    )
+                    );
                   })}
                 </div>
               </>
@@ -189,7 +214,7 @@ export function AdminDashboard({
             variant="secondary"
             size="md"
             type="button"
-            onClick={() => openFormDrawer('add-website')}
+            onClick={() => openFormDrawer("add-website")}
             className="gap-1.5 font-medium"
           >
             <Plus className="h-3.5 w-3.5" /> Add website
@@ -200,7 +225,7 @@ export function AdminDashboard({
             variant="primary"
             size="md"
             type="button"
-            onClick={() => openFormDrawer('create-task')}
+            onClick={() => openFormDrawer("create-task")}
             className="gap-1.5 font-medium"
           >
             <Plus className="h-3.5 w-3.5" /> Create task
@@ -212,16 +237,18 @@ export function AdminDashboard({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Registered websites */}
         <Card className="p-4 flex flex-col justify-between h-[105px]">
-          <span className="text-[12px] font-medium text-[var(--text-muted)]">Registered websites</span>
+          <span className="text-[12px] font-medium text-[var(--text-muted)]">
+            Registered websites
+          </span>
           <div className="flex items-baseline justify-between mt-2">
             <span className="mono-data text-[28px] font-bold text-[var(--text)] leading-none">
-              {loading ? '—' : activeWebsites.length}
+              {loading ? "—" : activeWebsites.length}
             </span>
             <span className="text-[12px] text-[var(--text-muted)]">
               {archivedWebsitesCount > 0
                 ? `${activeWebsites.length} active (${archivedWebsitesCount} archived)`
                 : activeWebsites.length === 1
-                  ? '1 active app'
+                  ? "1 active app"
                   : `${activeWebsites.length} active apps`}
             </span>
           </div>
@@ -229,23 +256,29 @@ export function AdminDashboard({
 
         {/* Card 2: Active tasks */}
         <Card className="p-4 flex flex-col justify-between h-[105px]">
-          <span className="text-[12px] font-medium text-[var(--text-muted)]">Active tasks</span>
+          <span className="text-[12px] font-medium text-[var(--text-muted)]">
+            Active tasks
+          </span>
           <div className="flex items-baseline justify-between mt-2">
             <span className="mono-data text-[28px] font-bold text-[var(--text)] leading-none">
-              {loading ? '—' : activeTasks}
+              {loading ? "—" : activeTasks}
             </span>
             <span className="text-[12px] text-[var(--text-muted)]">
-              {pendingPlans.length > 0 ? `${pendingPlans.length} in review` : 'All ready'}
+              {pendingPlans.length > 0
+                ? `${pendingPlans.length} in review`
+                : "All ready"}
             </span>
           </div>
         </Card>
 
         {/* Card 3: Total Runs */}
         <Card className="p-4 flex flex-col justify-between h-[105px]">
-          <span className="text-[12px] font-medium text-[var(--text-muted)]">Total test runs</span>
+          <span className="text-[12px] font-medium text-[var(--text-muted)]">
+            Total test runs
+          </span>
           <div className="flex items-baseline justify-between mt-2">
             <span className="mono-data text-[28px] font-bold text-[var(--text)] leading-none">
-              {loading ? '—' : totalRuns}
+              {loading ? "—" : totalRuns}
             </span>
             <span className="mono-data text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">
               {passedRunsCount} passed
@@ -255,13 +288,17 @@ export function AdminDashboard({
 
         {/* Card 4: Overall pass rate */}
         <Card className="p-4 flex flex-col justify-between h-[105px]">
-          <span className="text-[12px] font-medium text-[var(--text-muted)]">Overall pass rate</span>
+          <span className="text-[12px] font-medium text-[var(--text-muted)]">
+            Overall pass rate
+          </span>
           <div className="flex items-baseline justify-between mt-2">
             <span className="mono-data text-[28px] font-bold text-[var(--text)] leading-none">
-              {loading ? '—' : passRate}
+              {loading ? "—" : passRate}
             </span>
             <span className="mono-data text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">
-              {failedRunsCount === 0 ? 'Zero failures' : `${failedRunsCount} failures`}
+              {failedRunsCount === 0
+                ? "Zero failures"
+                : `${failedRunsCount} failures`}
             </span>
           </div>
         </Card>
@@ -282,7 +319,10 @@ export function AdminDashboard({
 
             <div className="flex-1 flex items-end justify-between gap-1.5 pt-4 pb-2 px-1">
               {TREND_BARS.map((bar, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center h-full justify-end group">
+                <div
+                  key={i}
+                  className="flex-1 flex flex-col items-center h-full justify-end group"
+                >
                   <div
                     className="w-full rounded-t-[4px] bg-[#D4D7F8] dark:bg-[#3E4378] group-hover:bg-[var(--primary)] transition-colors duration-150"
                     style={{ height: `${bar.height}%` }}
@@ -340,7 +380,9 @@ export function AdminDashboard({
 
                 <div>
                   <div className="flex justify-between text-[12px] mb-1.5">
-                    <span className="text-[var(--text-muted)]">Running / Other</span>
+                    <span className="text-[var(--text-muted)]">
+                      Running / Other
+                    </span>
                     <span className="mono-data font-semibold text-[var(--text)]">
                       {otherRunsCount} ({otherPct}%)
                     </span>
@@ -374,7 +416,9 @@ export function AdminDashboard({
           <Card className="p-0 overflow-hidden">
             <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[13px] font-semibold text-[var(--text)]">Recent runs</span>
+                <span className="text-[13px] font-semibold text-[var(--text)]">
+                  Recent runs
+                </span>
                 <span className="text-[11px] text-[var(--text-muted)]">
                   ({filteredRuns.length} recorded)
                 </span>
@@ -401,15 +445,21 @@ export function AdminDashboard({
                 <tbody className="divide-y divide-[var(--border)]">
                   {filteredRuns.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-8 text-center text-[var(--text-muted)] text-[12px]">
+                      <td
+                        colSpan={5}
+                        className="py-8 text-center text-[var(--text-muted)] text-[12px]"
+                      >
                         No test runs recorded for {selectedEnv}.
                       </td>
                     </tr>
                   ) : (
                     filteredRuns.slice(0, 6).map((run) => (
-                      <tr key={run.id} className="hover:bg-[var(--hover-row)] transition-colors">
+                      <tr
+                        key={run.id}
+                        className="hover:bg-[var(--hover-row)] transition-colors"
+                      >
                         <td className="py-3 px-4">
-                          {run.status === 'running' ? (
+                          {run.status === "running" ? (
                             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[12px] font-medium bg-[#E6F4FB] text-[#0284C7] dark:bg-sky-950/40 dark:text-sky-400">
                               <span className="h-1.5 w-1.5 rounded-full bg-[#0284C7] dark:bg-sky-400 animate-pulse" />
                               Running
@@ -433,13 +483,15 @@ export function AdminDashboard({
                           </div>
                         </td>
                         <td className="py-3 px-4 mono-data text-[12px] text-[var(--text-muted)] capitalize">
-                          {run.trigger || 'manual'}
+                          {run.trigger || "manual"}
                         </td>
                         <td className="py-3 px-4 mono-data text-[12px] text-[var(--text)]">
-                          {run.durationMs ? `${(run.durationMs / 1000).toFixed(1)}s` : '—'}
+                          {run.durationMs
+                            ? `${(run.durationMs / 1000).toFixed(1)}s`
+                            : "—"}
                         </td>
                         <td className="py-3 px-4 text-right mono-data text-[12px] text-[var(--text-muted)]">
-                          {run.dateLabel || 'Today'}
+                          {run.dateLabel || "Today"}
                         </td>
                       </tr>
                     ))
@@ -453,13 +505,15 @@ export function AdminDashboard({
         <div className="lg:col-span-4">
           <Card className="p-4 space-y-3">
             <div className="flex items-center justify-between pb-1">
-              <span className="text-[13px] font-semibold text-[var(--text)]">Needs approval</span>
+              <span className="text-[13px] font-semibold text-[var(--text)]">
+                Needs approval
+              </span>
               <span
                 className={cn(
-                  'h-5 min-w-[20px] px-1.5 rounded-full text-[11px] font-semibold mono-data flex items-center justify-center',
+                  "h-5 min-w-[20px] px-1.5 rounded-full text-[11px] font-semibold mono-data flex items-center justify-center",
                   pendingPlans.length > 0
-                    ? 'bg-[#FDF3E1] text-[#D97706] dark:bg-amber-950/40 dark:text-amber-400'
-                    : 'bg-[#DCFCE7] text-[#16A34A] dark:bg-emerald-950/40 dark:text-emerald-400'
+                    ? "bg-[#FDF3E1] text-[#D97706] dark:bg-amber-950/40 dark:text-amber-400"
+                    : "bg-[#DCFCE7] text-[#16A34A] dark:bg-emerald-950/40 dark:text-emerald-400",
                 )}
               >
                 {pendingPlans.length}
@@ -469,15 +523,22 @@ export function AdminDashboard({
             {pendingPlans.length === 0 ? (
               <div className="py-8 text-center space-y-2">
                 <CheckCircle2 className="h-8 w-8 text-emerald-500 mx-auto opacity-80" />
-                <p className="text-[13px] font-medium text-[var(--text)]">All plans approved</p>
+                <p className="text-[13px] font-medium text-[var(--text)]">
+                  All plans approved
+                </p>
                 <p className="text-[11px] text-[var(--text-muted)] max-w-[200px] mx-auto">
-                  No test plans currently awaiting review. All tasks are ready for execution.
+                  No test plans currently awaiting review. All tasks are ready
+                  for execution.
                 </p>
               </div>
             ) : (
               pendingPlans.map((plan) => {
-                const associatedTask = taskMap.get(plan.taskId)
-                const planTitle = associatedTask?.title || associatedTask?.prompt || plan.summary || 'Test Plan'
+                const associatedTask = taskMap.get(plan.taskId);
+                const planTitle =
+                  associatedTask?.title ||
+                  associatedTask?.prompt ||
+                  plan.summary ||
+                  "Test Plan";
 
                 return (
                   <div
@@ -486,24 +547,32 @@ export function AdminDashboard({
                   >
                     <div className="min-w-0">
                       <p className="text-[13px] font-semibold text-[var(--text)] truncate">
-                        {planTitle} <span className="text-[var(--primary)] font-mono text-[11px]">(v{plan.version})</span>
+                        {planTitle}{" "}
+                        <span className="text-[var(--primary)] font-mono text-[11px]">
+                          (v{plan.version})
+                        </span>
                       </p>
                       <p className="text-[11px] text-[var(--text-muted)] mt-0.5 truncate">
                         {plan.cases.length} cases · Status: In Review
                       </p>
                     </div>
-                    <Button variant="secondary" size="sm" asChild className="shrink-0 gap-1 text-[12px] h-8">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      asChild
+                      className="shrink-0 gap-1 text-[12px] h-8"
+                    >
                       <Link href={`/plans/${plan.id}`}>
                         Review <ArrowUpRight className="h-3.5 w-3.5" />
                       </Link>
                     </Button>
                   </div>
-                )
+                );
               })
             )}
           </Card>
         </div>
       </div>
     </div>
-  )
+  );
 }

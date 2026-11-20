@@ -101,21 +101,25 @@ export function Sidebar() {
           )
         })}
 
-        <div className="my-2 h-px bg-[var(--border)] mx-1" />
+        {user?.role !== 'qa_engineer' && (
+          <>
+            <div className="my-2 h-px bg-[var(--border)] mx-1" />
 
-        <Link
-          href="/settings/general"
-          title="Settings"
-          className={cn(
-            'flex items-center gap-3 h-9 px-2.5 rounded-[6px] text-[13px] transition-all duration-150',
-            pathname.startsWith('/settings')
-              ? 'bg-[var(--primary-tint)] text-[var(--primary)] font-semibold'
-              : 'text-[var(--text-muted)] hover:bg-[var(--hover-subtle)] hover:text-[var(--text)]'
-          )}
-        >
-          <Settings className="h-4 w-4 shrink-0" />
-          {!sidebarCollapsed && <span className="truncate">Settings</span>}
-        </Link>
+            <Link
+              href="/settings/general"
+              title="Settings"
+              className={cn(
+                'flex items-center gap-3 h-9 px-2.5 rounded-[6px] text-[13px] transition-all duration-150',
+                pathname.startsWith('/settings')
+                  ? 'bg-[var(--primary-tint)] text-[var(--primary)] font-semibold'
+                  : 'text-[var(--text-muted)] hover:bg-[var(--hover-subtle)] hover:text-[var(--text)]'
+              )}
+            >
+              <Settings className="h-4 w-4 shrink-0" />
+              {!sidebarCollapsed && <span className="truncate">Settings</span>}
+            </Link>
+          </>
+        )}
       </nav>
 
       {/* Footer: User profile info + theme switch */}

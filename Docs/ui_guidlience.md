@@ -31,45 +31,45 @@
 
 ### Surface, Border & Text Tokens
 
-| Token | Light Mode (`:root`) | Dark Mode (`.dark`) | Usage |
-|---|---|---|---|
-| `--bg` | `#FAFAFB` | `#0B0D14` | Page canvas, input fields, table header strips |
-| `--surface` | `#FFFFFF` | `#12151F` | Cards, sidebar, modals, secondary buttons |
-| `--surface-elevated` | `#F4F5F8` | `#171B26` | Interactive hover surfaces, active segments, chips |
-| `--border` | `#E7E8EC` | `#232838` | Default `1px` hairline borders & table dividers |
-| `--border-hover` | `#CFD2DC` | `#323950` | Hover/active borders on cards, controls, modals |
-| `--text` | `#0F1222` | `#E8EAF2` | Primary headings, body copy, table values |
-| `--text-muted` | `#6B7080` | `#8B90A3` | Subtitles, metadata, column headers, inactive nav |
+| Token                | Light Mode (`:root`) | Dark Mode (`.dark`) | Usage                                              |
+| -------------------- | -------------------- | ------------------- | -------------------------------------------------- |
+| `--bg`               | `#FAFAFB`            | `#0B0D14`           | Page canvas, input fields, table header strips     |
+| `--surface`          | `#FFFFFF`            | `#12151F`           | Cards, sidebar, modals, secondary buttons          |
+| `--surface-elevated` | `#F4F5F8`            | `#171B26`           | Interactive hover surfaces, active segments, chips |
+| `--border`           | `#E7E8EC`            | `#232838`           | Default `1px` hairline borders & table dividers    |
+| `--border-hover`     | `#CFD2DC`            | `#323950`           | Hover/active borders on cards, controls, modals    |
+| `--text`             | `#0F1222`            | `#E8EAF2`           | Primary headings, body copy, table values          |
+| `--text-muted`       | `#6B7080`            | `#8B90A3`           | Subtitles, metadata, column headers, inactive nav  |
 
 ### Theme-Safe Utility Surface Tokens
 
-| Token | Light Mode | Dark Mode | Usage |
-|---|---|---|---|
-| `--topbar-bg` | `rgba(250, 250, 251, 0.85)` | `rgba(11, 13, 20, 0.85)` | Sticky topbar with `backdrop-filter: blur(10px)` |
-| `--overlay-bg` | `rgba(15, 18, 34, 0.35)` | `rgba(0, 0, 0, 0.62)` | Backdrop behind modals, sheets, `⌘K` palette |
-| `--hover-row` | `rgba(15, 18, 34, 0.025)` | `rgba(255, 255, 255, 0.025)` | Table row & expandable header hover tint |
-| `--hover-subtle` | `rgba(15, 18, 34, 0.04)` | `rgba(255, 255, 255, 0.04)` | Ghost icon hover, nav item hover, neutral badge bg |
-| `--track-bg` | `#ECEEF2` | `rgba(255, 255, 255, 0.06)` | Progress bar & status breakdown tracks |
+| Token            | Light Mode                  | Dark Mode                    | Usage                                              |
+| ---------------- | --------------------------- | ---------------------------- | -------------------------------------------------- |
+| `--topbar-bg`    | `rgba(250, 250, 251, 0.85)` | `rgba(11, 13, 20, 0.85)`     | Sticky topbar with `backdrop-filter: blur(10px)`   |
+| `--overlay-bg`   | `rgba(15, 18, 34, 0.35)`    | `rgba(0, 0, 0, 0.62)`        | Backdrop behind modals, sheets, `⌘K` palette       |
+| `--hover-row`    | `rgba(15, 18, 34, 0.025)`   | `rgba(255, 255, 255, 0.025)` | Table row & expandable header hover tint           |
+| `--hover-subtle` | `rgba(15, 18, 34, 0.04)`    | `rgba(255, 255, 255, 0.04)`  | Ghost icon hover, nav item hover, neutral badge bg |
+| `--track-bg`     | `#ECEEF2`                   | `rgba(255, 255, 255, 0.06)`  | Progress bar & status breakdown tracks             |
 
 ### AI Accent & Focus Tokens
 
-| Token | Light Mode | Dark Mode | Usage |
-|---|---|---|---|
-| `--primary` | `#4F46E5` | `#818CF8` | Primary CTA fill, active nav indicator, AI dot |
-| `--primary-hover` | `#4338CA` | `#6366F1` | Primary CTA hover |
-| `--primary-tint` | `#EEF0FF` | `rgba(129, 140, 248, 0.12)` | Active sidebar link bg, AI security notice banner |
-| `--primary-text` | `#FFFFFF` | `#0B0D14` | Text inside solid `--primary` buttons (WCAG AA) |
-| `--ai-ring` | `rgba(79, 70, 229, 0.25)` | `rgba(129, 140, 248, 0.30)` | `2px` focus ring on inputs & AI controls |
+| Token             | Light Mode                | Dark Mode                   | Usage                                             |
+| ----------------- | ------------------------- | --------------------------- | ------------------------------------------------- |
+| `--primary`       | `#4F46E5`                 | `#818CF8`                   | Primary CTA fill, active nav indicator, AI dot    |
+| `--primary-hover` | `#4338CA`                 | `#6366F1`                   | Primary CTA hover                                 |
+| `--primary-tint`  | `#EEF0FF`                 | `rgba(129, 140, 248, 0.12)` | Active sidebar link bg, AI security notice banner |
+| `--primary-text`  | `#FFFFFF`                 | `#0B0D14`                   | Text inside solid `--primary` buttons (WCAG AA)   |
+| `--ai-ring`       | `rgba(79, 70, 229, 0.25)` | `rgba(129, 140, 248, 0.30)` | `2px` focus ring on inputs & AI controls          |
 
 ### Semantic Status Tokens
 
-| Status / Role | Light Text / Tint | Dark Text / Tint | Applied To |
-|---|---|---|---|
-| **Success** | `#16A34A` / `#E8F7EE` | `#22C55E` / `rgba(34, 197, 94, 0.12)` | `Passed`, `Completed`, `Approved`, positive deltas |
-| **Danger** | `#DC2626` / `#FDECEC` | `#EF4444` / `rgba(239, 68, 68, 0.12)` | `Failed`, `Rejected`, `Production` badge, cancel/delete |
-| **Warning** | `#D97706` / `#FDF3E1` | `#F59E0B` / `rgba(245, 158, 11, 0.12)` | `Error`, `In review`, HTTP-on-Production alert |
-| **Info** | `#0284C7` / `#E6F4FB` | `#38BDF8` / `rgba(56, 189, 248, 0.12)` | `Running`, `Live` pill, `Staging` badge |
-| **Neutral** | `--text-muted` / `--hover-subtle` | `--text-muted` / `--hover-subtle` | `Queued`, `Pending`, `Skipped`, `Draft`, `Dev` badge |
+| Status / Role | Light Text / Tint                 | Dark Text / Tint                       | Applied To                                              |
+| ------------- | --------------------------------- | -------------------------------------- | ------------------------------------------------------- |
+| **Success**   | `#16A34A` / `#E8F7EE`             | `#22C55E` / `rgba(34, 197, 94, 0.12)`  | `Passed`, `Completed`, `Approved`, positive deltas      |
+| **Danger**    | `#DC2626` / `#FDECEC`             | `#EF4444` / `rgba(239, 68, 68, 0.12)`  | `Failed`, `Rejected`, `Production` badge, cancel/delete |
+| **Warning**   | `#D97706` / `#FDF3E1`             | `#F59E0B` / `rgba(245, 158, 11, 0.12)` | `Error`, `In review`, HTTP-on-Production alert          |
+| **Info**      | `#0284C7` / `#E6F4FB`             | `#38BDF8` / `rgba(56, 189, 248, 0.12)` | `Running`, `Live` pill, `Staging` badge                 |
+| **Neutral**   | `--text-muted` / `--hover-subtle` | `--text-muted` / `--hover-subtle`      | `Queued`, `Pending`, `Skipped`, `Draft`, `Dev` badge    |
 
 ---
 
@@ -90,15 +90,15 @@
 - **UI Sans:** `Inter` (`font-feature-settings: "cv02", "cv03", "cv04", "cv11"`).
 - **Technical Monospace:** `JetBrains Mono` (`font-variant-numeric: tabular-nums`).
 
-| Role | Size | Weight | Font | Notes |
-|---|---|---|---|---|
-| KPI Metric Value | `24px` | `600` | `JetBrains Mono` | `-0.02em` tracking, `tabular-nums` |
-| Page Heading (`h1`) | `20px` | `600` | `Inter` | `-0.02em` tracking |
-| Card / Section Title (`h2`) | `14px` | `500` | `Inter` | — |
-| Body / Inputs | `14px` | `400` | `Inter` | `1.5` line-height |
-| Buttons / Table Cells / Nav | `13px` | `400–500` | `Inter` | Table rows `44px` min-height |
-| Badges / Captions / Deltas | `12px` | `500` | `Inter` / `Mono` | Badges `22px` fixed height |
-| Table Headers / Env Tags | `11px` | `500` | `Inter` / `Mono` | Uppercase, `+0.05em` tracking |
+| Role                        | Size   | Weight    | Font             | Notes                              |
+| --------------------------- | ------ | --------- | ---------------- | ---------------------------------- |
+| KPI Metric Value            | `24px` | `600`     | `JetBrains Mono` | `-0.02em` tracking, `tabular-nums` |
+| Page Heading (`h1`)         | `20px` | `600`     | `Inter`          | `-0.02em` tracking                 |
+| Card / Section Title (`h2`) | `14px` | `500`     | `Inter`          | —                                  |
+| Body / Inputs               | `14px` | `400`     | `Inter`          | `1.5` line-height                  |
+| Buttons / Table Cells / Nav | `13px` | `400–500` | `Inter`          | Table rows `44px` min-height       |
+| Badges / Captions / Deltas  | `12px` | `500`     | `Inter` / `Mono` | Badges `22px` fixed height         |
+| Table Headers / Env Tags    | `11px` | `500`     | `Inter` / `Mono` | Uppercase, `+0.05em` tracking      |
 
 **Always use `.mono-data` (`tabular-nums`) for:** IDs (`run-942`, `plan-108`), URLs & routes (`/tracking`), durations (`214ms`, `12.4s`), timestamps (`15:39:01.120`), AI model strings (`ollama/qwen2.5:14b`), token counts, and pass rates (`91.6%`).
 
@@ -115,6 +115,7 @@
   - `999px` — Status badges, live indicators, avatars
 
 ### App Shell Geometry
+
 - **Sidebar:** `240px` expanded / `64px` collapsed (icon-only). Responsive sheet below `1024px`.
   - Active item: `--primary-tint` fill + `2px` left vertical bar in `--primary`.
   - Footer: User avatar/role + `<ThemeSwitch />`.
@@ -126,13 +127,13 @@
 
 ## 6. Micro-Animations & Motion Language
 
-| Interaction | Animation | Timing | Implementation |
-|---|---|---|---|
-| **Card / Section Entrance** | Upward fade (`4px–5px`) | `180–190ms` `cubic-bezier(0.16, 1, 0.3, 1)` | `.animate-enter` with `35–40ms` `--stagger` |
-| **Tactile Button Press** | Subtle inward scale (`scale(0.985)`) | `120ms ease-out` | `.tactile:active` |
-| **Hover / Focus Border** | Border & tint shift | `150ms ease-out` | `--border` → `--border-hover`; `--ai-ring` on focus |
-| **Live AI / Runner Pulse** | Quiet ambient scale & opacity | `2000ms ease-in-out infinite` | `.animate-ai-pulse` strictly on brand AI dot & `Running` status dot |
-| **Sidebar Collapse** | Width transition | `200ms ease-out` | `transition-[width]` |
+| Interaction                 | Animation                            | Timing                                      | Implementation                                                      |
+| --------------------------- | ------------------------------------ | ------------------------------------------- | ------------------------------------------------------------------- |
+| **Card / Section Entrance** | Upward fade (`4px–5px`)              | `180–190ms` `cubic-bezier(0.16, 1, 0.3, 1)` | `.animate-enter` with `35–40ms` `--stagger`                         |
+| **Tactile Button Press**    | Subtle inward scale (`scale(0.985)`) | `120ms ease-out`                            | `.tactile:active`                                                   |
+| **Hover / Focus Border**    | Border & tint shift                  | `150ms ease-out`                            | `--border` → `--border-hover`; `--ai-ring` on focus                 |
+| **Live AI / Runner Pulse**  | Quiet ambient scale & opacity        | `2000ms ease-in-out infinite`               | `.animate-ai-pulse` strictly on brand AI dot & `Running` status dot |
+| **Sidebar Collapse**        | Width transition                     | `200ms ease-out`                            | `transition-[width]`                                                |
 
 **Mandatory Reduced Motion:** Wrap animations so `@media (prefers-reduced-motion: reduce)` turns off keyframes, transitions, and press transforms globally.
 

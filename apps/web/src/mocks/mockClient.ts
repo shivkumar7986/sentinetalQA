@@ -401,6 +401,16 @@ export const mockClient = {
     return all[idx]
   },
 
+  deleteMember: async (id: string): Promise<boolean> => {
+    const all = await mockClient.getMembers()
+    const updated = all.filter((m) => m.id !== id)
+    saveState(STORAGE_KEYS.members, updated)
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('testing_agent_members_changed'))
+    }
+    return true
+  },
+
   // Audit Logs
   getAuditLogs: async (userRole?: UserRole): Promise<AuditItem[]> => {
     const all = loadState<AuditItem[]>(STORAGE_KEYS.auditLogs, INITIAL_AUDIT_LOGS)

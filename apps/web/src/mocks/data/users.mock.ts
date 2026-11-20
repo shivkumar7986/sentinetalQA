@@ -8,6 +8,7 @@ export interface Member {
   status: 'active' | 'invited' | 'disabled'
   lastLogin: string
   assignedLead?: string
+  password?: string
 }
 
 export const INITIAL_MEMBERS: Member[] = [
@@ -18,6 +19,7 @@ export const INITIAL_MEMBERS: Member[] = [
     role: 'admin',
     status: 'active',
     lastLogin: 'Just now',
+    password: 'admin',
   },
   {
     id: 'm2',
@@ -27,6 +29,7 @@ export const INITIAL_MEMBERS: Member[] = [
     status: 'active',
     lastLogin: '14m ago',
     assignedLead: 'Alex Chen (Admin)',
+    password: 'lead',
   },
   {
     id: 'm3',
@@ -36,6 +39,7 @@ export const INITIAL_MEMBERS: Member[] = [
     status: 'active',
     lastLogin: '2h ago',
     assignedLead: 'Alex Chen (Admin)',
+    password: 'lead',
   },
   {
     id: 'm4',
@@ -45,6 +49,7 @@ export const INITIAL_MEMBERS: Member[] = [
     status: 'active',
     lastLogin: '3h ago',
     assignedLead: 'Riya Sharma',
+    password: 'employee',
   },
   {
     id: 'm5',
@@ -54,6 +59,7 @@ export const INITIAL_MEMBERS: Member[] = [
     status: 'active',
     lastLogin: '1h ago',
     assignedLead: 'Vikram Patel',
+    password: 'employee',
   },
   {
     id: 'm6',
@@ -63,6 +69,7 @@ export const INITIAL_MEMBERS: Member[] = [
     status: 'invited',
     lastLogin: '—',
     assignedLead: 'Riya Sharma',
+    password: 'employee',
   },
 ]
 

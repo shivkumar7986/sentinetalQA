@@ -697,7 +697,7 @@ export function AdminDashboard({
           </Card>
         </div>
 
-        {/* Right: Governance Audit */}
+        {/* Right: Governance Audit */} 
         <div className="lg:col-span-4">
           <Card className="p-5">
             <div className="flex items-center justify-between mb-4">

@@ -6,6 +6,7 @@ import { Eye, EyeOff, Shield, ShieldCheck, UserCheck, Wrench, ArrowRight, KeyRou
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuthStore, MOCK_USERS, type UserRole } from '@/stores/auth.store'
+import { mockClient } from '@/mocks/mockClient'
 import { ROLE_DEFINITIONS } from '@/lib/permissions'
 import { toast } from 'sonner'
 
@@ -107,9 +108,59 @@ export default function LoginPage() {
       return
     }
 
-    await new Promise((r) => setTimeout(r, 400))
+    await new Promise((r) => setTimeout(r, 300))
 
-    // Match with known roles
+    // 1. Check registered members database (mockClient.getMembers())
+    const members = await mockClient.getMembers()
+    const foundMember = members.find(
+      (m) => m.email.toLowerCase() === email.trim().toLowerCase()
+    )
+
+    if (foundMember) {
+      if (foundMember.status === 'disabled') {
+        setError('This account has been disabled. Please contact your administrator.')
+        setLoading(false)
+        return
+      }
+
+      const expectedPassword =
+        foundMember.password ||
+        (foundMember.role === 'admin'
+          ? 'admin'
+          : foundMember.role === 'qa_lead'
+          ? 'lead'
+          : 'employee')
+
+      if (
+        password !== expectedPassword &&
+        password !== 'password123' &&
+        password !== 'admin' &&
+        password !== 'lead' &&
+        password !== 'employee'
+      ) {
+        setError(`Incorrect password for ${foundMember.name}. Please enter the password assigned during user creation.`)
+        setLoading(false)
+        return
+      }
+
+      setAuth(
+        {
+          id: foundMember.id,
+          name: foundMember.name,
+          email: foundMember.email,
+          role: foundMember.role,
+        },
+        `mock-token-${foundMember.role}`
+      )
+
+      toast.success(`Welcome, ${foundMember.name}!`, {
+        description: `Signed in as ${ROLE_DEFINITIONS[foundMember.role].label}`,
+      })
+      router.push('/dashboard')
+      return
+    }
+
+    // 2. Match with demo roles
     const matchedRole = (Object.keys(MOCK_USERS) as UserRole[]).find(
       (r) => MOCK_USERS[r].email.toLowerCase() === email.trim().toLowerCase()
     )
@@ -119,7 +170,7 @@ export default function LoginPage() {
       return
     }
 
-    // Custom fallback
+    // 3. Custom fallback user
     const fallbackUser = {
       id: `u-${Date.now()}`,
       name: email.split('@')[0],

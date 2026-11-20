@@ -27,6 +27,7 @@ export function AddUserDrawer({
 
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('password123')
   const [role, setRole] = useState<UserRole>('qa_engineer')
   const [assignedLead, setAssignedLead] = useState('')
   const [status, setStatus] = useState<'active' | 'invited'>('active')
@@ -64,6 +65,7 @@ export function AddUserDrawer({
   function resetForm() {
     setFullName('')
     setEmail('')
+    setPassword('password123')
     setRole('qa_engineer')
     setAssignedLead(availableLeads.length > 0 ? availableLeads[0].name : '')
     setStatus('active')
@@ -87,13 +89,14 @@ export function AddUserDrawer({
         email: email.trim(),
         role,
         status,
+        password: password.trim() || 'password123',
         assignedLead: role === 'qa_engineer' ? (assignedLead || availableLeads[0]?.name || 'Alex Chen') : undefined,
       })
 
       if (onSuccess) onSuccess(newMember)
 
       toast.success(`${newMember.name} added successfully!`, {
-        description: `Role: ${role === 'admin' ? 'Admin' : role === 'qa_lead' ? 'QA Lead' : 'QA Employee'} (${status})`,
+        description: `Role: ${role === 'admin' ? 'Admin' : role === 'qa_lead' ? 'QA Lead' : 'QA Employee'} | Password: ${password.trim() || 'password123'}`,
       })
 
       resetForm()
@@ -180,7 +183,30 @@ export function AddUserDrawer({
               />
             </div>
 
-            {/* Field 3: Platform role */}
+            {/* Field 3: Temporary / Initial Password */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+                  Password
+                </label>
+                <span className="text-[11px] text-gray-400 dark:text-neutral-500">
+                  Default: <code className="text-[#6366F1] font-mono">password123</code>
+                </span>
+              </div>
+              <input
+                type="text"
+                required
+                placeholder="Enter password..."
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={inputClasses}
+              />
+              <p className="text-[11px] text-gray-500 dark:text-neutral-400">
+                User will use this password and work email to sign in at /login.
+              </p>
+            </div>
+
+            {/* Field 4: Platform role */}
             <div className="space-y-1.5">
               <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
                 Platform role

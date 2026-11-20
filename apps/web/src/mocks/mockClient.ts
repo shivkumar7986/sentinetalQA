@@ -4,6 +4,8 @@ import { INITIAL_TASKS, type Task } from './data/tasks.mock'
 import { INITIAL_PLANS, type TestPlan, type TestCase, type TestStep } from './data/plans.mock'
 import { INITIAL_RUNS, type Run, type StepLog } from './data/runs.mock'
 import { INITIAL_MEMBERS, type Member } from './data/users.mock'
+import { INITIAL_AUDIT_LOGS, type AuditItem } from './data/audit.mock'
+import type { UserRole } from '@/stores/auth.store'
 
 const STORAGE_KEYS = {
   websites: 'testing_agent_mock_websites',
@@ -12,6 +14,7 @@ const STORAGE_KEYS = {
   plans: 'testing_agent_mock_plans',
   runs: 'testing_agent_mock_runs',
   members: 'testing_agent_mock_members',
+  auditLogs: 'testing_agent_mock_audit_logs',
 }
 
 function loadState<T>(key: string, fallback: T): T {
@@ -396,6 +399,31 @@ export const mockClient = {
       window.dispatchEvent(new CustomEvent('testing_agent_members_changed'))
     }
     return all[idx]
+  },
+
+  // Audit Logs
+  getAuditLogs: async (userRole?: UserRole): Promise<AuditItem[]> => {
+    const all = loadState<AuditItem[]>(STORAGE_KEYS.auditLogs, INITIAL_AUDIT_LOGS)
+    if (userRole === 'qa_lead') {
+      // QA Lead sees QA Lead and QA Employee activities only (admin activities excluded)
+      return all.filter((l) => l.actorRole === 'qa_lead' || l.actorRole === 'qa_engineer')
+    }
+    // Admin sees all activities (admin, qa_lead, qa_engineer)
+    return all
+  },
+
+  createAuditLog: async (log: Omit<AuditItem, 'id' | 'timestamp'>): Promise<AuditItem> => {
+    const all = loadState<AuditItem[]>(STORAGE_KEYS.auditLogs, INITIAL_AUDIT_LOGS)
+    const now = new Date()
+    const formattedTime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`
+    const newLog: AuditItem = {
+      ...log,
+      id: `aud-${Date.now()}`,
+      timestamp: formattedTime,
+    }
+    const updated = [newLog, ...all]
+    saveState(STORAGE_KEYS.auditLogs, updated)
+    return newLog
   },
 }
 

@@ -76,6 +76,15 @@ const AUDIT_LOG = [
   },
   {
     id: "a5",
+    actor: "Karan Verma",
+    actorRole: "QA Employee",
+    action: "executed test run on",
+    target: "Billing Admin",
+    targetRole: null,
+    time: "4h ago",
+  },
+  {
+    id: "a6",
     actor: "Alex Chen",
     actorRole: "Admin",
     action: "enabled Kill Switch for",

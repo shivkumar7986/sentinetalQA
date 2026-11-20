@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { X, Sparkles } from 'lucide-react'
+import { X, Sparkles, Lock } from 'lucide-react'
 import { mockClient } from '@/mocks/mockClient'
 import type { Website } from '@/mocks/data/websites.mock'
 import { cn } from '@/lib/utils'
@@ -32,6 +32,8 @@ export function CreateTaskDrawer({
   const [engine, setEngine] = useState<'ollama' | 'gemini' | 'hybrid'>('ollama')
   const [role, setRole] = useState('Admin')
   const [loading, setLoading] = useState(false)
+
+  const isWebsiteLocked = Boolean(formDrawerData?.websiteId)
 
   useEffect(() => {
     if (isOpen) {
@@ -126,13 +128,26 @@ export function CreateTaskDrawer({
 
             {/* Target Website */}
             <div className="space-y-1.5 pt-1">
-              <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                Target website
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+                  Target website
+                </label>
+                {isWebsiteLocked && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-mono font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-200/80">
+                    <Lock className="h-3 w-3" /> Locked to current website
+                  </span>
+                )}
+              </div>
               <select
                 value={selectedWebsiteId}
+                disabled={isWebsiteLocked}
                 onChange={(e) => setSelectedWebsiteId(e.target.value)}
-                className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
+                className={cn(
+                  'w-full h-11 px-3.5 text-[14px] rounded-lg border transition-all',
+                  isWebsiteLocked
+                    ? 'border-gray-200 dark:border-neutral-700 bg-gray-100 dark:bg-neutral-800/80 text-gray-600 dark:text-neutral-400 cursor-not-allowed select-none opacity-90'
+                    : 'border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 cursor-pointer'
+                )}
               >
                 {websites.map((w) => (
                   <option key={w.id} value={w.id}>
@@ -140,6 +155,11 @@ export function CreateTaskDrawer({
                   </option>
                 ))}
               </select>
+              {isWebsiteLocked && (
+                <p className="text-[11px] text-gray-400 dark:text-neutral-500">
+                  Task will be automatically registered and linked to this application.
+                </p>
+              )}
             </div>
 
             {/* Task Title */}

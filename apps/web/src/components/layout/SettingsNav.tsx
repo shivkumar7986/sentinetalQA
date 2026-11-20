@@ -3,9 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ShieldAlert } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { usePermissions } from '@/lib/permissions'
 import { useAuthStore } from '@/stores/auth.store'
 
 interface SettingsNavProps {
@@ -14,8 +12,7 @@ interface SettingsNavProps {
 
 export function SettingsNav({ action }: SettingsNavProps) {
   const pathname = usePathname()
-  const { isAdmin, isLead, meta } = usePermissions()
-  const { switchRole, user } = useAuthStore()
+  const { user } = useAuthStore()
 
   // RBAC Tab Visibility:
   // Admin -> all tabs
@@ -46,25 +43,6 @@ export function SettingsNav({ action }: SettingsNavProps) {
         </div>
         {action && <div className="shrink-0">{action}</div>}
       </div>
-
-      {/* Admin Notice Banner if not Admin */}
-      {!isAdmin && (
-        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded-lg px-3.5 py-2.5 text-[12px] flex items-center justify-between">
-          <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
-            <ShieldAlert className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
-            <span>
-              You are signed in as <strong>{meta.label}</strong>. Tabs marked <strong>Admin</strong> require administrator permissions to modify.
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={() => switchRole('admin')}
-            className="text-amber-900 dark:text-amber-100 font-semibold underline hover:no-underline ml-3 shrink-0 cursor-pointer"
-          >
-            Switch to Admin
-          </button>
-        </div>
-      )}
 
       {/* Tabs Row */}
       <div className="flex items-center gap-6 border-b border-gray-200 dark:border-neutral-800 text-[13px]">

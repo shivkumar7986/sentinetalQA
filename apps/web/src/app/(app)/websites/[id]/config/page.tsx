@@ -158,7 +158,7 @@ export default function WebsiteConfigPage({
 }) {
   const { openFormDrawer } = useUIStore();
   const { user } = useAuthStore();
-  const canEditConfig = user?.role === 'admin' || user?.role === 'qa_lead';
+  const canEditConfig = user?.role === "admin" || user?.role === "qa_lead";
   const [website, setWebsite] = useState<Website | null>(null);
   const [config, setConfig] = useState<FullWebsiteConfig | null>(null);
   const [loading, setLoading] = useState(true);
@@ -682,7 +682,10 @@ export default function WebsiteConfigPage({
           <div className="flex items-center gap-2.5 text-amber-900 dark:text-amber-200">
             <Shield className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
             <span>
-              <strong>Immutable Website Configuration:</strong> QA Employees have read-only access. You cannot create, modify, or delete website roles, modules, business rules, auth flows, or credentials.
+              <strong>Immutable Website Configuration:</strong> QA Employees
+              have read-only access. You cannot create, modify, or delete
+              website roles, modules, business rules, auth flows, or
+              credentials.
             </span>
           </div>
           <span className="text-[11px] font-semibold uppercase tracking-wider bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded shrink-0 ml-3">

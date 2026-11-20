@@ -15,6 +15,7 @@ import type { Website } from '@/mocks/data/websites.mock'
 import type { Task } from '@/mocks/data/tasks.mock'
 import type { FullWebsiteConfig } from '@/mocks/data/configs.mock'
 import { useUIStore } from '@/stores/ui.store'
+import { cn } from '@/lib/utils'
 
 export default function WebsiteDetailPage({ params }: { params: { id: string } }) {
   const { formDrawer, openFormDrawer } = useUIStore()
@@ -25,10 +26,12 @@ export default function WebsiteDetailPage({ params }: { params: { id: string } }
 
   useEffect(() => {
     loadData()
+    const handleFocus = () => loadData()
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
   }, [params.id, formDrawer])
 
   async function loadData() {
-    setLoading(true)
     const site = await mockClient.getWebsiteById(params.id)
     if (site) {
       setWebsite(site)
@@ -40,7 +43,7 @@ export default function WebsiteDetailPage({ params }: { params: { id: string } }
     setLoading(false)
   }
 
-  if (loading) {
+  if (loading && !website) {
     return <StateView isLoading={true} skeletonCount={4}><div /></StateView>
   }
 
@@ -53,11 +56,39 @@ export default function WebsiteDetailPage({ params }: { params: { id: string } }
   }
 
   const checklist = [
-    { label: 'Roles Defined', complete: (config?.roles.length || 0) > 0, count: config?.roles.length || 0 },
-    { label: 'Target Modules Mapped', complete: (config?.modules.length || 0) > 0, count: config?.modules.length || 0 },
-    { label: 'Auth Flow Configured', complete: !!config?.authFlow?.submitSelector },
-    { label: 'Business Rules Injected', complete: (config?.businessRules.length || 0) > 0, count: config?.businessRules.length || 0 },
-    { label: 'Credentials Stored', complete: (config?.credentials.length || 0) > 0, count: config?.credentials.length || 0 },
+    {
+      label: 'Roles Defined',
+      complete: (config?.roles?.length || 0) > 0,
+      count: config?.roles?.length || 0,
+      detail: config?.roles?.length ? `${config.roles.length} roles` : '0 roles',
+    },
+    {
+      label: 'Target Modules Mapped',
+      complete: (config?.modules?.length || 0) > 0,
+      count: config?.modules?.length || 0,
+      detail: config?.modules?.length ? `${config.modules.length} routes` : '0 routes',
+    },
+    {
+      label: 'Auth Flow Configured',
+      complete: Boolean(
+        config?.authFlow &&
+        (config.authFlow.usernameSelector || config.authFlow.redirectTarget || config.authFlow.method)
+      ),
+      count: config?.authFlow ? 1 : 0,
+      detail: config?.authFlow?.method ? 'Configured' : 'Missing',
+    },
+    {
+      label: 'Business Rules Injected',
+      complete: (config?.businessRules?.length || 0) > 0,
+      count: config?.businessRules?.length || 0,
+      detail: config?.businessRules?.length ? `${config.businessRules.length} rules` : '0 rules',
+    },
+    {
+      label: 'Credentials Stored',
+      complete: (config?.credentials?.length || 0) > 0,
+      count: config?.credentials?.length || 0,
+      detail: config?.credentials?.length ? `${config.credentials.length} stored` : '0 stored',
+    },
   ]
 
   return (
@@ -108,8 +139,21 @@ export default function WebsiteDetailPage({ params }: { params: { id: string } }
           <div className="text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wider mb-2">
             Config Completeness
           </div>
-          <div className="text-[20px] font-semibold mono-data text-[var(--text)]">
-            {checklist.filter((c) => c.complete).length} / {checklist.length}
+          <div className="flex items-baseline justify-between mb-1.5">
+            <span className="text-[20px] font-semibold mono-data text-[var(--text)]">
+              {checklist.filter((c) => c.complete).length} / {checklist.length}
+            </span>
+            <span className="text-[12px] font-mono font-semibold text-indigo-600 dark:text-indigo-400">
+              {Math.round((checklist.filter((c) => c.complete).length / checklist.length) * 100)}%
+            </span>
+          </div>
+          <div className="w-full h-1.5 bg-gray-100 dark:bg-neutral-800 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#4F46E5] transition-all duration-300 rounded-full"
+              style={{
+                width: `${(checklist.filter((c) => c.complete).length / checklist.length) * 100}%`,
+              }}
+            />
           </div>
         </Card>
 
@@ -125,8 +169,13 @@ export default function WebsiteDetailPage({ params }: { params: { id: string } }
 
       {/* Config Checklist Banner */}
       <Card>
-        <CardHeader>
-          <CardTitle>Configuration Readiness</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between pb-3">
+          <div>
+            <CardTitle>Configuration Readiness</CardTitle>
+            <p className="text-[12px] text-[var(--text-muted)] mt-0.5">
+              Prerequisites required for autonomous AI exploration and task execution.
+            </p>
+          </div>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/websites/${website.id}/config`}>Edit Config</Link>
           </Button>
@@ -135,15 +184,25 @@ export default function WebsiteDetailPage({ params }: { params: { id: string } }
           {checklist.map((item) => (
             <div
               key={item.label}
-              className="flex items-center gap-2 p-2.5 rounded-[6px] bg-[var(--surface-elevated)] border border-[var(--border)] text-[12px]"
+              className="flex items-center justify-between p-2.5 rounded-[6px] bg-[var(--surface-elevated)] border border-[var(--border)] text-[12px]"
             >
-              {item.complete ? (
-                <CheckCircle2 className="h-4 w-4 text-[var(--success)] shrink-0" />
-              ) : (
-                <Circle className="h-4 w-4 text-[var(--border-hover)] shrink-0" />
-              )}
-              <span className={item.complete ? 'text-[var(--text)] font-medium' : 'text-[var(--text-muted)]'}>
-                {item.label}
+              <div className="flex items-center gap-2 min-w-0">
+                {item.complete ? (
+                  <CheckCircle2 className="h-4 w-4 text-[var(--success)] shrink-0" />
+                ) : (
+                  <Circle className="h-4 w-4 text-[var(--border-hover)] shrink-0" />
+                )}
+                <span className={cn('truncate', item.complete ? 'text-[var(--text)] font-medium' : 'text-[var(--text-muted)]')}>
+                  {item.label}
+                </span>
+              </div>
+              <span className={cn(
+                'text-[10px] font-mono font-medium px-1.5 py-0.5 rounded shrink-0 ml-1.5',
+                item.complete
+                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400'
+                  : 'bg-gray-100 dark:bg-neutral-800 text-gray-500'
+              )}>
+                {item.detail}
               </span>
             </div>
           ))}

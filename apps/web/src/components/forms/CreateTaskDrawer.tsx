@@ -21,7 +21,7 @@ export function CreateTaskDrawer({
   onSuccess: propOnSuccess,
 }: CreateTaskDrawerProps) {
   const router = useRouter()
-  const { formDrawer, closeFormDrawer } = useUIStore()
+  const { formDrawer, formDrawerData, closeFormDrawer } = useUIStore()
   const isOpen = propOpen !== undefined ? propOpen : formDrawer === 'create-task'
   const handleClose = propOnClose || closeFormDrawer
 
@@ -37,12 +37,14 @@ export function CreateTaskDrawer({
     if (isOpen) {
       mockClient.getWebsites().then((sites) => {
         setWebsites(sites)
-        if (sites.length > 0 && !selectedWebsiteId) {
+        if (formDrawerData?.websiteId) {
+          setSelectedWebsiteId(formDrawerData.websiteId)
+        } else if (sites.length > 0 && !selectedWebsiteId) {
           setSelectedWebsiteId(sites[0].id)
         }
       })
     }
-  }, [isOpen, selectedWebsiteId])
+  }, [isOpen, formDrawerData])
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -88,14 +90,14 @@ export function CreateTaskDrawer({
     <div className="fixed inset-0 z-[100] flex justify-end">
       {/* Blurred Backdrop */}
       <div
-        className="fixed inset-0 bg-black/45 backdrop-blur-[7px] transition-opacity animate-in fade-in duration-200"
+        className="fixed inset-0 bg-black/45 backdrop-blur-[7px] transition-opacity animate-fade-in"
         onClick={handleClose}
         aria-hidden="true"
       />
 
       {/* Slide-over Drawer Panel */}
       <div
-        className="relative z-10 w-full max-w-[500px] h-screen bg-white dark:bg-[#12151F] border-l border-gray-200 dark:border-neutral-800 shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-250 ease-out select-text"
+        className="relative z-10 w-full max-w-[500px] h-screen bg-white dark:bg-[#12151F] border-l border-gray-200 dark:border-neutral-800 shadow-2xl flex flex-col justify-between animate-slide-in-right select-text"
         role="dialog"
         aria-modal="true"
       >

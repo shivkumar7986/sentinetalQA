@@ -98,10 +98,11 @@ export const mockClient = {
     )
   },
 
-  updateConfig: async (websiteId: string, updates: Partial<FullWebsiteConfig>): Promise<FullWebsiteConfig> => {
+  updateConfig: async (websiteId: string, updates: Partial<FullWebsiteConfig>, customSummary?: string): Promise<FullWebsiteConfig> => {
     const allConfigs = loadState(STORAGE_KEYS.configs, INITIAL_CONFIGS)
     const current = allConfigs[websiteId] || await mockClient.getConfigByWebsiteId(websiteId)
     const newVersion = current.version + 1
+    const summaryText = customSummary || 'Updated configuration'
     const updated: FullWebsiteConfig = {
       ...current,
       ...updates,
@@ -109,11 +110,11 @@ export const mockClient = {
       versions: [
         {
           version: newVersion,
-          title: 'Config update',
+          title: summaryText,
           category: 'General',
           createdAt: new Date().toISOString(),
-          author: 'Current User',
-          summary: 'Updated configuration',
+          author: 'Admin',
+          summary: summaryText,
         },
         ...current.versions,
       ],

@@ -1,15 +1,17 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function NewTaskRedirectPage() {
+function NewTaskRedirectInner() {
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
-    // Redirect to tasks page with create task slide-over drawer open
-    router.replace('/tasks?new=true')
-  }, [router])
+    const webId = searchParams.get('websiteId')
+    const query = webId ? `?new=true&websiteId=${encodeURIComponent(webId)}` : '?new=true'
+    router.replace(`/tasks${query}`)
+  }, [router, searchParams])
 
   return (
     <div className="h-64 flex items-center justify-center">
@@ -18,5 +20,13 @@ export default function NewTaskRedirectPage() {
         <span>Opening task creator...</span>
       </div>
     </div>
+  )
+}
+
+export default function NewTaskRedirectPage() {
+  return (
+    <Suspense fallback={<div className="h-64" />}>
+      <NewTaskRedirectInner />
+    </Suspense>
   )
 }

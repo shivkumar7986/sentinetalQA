@@ -85,14 +85,14 @@ export function AddWebsiteDrawer({
     <div className="fixed inset-0 z-[100] flex justify-end">
       {/* Blurred Backdrop covering entire screen */}
       <div
-        className="fixed inset-0 bg-black/45 backdrop-blur-[7px] transition-opacity animate-in fade-in duration-200"
+        className="fixed inset-0 bg-black/45 backdrop-blur-[7px] transition-opacity animate-fade-in"
         onClick={handleClose}
         aria-hidden="true"
       />
 
       {/* Drawer Panel - Full Viewport Height without clipping or forced scrollbar */}
       <div
-        className="relative z-10 w-full max-w-[500px] h-screen bg-white dark:bg-[#12151F] border-l border-gray-200 dark:border-neutral-800 shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-250 ease-out select-text"
+        className="relative z-10 w-full max-w-[500px] h-screen bg-white dark:bg-[#12151F] border-l border-gray-200 dark:border-neutral-800 shadow-2xl flex flex-col justify-between animate-slide-in-right select-text"
         role="dialog"
         aria-modal="true"
       >

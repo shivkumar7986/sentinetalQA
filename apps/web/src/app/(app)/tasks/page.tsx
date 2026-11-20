@@ -35,7 +35,8 @@ function TasksPageContent() {
   useEffect(() => {
     loadTasks()
     if (searchParams.get('new') === 'true') {
-      openFormDrawer('create-task')
+      const webId = searchParams.get('websiteId')
+      openFormDrawer('create-task', webId ? { websiteId: webId } : undefined)
     }
   }, [searchParams, formDrawer])
 

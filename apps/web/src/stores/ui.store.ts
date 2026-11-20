@@ -4,15 +4,20 @@ import { persist } from 'zustand/middleware'
 type Theme = 'light' | 'dark' | 'system'
 export type FormDrawerType = 'add-website' | 'create-task' | null
 
+export interface FormDrawerData {
+  websiteId?: string
+}
+
 interface UIState {
   theme: Theme
   sidebarCollapsed: boolean
   commandMenuOpen: boolean
   formDrawer: FormDrawerType
+  formDrawerData: FormDrawerData | null
   setTheme: (t: Theme) => void
   toggleSidebar: () => void
   setCommandMenuOpen: (open: boolean) => void
-  openFormDrawer: (drawer: FormDrawerType) => void
+  openFormDrawer: (drawer: FormDrawerType, data?: FormDrawerData | null) => void
   closeFormDrawer: () => void
 }
 
@@ -23,11 +28,12 @@ export const useUIStore = create<UIState>()(
       sidebarCollapsed: false,
       commandMenuOpen: false,
       formDrawer: null,
+      formDrawerData: null,
       setTheme: (theme) => set({ theme }),
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
       setCommandMenuOpen: (commandMenuOpen) => set({ commandMenuOpen }),
-      openFormDrawer: (formDrawer) => set({ formDrawer }),
-      closeFormDrawer: () => set({ formDrawer: null }),
+      openFormDrawer: (formDrawer, formDrawerData = null) => set({ formDrawer, formDrawerData: formDrawerData ?? null }),
+      closeFormDrawer: () => set({ formDrawer: null, formDrawerData: null }),
     }),
     {
       name: 'testing-agent-ui',

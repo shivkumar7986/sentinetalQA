@@ -14,8 +14,10 @@ import { mockClient } from '@/mocks/mockClient'
 import type { Website } from '@/mocks/data/websites.mock'
 import type { Task } from '@/mocks/data/tasks.mock'
 import type { FullWebsiteConfig } from '@/mocks/data/configs.mock'
+import { useUIStore } from '@/stores/ui.store'
 
 export default function WebsiteDetailPage({ params }: { params: { id: string } }) {
+  const { formDrawer, openFormDrawer } = useUIStore()
   const [website, setWebsite] = useState<Website | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
   const [config, setConfig] = useState<FullWebsiteConfig | null>(null)
@@ -23,7 +25,7 @@ export default function WebsiteDetailPage({ params }: { params: { id: string } }
 
   useEffect(() => {
     loadData()
-  }, [params.id])
+  }, [params.id, formDrawer])
 
   async function loadData() {
     setLoading(true)
@@ -70,10 +72,13 @@ export default function WebsiteDetailPage({ params }: { params: { id: string } }
                 <Settings className="h-4 w-4" /> Configure
               </Link>
             </Button>
-            <Button variant="primary" size="sm" asChild>
-              <Link href={`/tasks/new?websiteId=${website.id}`}>
-                <Plus className="h-4 w-4" /> Create Task
-              </Link>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => openFormDrawer('create-task', { websiteId: website.id })}
+              className="gap-1.5"
+            >
+              <Plus className="h-4 w-4" /> Create Task
             </Button>
           </div>
         }
@@ -149,10 +154,13 @@ export default function WebsiteDetailPage({ params }: { params: { id: string } }
       <Card>
         <CardHeader>
           <CardTitle>Tasks for this Website</CardTitle>
-          <Button variant="primary" size="sm" asChild>
-            <Link href={`/tasks/new?websiteId=${website.id}`}>
-              <Plus className="h-3.5 w-3.5" /> New Task
-            </Link>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => openFormDrawer('create-task', { websiteId: website.id })}
+            className="gap-1.5"
+          >
+            <Plus className="h-3.5 w-3.5" /> New Task
           </Button>
         </CardHeader>
 
@@ -165,12 +173,20 @@ export default function WebsiteDetailPage({ params }: { params: { id: string } }
             {tasks.map((t) => (
               <div key={t.id} className="py-3 flex items-center justify-between gap-4">
                 <div>
-                  <Link
-                    href={`/tasks/${t.id}`}
-                    className="text-[14px] font-medium text-[var(--text)] hover:text-[var(--primary)] transition-colors"
-                  >
-                    {t.title}
-                  </Link>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Link
+                      href={`/tasks/${t.id}`}
+                      className="mono-data text-[12px] font-semibold text-[var(--primary)] bg-[var(--primary-tint)] px-2 py-0.5 rounded-[4px] border border-[var(--primary)]/20 hover:underline"
+                    >
+                      {t.id}
+                    </Link>
+                    <Link
+                      href={`/tasks/${t.id}`}
+                      className="text-[14px] font-medium text-[var(--text)] hover:text-[var(--primary)] transition-colors"
+                    >
+                      {t.title}
+                    </Link>
+                  </div>
                   <div className="flex items-center gap-2 mt-1">
                     <EngineBadge engine={t.providerKind as EngineKind} model={t.model} />
                     {t.roleName && (

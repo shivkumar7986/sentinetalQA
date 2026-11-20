@@ -26,7 +26,7 @@ export function StepLogDrawer({ log, onClose, onAddNote }: StepLogDrawerProps) {
   }
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full max-w-lg bg-[var(--surface)] border-l border-[var(--border)] z-40 flex flex-col shadow-none animate-enter">
+    <div className="fixed inset-y-0 right-0 w-full max-w-lg bg-[var(--surface)] border-l border-[var(--border)] z-40 flex flex-col shadow-none animate-slide-in-right">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
         <div>

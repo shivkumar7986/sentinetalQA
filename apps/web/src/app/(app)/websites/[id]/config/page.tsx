@@ -14,6 +14,14 @@ import {
 import { Button } from '@/components/ui/button'
 import { StateView } from '@/components/data/StateView'
 import { Switch } from '@/components/ui/switch'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import { mockClient } from '@/mocks/mockClient'
 import type { Website } from '@/mocks/data/websites.mock'
 import type {
@@ -42,11 +50,63 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
 
   // Expanded diff states in versions tab
   const [expandedDiffs, setExpandedDiffs] = useState<Record<number, boolean>>({
-    4: true, // v4 diff visible by default as per screenshot
+    4: true,
   })
 
   // Instructions text state
   const [instructionsText, setInstructionsText] = useState('')
+
+  // Auth Flow state
+  const [authForm, setAuthForm] = useState({
+    authMethod: 'Form login (Email / Password)',
+    redirectTarget: '/dashboard',
+    usernameSelector: 'input[name="username"]',
+    passwordSelector: 'input[name="password"]',
+    successIndicatorSelector: 'body',
+    failureMessageSelector: 'Invalid credentials. Please try again.',
+  })
+
+  // Role Modal state
+  const [roleModalOpen, setRoleModalOpen] = useState(false)
+  const [editingRole, setEditingRole] = useState<WebsiteRole | null>(null)
+  const [roleForm, setRoleForm] = useState({
+    name: '',
+    description: '',
+    landingPath: '/dashboard',
+    allowedModules: 'Dashboard',
+  })
+
+  // Module Modal state
+  const [moduleModalOpen, setModuleModalOpen] = useState(false)
+  const [editingModule, setEditingModule] = useState<WebsiteModule | null>(null)
+  const [moduleForm, setModuleForm] = useState({
+    name: '',
+    path: '',
+    expectedHeading: '',
+    navigationPath: 'Direct URL',
+  })
+
+  // Rule Modal state
+  const [ruleModalOpen, setRuleModalOpen] = useState(false)
+  const [editingRule, setEditingRule] = useState<BusinessRule | null>(null)
+  const [ruleForm, setRuleForm] = useState<{
+    text: string
+    priority: 'P1' | 'P2'
+    tag: string
+  }>({
+    text: '',
+    priority: 'P2',
+    tag: 'Custom',
+  })
+
+  // Credential Modal state
+  const [credModalOpen, setCredModalOpen] = useState(false)
+  const [editingCred, setEditingCred] = useState<MaskedCredential | null>(null)
+  const [credForm, setCredForm] = useState({
+    roleName: 'Admin',
+    usernameMasked: '',
+    secretMasked: '',
+  })
 
   useEffect(() => {
     loadConfig()
@@ -63,102 +123,284 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
     if (data?.customInstructions) {
       setInstructionsText(data.customInstructions)
     }
+    if (data?.authFlow) {
+      setAuthForm({
+        authMethod: data.authFlow.method === 'bearer' ? 'Bearer API Token' : data.authFlow.method === 'oauth' ? 'SSO OAuth 2.0 / OIDC' : 'Form login (Email / Password)',
+        redirectTarget: data.authFlow.redirectTarget || '/dashboard',
+        usernameSelector: data.authFlow.usernameSelector || 'email',
+        passwordSelector: data.authFlow.passwordSelector || 'password',
+        successIndicatorSelector: data.authFlow.successIndicatorSelector || 'Set-Cookie: sid + HTTP 200',
+        failureMessageSelector: data.authFlow.failureMessageSelector || 'Invalid credentials. Please try again.',
+      })
+    }
     setLoading(false)
+  }
+
+  // Unified save to mockClient & update state
+  async function persistConfig(updated: Partial<FullWebsiteConfig>, summary: string) {
+    if (!config) return
+    try {
+      const note = versionNote ? `${summary}: ${versionNote}` : summary
+      const saved = await mockClient.updateConfig(params.id, updated, note)
+      setConfig(saved)
+      setVersionNote('')
+      toast.success(`${summary} saved successfully`)
+    } catch {
+      toast.error(`Failed to save ${summary}`)
+    }
+  }
+
+  // Role actions
+  function handleOpenAddRole() {
+    setEditingRole(null)
+    setRoleForm({
+      name: '',
+      description: '',
+      landingPath: '/dashboard',
+      allowedModules: 'Dashboard',
+    })
+    setRoleModalOpen(true)
+  }
+
+  function handleOpenEditRole(r: WebsiteRole) {
+    setEditingRole(r)
+    setRoleForm({
+      name: r.name,
+      description: r.description,
+      landingPath: r.landingPath,
+      allowedModules: Array.isArray(r.allowedModules) ? r.allowedModules.join(', ') : r.allowedModules,
+    })
+    setRoleModalOpen(true)
+  }
+
+  async function handleSaveRoleModal(e: React.FormEvent) {
+    e.preventDefault()
+    if (!config) return
+    const modulesArr = roleForm.allowedModules.split(',').map((s) => s.trim()).filter(Boolean)
+    let newRoles: WebsiteRole[]
+    if (editingRole) {
+      newRoles = config.roles.map((r) =>
+        r.id === editingRole.id
+          ? { ...r, name: roleForm.name, description: roleForm.description, landingPath: roleForm.landingPath, allowedModules: modulesArr }
+          : r
+      )
+    } else {
+      const newRole: WebsiteRole = {
+        id: `role-${Date.now()}`,
+        name: roleForm.name,
+        description: roleForm.description,
+        landingPath: roleForm.landingPath,
+        allowedModules: modulesArr,
+      }
+      newRoles = [...config.roles, newRole]
+    }
+    await persistConfig({ roles: newRoles }, editingRole ? `Updated role "${roleForm.name}"` : `Added role "${roleForm.name}"`)
+    setRoleModalOpen(false)
+  }
+
+  async function handleDeleteRole(roleId: string, roleName: string) {
+    if (!config) return
+    const newRoles = config.roles.filter((r) => r.id !== roleId)
+    await persistConfig({ roles: newRoles }, `Deleted role "${roleName}"`)
+  }
+
+  // Module actions
+  function handleOpenAddModule() {
+    setEditingModule(null)
+    setModuleForm({
+      name: '',
+      path: '',
+      expectedHeading: '',
+      navigationPath: 'Direct URL',
+    })
+    setModuleModalOpen(true)
+  }
+
+  function handleOpenEditModule(m: WebsiteModule) {
+    setEditingModule(m)
+    setModuleForm({
+      name: m.name,
+      path: m.path,
+      expectedHeading: m.expectedHeading || '',
+      navigationPath: m.navigationPath || 'Direct URL',
+    })
+    setModuleModalOpen(true)
+  }
+
+  async function handleSaveModuleModal(e: React.FormEvent) {
+    e.preventDefault()
+    if (!config) return
+    let newMods: WebsiteModule[]
+    if (editingModule) {
+      newMods = config.modules.map((m) =>
+        m.id === editingModule.id ? { ...m, ...moduleForm } : m
+      )
+    } else {
+      const newMod: WebsiteModule = {
+        id: `mod-${Date.now()}`,
+        ...moduleForm,
+      }
+      newMods = [...config.modules, newMod]
+    }
+    await persistConfig({ modules: newMods }, editingModule ? `Updated module "${moduleForm.name}"` : `Added module "${moduleForm.name}"`)
+    setModuleModalOpen(false)
+  }
+
+  async function handleDeleteModule(modId: string, modName: string) {
+    if (!config) return
+    const newMods = config.modules.filter((m) => m.id !== modId)
+    await persistConfig({ modules: newMods }, `Deleted module "${modName}"`)
+  }
+
+  // Auth Flow action
+  async function handleSaveAuthFlow() {
+    if (!config) return
+    const updatedAuth = {
+      ...config.authFlow,
+      method: (authForm.authMethod.includes('Bearer') ? 'bearer' : authForm.authMethod.includes('SSO') ? 'oauth' : 'form') as any,
+      redirectTarget: authForm.redirectTarget,
+      usernameSelector: authForm.usernameSelector,
+      passwordSelector: authForm.passwordSelector,
+      successIndicatorSelector: authForm.successIndicatorSelector,
+      failureMessageSelector: authForm.failureMessageSelector,
+    }
+    await persistConfig({ authFlow: updatedAuth }, 'Authentication flow')
+  }
+
+  // Rule actions
+  function handleOpenAddRule() {
+    setEditingRule(null)
+    setRuleForm({
+      text: '',
+      priority: 'P2',
+      tag: 'Custom',
+    })
+    setRuleModalOpen(true)
+  }
+
+  function handleOpenEditRule(rule: BusinessRule) {
+    setEditingRule(rule)
+    setRuleForm({
+      text: rule.text,
+      priority: (rule.priority === 'P1' || rule.priority === 'high') ? 'P1' : 'P2',
+      tag: rule.tag || 'Custom',
+    })
+    setRuleModalOpen(true)
+  }
+
+  async function handleSaveRuleModal(e: React.FormEvent) {
+    e.preventDefault()
+    if (!config) return
+    let newRules: BusinessRule[]
+    if (editingRule) {
+      newRules = config.businessRules.map((r) =>
+        r.id === editingRule.id ? { ...r, ...ruleForm } : r
+      )
+    } else {
+      const newRule: BusinessRule = {
+        id: `rule-${Date.now()}`,
+        ...ruleForm,
+        isActive: true,
+      }
+      newRules = [...config.businessRules, newRule]
+    }
+    await persistConfig({ businessRules: newRules }, editingRule ? 'Updated business rule' : 'Added business rule')
+    setRuleModalOpen(false)
+  }
+
+  async function toggleRule(id: string) {
+    if (!config) return
+    const newRules = config.businessRules.map((r) =>
+      r.id === id ? { ...r, isActive: !r.isActive } : r
+    )
+    await persistConfig({ businessRules: newRules }, 'Business rules status')
+  }
+
+  async function handleDeleteRule(id: string) {
+    if (!config) return
+    const newRules = config.businessRules.filter((r) => r.id !== id)
+    await persistConfig({ businessRules: newRules }, 'Removed business rule')
+  }
+
+  // Instructions action
+  async function handleSaveInstructions() {
+    if (!config) return
+    await persistConfig({ customInstructions: instructionsText }, 'Custom AI instructions')
+  }
+
+  // Credential actions
+  function handleOpenAddCredential() {
+    setEditingCred(null)
+    setCredForm({
+      roleName: config?.roles[0]?.name || 'Admin',
+      usernameMasked: '',
+      secretMasked: '',
+    })
+    setCredModalOpen(true)
+  }
+
+  function handleOpenEditCredential(cred: MaskedCredential) {
+    setEditingCred(cred)
+    setCredForm({
+      roleName: cred.roleName,
+      usernameMasked: cred.usernameMasked,
+      secretMasked: '',
+    })
+    setCredModalOpen(true)
+  }
+
+  async function handleSaveCredModal(e: React.FormEvent) {
+    e.preventDefault()
+    if (!config) return
+    let newCreds: MaskedCredential[]
+    if (editingCred) {
+      newCreds = config.credentials.map((c) =>
+        c.roleId === editingCred.roleId
+          ? {
+              ...c,
+              roleName: credForm.roleName,
+              usernameMasked: credForm.usernameMasked,
+              secretMasked: credForm.secretMasked ? '••••••••••••' : c.secretMasked,
+              lastUpdated: 'Just now',
+            }
+          : c
+      )
+    } else {
+      const newCred: MaskedCredential = {
+        roleId: `role-${Date.now()}`,
+        roleName: credForm.roleName,
+        usernameMasked: credForm.usernameMasked,
+        secretMasked: '••••••••••••',
+        hasPassword: true,
+        lastUpdated: 'Just now',
+      }
+      newCreds = [...config.credentials, newCred]
+    }
+    await persistConfig({ credentials: newCreds }, editingCred ? `Replaced credential for ${credForm.roleName}` : `Added credential for ${credForm.roleName}`)
+    setCredModalOpen(false)
+  }
+
+  async function handleRemoveCredential(roleId: string, roleName: string) {
+    if (!config) return
+    const newCreds = config.credentials.filter((c) => c.roleId !== roleId)
+    await persistConfig({ credentials: newCreds }, `Removed credential for ${roleName}`)
   }
 
   async function handleSaveSection(sectionName: string) {
     if (!config) return
-    const note = versionNote || `Updated ${sectionName} mapping`
-    toast.success(`Saved ${sectionName} (snapshot noted: "${note}")`)
-    setVersionNote('')
-  }
-
-  function toggleRule(id: string) {
-    if (!config) return
-    setConfig({
-      ...config,
-      businessRules: config.businessRules.map((r) =>
-        r.id === id ? { ...r, isActive: !r.isActive } : r
-      ),
-    })
-  }
-
-  function handleDeleteRule(id: string) {
-    if (!config) return
-    setConfig({
-      ...config,
-      businessRules: config.businessRules.filter((r) => r.id !== id),
-    })
-    toast.success('Removed business rule')
-  }
-
-  function handleAddRule() {
-    const text = prompt('Enter invariant rule description:')
-    if (!text || !config) return
-    const newRule: BusinessRule = {
-      id: `rule-${Date.now()}`,
-      text,
-      tag: 'Custom',
-      priority: 'P2',
-      isActive: true,
+    if (sectionName === 'roles') {
+      await persistConfig({ roles: config.roles }, 'Roles mapping')
+    } else if (sectionName === 'modules') {
+      await persistConfig({ modules: config.modules }, 'Modules mapping')
+    } else if (sectionName === 'auth flow') {
+      await handleSaveAuthFlow()
+    } else if (sectionName === 'business rules') {
+      await persistConfig({ businessRules: config.businessRules }, 'Business rules mapping')
+    } else if (sectionName === 'instructions') {
+      await handleSaveInstructions()
+    } else if (sectionName === 'credentials') {
+      await persistConfig({ credentials: config.credentials }, 'Credentials mapping')
     }
-    setConfig({
-      ...config,
-      businessRules: [...config.businessRules, newRule],
-    })
-    toast.success('Added business rule')
-  }
-
-  function handleAddRole() {
-    const name = prompt('Enter role name:')
-    if (!name || !config) return
-    const newRole: WebsiteRole = {
-      id: `role-${Date.now()}`,
-      name,
-      description: 'Custom user persona for test execution',
-      landingPath: '/dashboard',
-      allowedModules: ['Dashboard'],
-    }
-    setConfig({
-      ...config,
-      roles: [...config.roles, newRole],
-    })
-    toast.success(`Added role "${name}"`)
-  }
-
-  function handleAddModule() {
-    const name = prompt('Enter module name:')
-    if (!name || !config) return
-    const newMod: WebsiteModule = {
-      id: `mod-${Date.now()}`,
-      name,
-      path: `/${name.toLowerCase().replace(/\s+/g, '-')}`,
-      expectedHeading: `${name} Overview`,
-      navigationPath: 'Direct URL',
-    }
-    setConfig({
-      ...config,
-      modules: [...config.modules, newMod],
-    })
-    toast.success(`Added module "${name}"`)
-  }
-
-  function handleAddCredential() {
-    const username = prompt('Enter username / email for credential:')
-    if (!username || !config) return
-    const newCred: MaskedCredential = {
-      roleId: `role-${Date.now()}`,
-      roleName: 'Dispatcher',
-      usernameMasked: username,
-      secretMasked: '••••••••••••',
-      hasPassword: true,
-      lastUpdated: 'Just now',
-    }
-    setConfig({
-      ...config,
-      credentials: [...config.credentials, newCred],
-    })
-    toast.success(`Saved credential for ${username}`)
   }
 
   function handleRestoreVersion(v: ConfigVersion) {
@@ -270,8 +512,8 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
             </div>
             <button
               type="button"
-              onClick={handleAddRole}
-              className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none"
+              onClick={handleOpenAddRole}
+              className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none cursor-pointer"
             >
               + Add role
             </button>
@@ -308,13 +550,15 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
                       <div className="flex items-center justify-end gap-2">
                         <button
                           type="button"
-                          className="h-7 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px]"
+                          onClick={() => handleOpenEditRole(role)}
+                          className="h-7 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
                         >
                           Edit
                         </button>
                         <button
                           type="button"
-                          className="h-7 px-3 text-[12px] font-medium border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-neutral-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 rounded-[4px]"
+                          onClick={() => handleDeleteRole(role.id, role.name)}
+                          className="h-7 px-3 text-[12px] font-medium border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-neutral-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 rounded-[4px] cursor-pointer"
                         >
                           Delete
                         </button>
@@ -338,7 +582,7 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
             <button
               type="button"
               onClick={() => handleSaveSection('roles')}
-              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0"
+              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
             >
               Save roles
             </button>
@@ -361,8 +605,8 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
             </div>
             <button
               type="button"
-              onClick={handleAddModule}
-              className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none"
+              onClick={handleOpenAddModule}
+              className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none cursor-pointer"
             >
               + Add module
             </button>
@@ -399,13 +643,15 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
                       <div className="flex items-center justify-end gap-2">
                         <button
                           type="button"
-                          className="h-7 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px]"
+                          onClick={() => handleOpenEditModule(mod)}
+                          className="h-7 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
                         >
                           Edit
                         </button>
                         <button
                           type="button"
-                          className="h-7 px-3 text-[12px] font-medium border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-neutral-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 rounded-[4px]"
+                          onClick={() => handleDeleteModule(mod.id, mod.name)}
+                          className="h-7 px-3 text-[12px] font-medium border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-neutral-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 rounded-[4px] cursor-pointer"
                         >
                           Delete
                         </button>
@@ -429,7 +675,7 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
             <button
               type="button"
               onClick={() => handleSaveSection('modules')}
-              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0"
+              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
             >
               Save modules
             </button>
@@ -450,7 +696,7 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
             </p>
           </div>
 
-          {/* Form Fields matching screenshot */}
+          {/* Form Fields */}
           <div className="p-6 space-y-5">
             {/* Row 1 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -460,7 +706,8 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
                 </label>
                 <div className="relative">
                   <select
-                    defaultValue="Form login (Email / Password)"
+                    value={authForm.authMethod}
+                    onChange={(e) => setAuthForm((p) => ({ ...p, authMethod: e.target.value }))}
                     className="w-full h-10 px-3.5 pr-8 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] appearance-none cursor-pointer transition-colors"
                   >
                     <option value="Form login (Email / Password)">
@@ -479,8 +726,9 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
                 </label>
                 <input
                   type="text"
-                  defaultValue={config.authFlow.redirectTarget || '/dashboard'}
-                  className="w-full h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
+                  value={authForm.redirectTarget}
+                  onChange={(e) => setAuthForm((p) => ({ ...p, redirectTarget: e.target.value }))}
+                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
                 />
               </div>
             </div>
@@ -489,23 +737,25 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-1.5">
                 <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                  Username field name
+                  Username field name / selector
                 </label>
                 <input
                   type="text"
-                  defaultValue={config.authFlow.usernameSelector || 'email'}
-                  className="w-full h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
+                  value={authForm.usernameSelector}
+                  onChange={(e) => setAuthForm((p) => ({ ...p, usernameSelector: e.target.value }))}
+                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
                 />
               </div>
 
               <div className="space-y-1.5">
                 <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
-                  Password field name
+                  Password field name / selector
                 </label>
                 <input
                   type="text"
-                  defaultValue={config.authFlow.passwordSelector || 'password'}
-                  className="w-full h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
+                  value={authForm.passwordSelector}
+                  onChange={(e) => setAuthForm((p) => ({ ...p, passwordSelector: e.target.value }))}
+                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
                 />
               </div>
             </div>
@@ -518,8 +768,9 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
                 </label>
                 <input
                   type="text"
-                  defaultValue={config.authFlow.successIndicatorSelector || 'Set-Cookie: sid + HTTP 200'}
-                  className="w-full h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
+                  value={authForm.successIndicatorSelector}
+                  onChange={(e) => setAuthForm((p) => ({ ...p, successIndicatorSelector: e.target.value }))}
+                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
                 />
               </div>
 
@@ -529,7 +780,8 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
                 </label>
                 <input
                   type="text"
-                  defaultValue={config.authFlow.failureMessageSelector || 'Invalid credentials. Please try again.'}
+                  value={authForm.failureMessageSelector}
+                  onChange={(e) => setAuthForm((p) => ({ ...p, failureMessageSelector: e.target.value }))}
                   className="w-full h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
                 />
               </div>
@@ -547,8 +799,8 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
             />
             <button
               type="button"
-              onClick={() => handleSaveSection('auth flow')}
-              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0"
+              onClick={handleSaveAuthFlow}
+              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
             >
               Save auth flow
             </button>
@@ -571,8 +823,8 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
             </div>
             <button
               type="button"
-              onClick={handleAddRule}
-              className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none"
+              onClick={handleOpenAddRule}
+              className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none cursor-pointer"
             >
               + Add rule
             </button>
@@ -620,8 +872,8 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
                   )}
                 </div>
 
-                {/* Right controls: Switch + Delete */}
-                <div className="flex items-center gap-3 shrink-0">
+                {/* Right controls: Switch + Edit + Delete */}
+                <div className="flex items-center gap-2.5 shrink-0">
                   <Switch
                     checked={rule.isActive}
                     onCheckedChange={() => toggleRule(rule.id)}
@@ -629,8 +881,16 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
                   />
                   <button
                     type="button"
+                    onClick={() => handleOpenEditRule(rule)}
+                    className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-1 cursor-pointer transition-colors"
+                    title="Edit rule"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => handleDeleteRule(rule.id)}
-                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1"
+                    className="text-gray-400 hover:text-rose-600 p-1 cursor-pointer transition-colors"
                     title="Delete rule"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -652,7 +912,7 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
             <button
               type="button"
               onClick={() => handleSaveSection('business rules')}
-              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0"
+              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
             >
               Save business rules
             </button>
@@ -702,7 +962,7 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
                     (prev) => prev + ' Ignore cookie consent banners.'
                   )
                 }
-                className="px-2.5 py-1 rounded-full border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 hover:bg-gray-50 transition-colors"
+                className="px-2.5 py-1 rounded-full border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
               >
                 + Ignore cookie banners
               </button>
@@ -713,7 +973,7 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
                     (prev) => prev + ' Wait for Tracking table hydration before asserting.'
                   )
                 }
-                className="px-2.5 py-1 rounded-full border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 hover:bg-gray-50 transition-colors"
+                className="px-2.5 py-1 rounded-full border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
               >
                 + Wait for async hydration
               </button>
@@ -724,7 +984,7 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
                     (prev) => prev + ' Read-only assertions only.'
                   )
                 }
-                className="px-2.5 py-1 rounded-full border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 hover:bg-gray-50 transition-colors"
+                className="px-2.5 py-1 rounded-full border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
               >
                 + Read-only assertions
               </button>
@@ -742,8 +1002,8 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
             />
             <button
               type="button"
-              onClick={() => handleSaveSection('instructions')}
-              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0"
+              onClick={handleSaveInstructions}
+              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
             >
               Save instructions
             </button>
@@ -766,14 +1026,14 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
             </div>
             <button
               type="button"
-              onClick={handleAddCredential}
-              className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none"
+              onClick={handleOpenAddCredential}
+              className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none cursor-pointer"
             >
               + Add credential
             </button>
           </div>
 
-          {/* Notice Banner matching screenshot */}
+          {/* Notice Banner */}
           <div className="mx-6 mt-4 p-3 rounded-lg bg-[#EEF2FF]/60 dark:bg-indigo-950/30 border border-[#4F46E5]/20 flex items-center gap-2.5 text-[12px] text-gray-700 dark:text-gray-300">
             <span className="text-[14px]">🛡</span>
             <span>
@@ -813,13 +1073,15 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
                       <div className="flex items-center justify-end gap-2">
                         <button
                           type="button"
-                          className="h-7 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px]"
+                          onClick={() => handleOpenEditCredential(cred)}
+                          className="h-7 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
                         >
                           Replace
                         </button>
                         <button
                           type="button"
-                          className="h-7 px-3 text-[12px] font-medium border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-neutral-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 rounded-[4px]"
+                          onClick={() => handleRemoveCredential(cred.roleId, cred.roleName)}
+                          className="h-7 px-3 text-[12px] font-medium border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-neutral-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 rounded-[4px] cursor-pointer"
                         >
                           Remove
                         </button>
@@ -843,7 +1105,7 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
             <button
               type="button"
               onClick={() => handleSaveSection('credentials')}
-              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0"
+              className="h-10 px-4 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none shrink-0 cursor-pointer"
             >
               Save credentials
             </button>
@@ -868,7 +1130,7 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
           <div className="relative pl-6 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[1px] before:bg-gray-200 dark:before:bg-neutral-800">
             {config.versions.map((ver) => {
               const isDiffVisible = expandedDiffs[ver.version] || false
-              const isActive = ver.isActive || ver.version === 4
+              const isActive = ver.isActive || ver.version === config.version
 
               return (
                 <div key={ver.version} className="relative">
@@ -917,7 +1179,7 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
                                 [ver.version]: !prev[ver.version],
                               }))
                             }
-                            className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px] transition-colors"
+                            className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px] transition-colors cursor-pointer"
                           >
                             {isDiffVisible ? 'Hide diff' : 'View diff'}
                           </button>
@@ -931,7 +1193,7 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
                           <button
                             type="button"
                             onClick={() => handleRestoreVersion(ver)}
-                            className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px] transition-colors flex items-center gap-1.5"
+                            className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px] transition-colors flex items-center gap-1.5 cursor-pointer"
                           >
                             <RotateCcw className="h-3 w-3" /> Restore
                           </button>
@@ -952,6 +1214,283 @@ export default function WebsiteConfigPage({ params }: { params: { id: string } }
           </div>
         </div>
       )}
+
+      {/* Role Add/Edit Dialog */}
+      <Dialog open={roleModalOpen} onOpenChange={setRoleModalOpen}>
+        <DialogContent className="max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>{editingRole ? 'Edit Role' : 'Add Website User Role'}</DialogTitle>
+            <DialogDescription>
+              Define the application persona, landing URL, and allowed test modules.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSaveRoleModal} className="space-y-4 pt-2">
+            <div>
+              <label className="block text-[12px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                Role Name *
+              </label>
+              <input
+                type="text"
+                required
+                value={roleForm.name}
+                onChange={(e) => setRoleForm((p) => ({ ...p, name: e.target.value }))}
+                placeholder="e.g. Dispatcher, Billing Specialist, Auditor"
+                className="w-full h-9 px-3 text-[13px] rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5]"
+              />
+            </div>
+            <div>
+              <label className="block text-[12px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                Description
+              </label>
+              <input
+                type="text"
+                value={roleForm.description}
+                onChange={(e) => setRoleForm((p) => ({ ...p, description: e.target.value }))}
+                placeholder="e.g. Operates dispatch orders and fleet assign"
+                className="w-full h-9 px-3 text-[13px] rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5]"
+              />
+            </div>
+            <div>
+              <label className="block text-[12px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                Landing Path
+              </label>
+              <input
+                type="text"
+                value={roleForm.landingPath}
+                onChange={(e) => setRoleForm((p) => ({ ...p, landingPath: e.target.value }))}
+                placeholder="e.g. /dashboard or /orders"
+                className="w-full h-9 px-3 text-[13px] font-mono rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5]"
+              />
+            </div>
+            <div>
+              <label className="block text-[12px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                Allowed Modules (comma-separated)
+              </label>
+              <input
+                type="text"
+                value={roleForm.allowedModules}
+                onChange={(e) => setRoleForm((p) => ({ ...p, allowedModules: e.target.value }))}
+                placeholder="e.g. Dashboard, Orders, Tracking"
+                className="w-full h-9 px-3 text-[13px] rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5]"
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="secondary" size="sm" onClick={() => setRoleModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="primary" size="sm" className="bg-[#4F46E5] hover:bg-[#4338CA]">
+                {editingRole ? 'Update Role' : 'Add Role'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Module Add/Edit Dialog */}
+      <Dialog open={moduleModalOpen} onOpenChange={setModuleModalOpen}>
+        <DialogContent className="max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>{editingModule ? 'Edit Module' : 'Add Application Module'}</DialogTitle>
+            <DialogDescription>
+              Target route, expected page heading, and navigation path for AI exploration.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSaveModuleModal} className="space-y-4 pt-2">
+            <div>
+              <label className="block text-[12px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                Module Name *
+              </label>
+              <input
+                type="text"
+                required
+                value={moduleForm.name}
+                onChange={(e) => setModuleForm((p) => ({ ...p, name: e.target.value }))}
+                placeholder="e.g. Tracking, Orders, Invoices"
+                className="w-full h-9 px-3 text-[13px] rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5]"
+              />
+            </div>
+            <div>
+              <label className="block text-[12px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                Target Route Path *
+              </label>
+              <input
+                type="text"
+                required
+                value={moduleForm.path}
+                onChange={(e) => setModuleForm((p) => ({ ...p, path: e.target.value }))}
+                placeholder="e.g. /tracking or /invoices"
+                className="w-full h-9 px-3 text-[13px] font-mono rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5]"
+              />
+            </div>
+            <div>
+              <label className="block text-[12px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                Expected Heading
+              </label>
+              <input
+                type="text"
+                value={moduleForm.expectedHeading}
+                onChange={(e) => setModuleForm((p) => ({ ...p, expectedHeading: e.target.value }))}
+                placeholder="e.g. Live Shipment Tracking"
+                className="w-full h-9 px-3 text-[13px] rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5]"
+              />
+            </div>
+            <div>
+              <label className="block text-[12px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                Navigation Path
+              </label>
+              <input
+                type="text"
+                value={moduleForm.navigationPath}
+                onChange={(e) => setModuleForm((p) => ({ ...p, navigationPath: e.target.value }))}
+                placeholder="e.g. Sidebar → Logistics → Tracking"
+                className="w-full h-9 px-3 text-[13px] rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5]"
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="secondary" size="sm" onClick={() => setModuleModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="primary" size="sm" className="bg-[#4F46E5] hover:bg-[#4338CA]">
+                {editingModule ? 'Update Module' : 'Add Module'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rule Add/Edit Dialog */}
+      <Dialog open={ruleModalOpen} onOpenChange={setRuleModalOpen}>
+        <DialogContent className="max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>{editingRule ? 'Edit Business Rule' : 'Add Business Rule'}</DialogTitle>
+            <DialogDescription>
+              Invariants verified during test plan generation and AI execution assertions.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSaveRuleModal} className="space-y-4 pt-2">
+            <div>
+              <label className="block text-[12px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                Rule Description *
+              </label>
+              <textarea
+                required
+                rows={3}
+                value={ruleForm.text}
+                onChange={(e) => setRuleForm((p) => ({ ...p, text: e.target.value }))}
+                placeholder="e.g. Dispatcher role cannot access /billing/invoices without OTP"
+                className="w-full p-2.5 text-[13px] rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] resize-none"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[12px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  Priority
+                </label>
+                <select
+                  value={ruleForm.priority}
+                  onChange={(e) => setRuleForm((p) => ({ ...p, priority: e.target.value as 'P1' | 'P2' }))}
+                  className="w-full h-9 px-3 text-[13px] rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5]"
+                >
+                  <option value="P1">P1 (Critical Assertion)</option>
+                  <option value="P2">P2 (Standard)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[12px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  Category Tag
+                </label>
+                <input
+                  type="text"
+                  value={ruleForm.tag}
+                  onChange={(e) => setRuleForm((p) => ({ ...p, tag: e.target.value }))}
+                  placeholder="e.g. Auth, Routing, Data"
+                  className="w-full h-9 px-3 text-[13px] rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5]"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="secondary" size="sm" onClick={() => setRuleModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="primary" size="sm" className="bg-[#4F46E5] hover:bg-[#4338CA]">
+                {editingRule ? 'Update Rule' : 'Add Rule'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Credential Add/Edit Dialog */}
+      <Dialog open={credModalOpen} onOpenChange={setCredModalOpen}>
+        <DialogContent className="max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>{editingCred ? 'Replace Credential' : 'Add Role Credential'}</DialogTitle>
+            <DialogDescription>
+              Credentials are encrypted and masked; decrypted only in worker execution sandboxes.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSaveCredModal} className="space-y-4 pt-2">
+            <div>
+              <label className="block text-[12px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                Associated Role
+              </label>
+              <select
+                value={credForm.roleName}
+                onChange={(e) => setCredForm((p) => ({ ...p, roleName: e.target.value }))}
+                className="w-full h-9 px-3 text-[13px] rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5]"
+              >
+                {config.roles.length > 0 ? (
+                  config.roles.map((r) => (
+                    <option key={r.id} value={r.name}>
+                      {r.name}
+                    </option>
+                  ))
+                ) : (
+                  <>
+                    <option value="Admin">Admin</option>
+                    <option value="Dispatcher">Dispatcher</option>
+                    <option value="Viewer">Viewer</option>
+                  </>
+                )}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[12px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                Username / Email *
+              </label>
+              <input
+                type="text"
+                required
+                value={credForm.usernameMasked}
+                onChange={(e) => setCredForm((p) => ({ ...p, usernameMasked: e.target.value }))}
+                placeholder="e.g. dispatcher@acme.internal"
+                className="w-full h-9 px-3 text-[13px] font-mono rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5]"
+              />
+            </div>
+            <div>
+              <label className="block text-[12px] font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                Password / Secret Token {editingCred ? '(Leave blank to keep existing)' : '*'}
+              </label>
+              <input
+                type="password"
+                required={!editingCred}
+                value={credForm.secretMasked}
+                onChange={(e) => setCredForm((p) => ({ ...p, secretMasked: e.target.value }))}
+                placeholder="••••••••••••"
+                className="w-full h-9 px-3 text-[13px] font-mono rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5]"
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="secondary" size="sm" onClick={() => setCredModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="primary" size="sm" className="bg-[#4F46E5] hover:bg-[#4338CA]">
+                {editingCred ? 'Save Credential' : 'Add Credential'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

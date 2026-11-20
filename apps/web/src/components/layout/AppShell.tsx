@@ -8,13 +8,14 @@ import { AddWebsiteDrawer } from '@/components/forms/AddWebsiteDrawer'
 import { CreateTaskDrawer } from '@/components/forms/CreateTaskDrawer'
 import { AddUserDrawer } from '@/components/forms/AddUserDrawer'
 import { EditUserDrawer } from '@/components/forms/EditUserDrawer'
+import { DeleteUserModal } from '@/components/forms/DeleteUserModal'
 import { useUIStore } from '@/stores/ui.store'
 import { cn } from '@/lib/utils'
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { commandMenuOpen, formDrawer, closeFormDrawer } = useUIStore()
+  const { commandMenuOpen, formDrawer, deleteUserModal } = useUIStore()
 
-  const isBlurred = commandMenuOpen || Boolean(formDrawer)
+  const isBlurred = commandMenuOpen || Boolean(formDrawer) || Boolean(deleteUserModal)
 
   return (
     <div className="relative flex h-screen bg-[var(--bg)] overflow-hidden">
@@ -40,11 +41,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Global Command Menu / Jump To Palette */}
       <CommandMenu />
 
-      {/* Global Slide-over Form Drawers (Full 100vh height, top-0 to bottom-0) */}
+      {/* Global Slide-over Form Drawers & Modals (Full viewport, z-[100]+) */}
       <AddWebsiteDrawer />
       <CreateTaskDrawer />
       <AddUserDrawer />
       <EditUserDrawer />
+      <DeleteUserModal />
     </div>
   )
 }

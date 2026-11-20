@@ -15,11 +15,14 @@ interface UIState {
   commandMenuOpen: boolean
   formDrawer: FormDrawerType
   formDrawerData: FormDrawerData | null
+  deleteUserModal: any | null
   setTheme: (t: Theme) => void
   toggleSidebar: () => void
   setCommandMenuOpen: (open: boolean) => void
   openFormDrawer: (drawer: FormDrawerType, data?: FormDrawerData | null) => void
   closeFormDrawer: () => void
+  openDeleteUserModal: (member: any) => void
+  closeDeleteUserModal: () => void
 }
 
 export const useUIStore = create<UIState>()(
@@ -30,11 +33,14 @@ export const useUIStore = create<UIState>()(
       commandMenuOpen: false,
       formDrawer: null,
       formDrawerData: null,
+      deleteUserModal: null,
       setTheme: (theme) => set({ theme }),
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
       setCommandMenuOpen: (commandMenuOpen) => set({ commandMenuOpen }),
       openFormDrawer: (formDrawer, formDrawerData = null) => set({ formDrawer, formDrawerData: formDrawerData ?? null }),
       closeFormDrawer: () => set({ formDrawer: null, formDrawerData: null }),
+      openDeleteUserModal: (member) => set({ deleteUserModal: member }),
+      closeDeleteUserModal: () => set({ deleteUserModal: null }),
     }),
     {
       name: 'testing-agent-ui',

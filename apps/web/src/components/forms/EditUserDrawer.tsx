@@ -22,7 +22,7 @@ export function EditUserDrawer({
   onClose: propOnClose,
   onSuccess: propOnSuccess,
 }: EditUserDrawerProps) {
-  const { formDrawer, formDrawerData, closeFormDrawer } = useUIStore()
+  const { formDrawer, formDrawerData, closeFormDrawer, openDeleteUserModal } = useUIStore()
   const { user } = useAuthStore()
 
   const isOpen = propOpen !== undefined ? propOpen : formDrawer === 'edit-user'
@@ -37,7 +37,6 @@ export function EditUserDrawer({
   const [status, setStatus] = useState<'active' | 'invited' | 'disabled'>('active')
   const [availableLeads, setAvailableLeads] = useState<Member[]>([])
   const [loading, setLoading] = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState(false)
 
   // Load available QA Leads
   useEffect(() => {
@@ -60,7 +59,6 @@ export function EditUserDrawer({
       setRole(member.role)
       setAssignedLead(member.assignedLead || '')
       setStatus(member.status)
-      setConfirmDelete(false)
     }
   }, [member])
 
@@ -107,36 +105,6 @@ export function EditUserDrawer({
       handleClose()
     } catch (err: any) {
       toast.error('Failed to update user', { description: err.message || 'An error occurred' })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function handleDelete() {
-    if (!member) return
-
-    if (isSelf) {
-      toast.error('Action not allowed', {
-        description: 'You cannot delete your own account.',
-      })
-      return
-    }
-
-    if (!canManage) {
-      toast.error('Permission Denied', {
-        description: `You do not have permission to delete ${member.name}.`,
-      })
-      return
-    }
-
-    setLoading(true)
-    try {
-      await mockClient.deleteMember(member.id)
-      toast.success(`${member.name} has been deleted.`)
-      if (propOnSuccess) propOnSuccess()
-      handleClose()
-    } catch (err: any) {
-      toast.error('Failed to delete user', { description: err.message || 'An error occurred' })
     } finally {
       setLoading(false)
     }
@@ -318,36 +286,6 @@ export function EditUserDrawer({
               </div>
             </div>
 
-            {/* Delete Confirmation Box */}
-            {confirmDelete && (
-              <div className="p-4 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 space-y-3 animate-enter">
-                <div className="flex items-start gap-2.5 text-rose-800 dark:text-rose-200">
-                  <AlertTriangle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="text-[13px] font-bold">Delete {member.name}?</h4>
-                    <p className="text-[12px] text-rose-700 dark:text-rose-300 mt-0.5">
-                      Are you sure you want to delete this user? Their account and access will be permanently removed.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-end gap-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setConfirmDelete(false)}
-                    className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleDelete}
-                    className="h-8 px-3 text-[12px] font-medium bg-rose-600 hover:bg-rose-700 text-white rounded-md transition-colors"
-                  >
-                    Yes, Delete User
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Bottom Actions - Exactly matching AddWebsiteDrawer / CreateTaskDrawer */}
@@ -356,7 +294,10 @@ export function EditUserDrawer({
             {canManage && !isSelf ? (
               <button
                 type="button"
-                onClick={() => setConfirmDelete(true)}
+                onClick={() => {
+                  handleClose()
+                  openDeleteUserModal(member)
+                }}
                 className="h-10 px-3.5 rounded-lg border border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-[13px] font-medium flex items-center gap-1.5 transition-colors"
               >
                 <Trash2 className="h-4 w-4" /> Delete user

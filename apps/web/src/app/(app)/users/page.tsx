@@ -26,11 +26,9 @@ export default function UsersPage() {
     }
   }, [user, router])
 
-  const { openFormDrawer } = useUIStore()
+  const { openFormDrawer, openDeleteUserModal } = useUIStore()
 
   const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS)
-  const [memberToDelete, setMemberToDelete] = useState<Member | null>(null)
-  const [deleteLoading, setDeleteLoading] = useState(false)
 
   useEffect(() => {
     async function loadMembers() {
@@ -110,20 +108,6 @@ export default function UsersPage() {
       toast.success(newStatus === 'active' ? `Enabled account for ${member.name}` : `Disabled access for ${member.name}`)
     } catch (err: any) {
       toast.error('Failed to update user status', { description: err.message })
-    }
-  }
-
-  async function handleConfirmDelete() {
-    if (!memberToDelete) return
-    setDeleteLoading(true)
-    try {
-      await mockClient.deleteMember(memberToDelete.id)
-      toast.success(`${memberToDelete.name} has been deleted.`)
-      setMemberToDelete(null)
-    } catch (err: any) {
-      toast.error('Failed to delete user', { description: err.message })
-    } finally {
-      setDeleteLoading(false)
     }
   }
 
@@ -311,7 +295,7 @@ export default function UsersPage() {
                         {canEditThisRow && !isSelf && (
                           <button
                             type="button"
-                            onClick={() => setMemberToDelete(member)}
+                            onClick={() => openDeleteUserModal(member)}
                             className="h-8 w-8 flex items-center justify-center rounded-[6px] border border-gray-200 dark:border-neutral-700 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
                             title="Delete user"
                           >
@@ -327,49 +311,6 @@ export default function UsersPage() {
           </table>
         </div>
       </div>
-
-      {/* Delete User Confirmation Modal */}
-      {memberToDelete && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
-            onClick={() => setMemberToDelete(null)}
-          />
-          <div className="relative z-10 w-full max-w-md bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-xl p-6 shadow-2xl space-y-4 animate-enter">
-            <div className="flex items-start gap-3">
-              <div className="h-10 w-10 rounded-full bg-rose-100 dark:bg-rose-950/60 flex items-center justify-center shrink-0 text-rose-600">
-                <AlertTriangle className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="text-[16px] font-bold text-gray-900 dark:text-white">
-                  Delete {memberToDelete.name}?
-                </h3>
-                <p className="text-[13px] text-gray-500 dark:text-neutral-400 mt-1">
-                  Are you sure you want to permanently delete this user ({memberToDelete.email})? They will lose all access to the workspace immediately.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-2.5 pt-2">
-              <button
-                type="button"
-                onClick={() => setMemberToDelete(null)}
-                className="h-9 px-4 rounded-lg border border-gray-200 dark:border-neutral-700 text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-800 hover:bg-gray-50 text-[13px] font-medium transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={deleteLoading}
-                onClick={handleConfirmDelete}
-                className="h-9 px-4 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[13px] font-medium transition-colors shadow-none disabled:opacity-50"
-              >
-                {deleteLoading ? 'Deleting...' : 'Delete User'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

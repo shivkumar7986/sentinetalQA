@@ -61,15 +61,6 @@ export const INITIAL_MEMBERS: Member[] = [
     assignedLead: 'Vikram Patel',
     password: 'employee',
   },
-  {
-    id: 'm6',
-    name: 'Neha Kapoor',
-    email: 'neha@testingagent.ai',
-    role: 'qa_engineer',
-    status: 'invited',
-    lastLogin: '—',
-    assignedLead: 'Riya Sharma',
-    password: 'employee',
-  },
+  
 ]
 

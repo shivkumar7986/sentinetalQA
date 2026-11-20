@@ -29,7 +29,6 @@ export default function UsersPage() {
   const { openFormDrawer } = useUIStore()
 
   const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS)
-  const [editingMember, setEditingMember] = useState<Member | null>(null)
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
 
@@ -283,7 +282,7 @@ export default function UsersPage() {
                           size="sm"
                           type="button"
                           disabled={!canEditThisRow}
-                          onClick={() => setEditingMember(member)}
+                          onClick={() => openFormDrawer('edit-user', { member })}
                           className="h-8 px-2.5 text-[12px] font-medium"
                         >
                           Edit
@@ -328,13 +327,6 @@ export default function UsersPage() {
           </table>
         </div>
       </div>
-
-      {/* Edit User Drawer */}
-      <EditUserDrawer
-        open={Boolean(editingMember)}
-        member={editingMember}
-        onClose={() => setEditingMember(null)}
-      />
 
       {/* Delete User Confirmation Modal */}
       {memberToDelete && (

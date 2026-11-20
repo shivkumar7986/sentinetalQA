@@ -1,27 +1,33 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { X, ChevronDown, Trash2, AlertTriangle } from 'lucide-react'
+import { X, ChevronDown, Trash2, AlertTriangle, ShieldCheck } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthStore, type UserRole } from '@/stores/auth.store'
+import { useUIStore } from '@/stores/ui.store'
 import { type Member } from '@/mocks/data/users.mock'
 import { mockClient } from '@/mocks/mockClient'
-import { canManageUser, canAddRole } from '@/lib/permissions'
+import { canManageUser } from '@/lib/permissions'
 
 interface EditUserDrawerProps {
-  open: boolean
-  member: Member | null
-  onClose: () => void
+  open?: boolean
+  member?: Member | null
+  onClose?: () => void
   onSuccess?: () => void
 }
 
 export function EditUserDrawer({
-  open,
-  member,
-  onClose,
-  onSuccess,
+  open: propOpen,
+  member: propMember,
+  onClose: propOnClose,
+  onSuccess: propOnSuccess,
 }: EditUserDrawerProps) {
+  const { formDrawer, formDrawerData, closeFormDrawer } = useUIStore()
   const { user } = useAuthStore()
+
+  const isOpen = propOpen !== undefined ? propOpen : formDrawer === 'edit-user'
+  const member = propMember !== undefined ? propMember : (formDrawerData?.member as Member | null)
+  const handleClose = propOnClose || closeFormDrawer
 
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
@@ -40,10 +46,10 @@ export function EditUserDrawer({
       const leads = all.filter((m) => m.role === 'qa_lead' && m.status !== 'disabled')
       setAvailableLeads(leads)
     }
-    if (open) {
+    if (isOpen) {
       loadLeads()
     }
-  }, [open])
+  }, [isOpen])
 
   // Sync state with incoming member prop
   useEffect(() => {
@@ -61,15 +67,15 @@ export function EditUserDrawer({
   // Escape key handler
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape' && open) {
-        onClose()
+      if (e.key === 'Escape' && isOpen) {
+        handleClose()
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [open, onClose])
+  }, [isOpen, handleClose])
 
-  if (!open || !member) return null
+  if (!isOpen || !member) return null
 
   const isSelf = member.id === user?.id
   const canManage = canManageUser(user?.role, member.role)
@@ -97,8 +103,8 @@ export function EditUserDrawer({
       })
 
       toast.success(`Updated ${fullName.trim()} successfully!`)
-      if (onSuccess) onSuccess()
-      onClose()
+      if (propOnSuccess) propOnSuccess()
+      handleClose()
     } catch (err: any) {
       toast.error('Failed to update user', { description: err.message || 'An error occurred' })
     } finally {
@@ -127,8 +133,8 @@ export function EditUserDrawer({
     try {
       await mockClient.deleteMember(member.id)
       toast.success(`${member.name} has been deleted.`)
-      if (onSuccess) onSuccess()
-      onClose()
+      if (propOnSuccess) propOnSuccess()
+      handleClose()
     } catch (err: any) {
       toast.error('Failed to delete user', { description: err.message || 'An error occurred' })
     } finally {
@@ -144,27 +150,27 @@ export function EditUserDrawer({
 
   return (
     <div className="fixed inset-0 z-[100] flex justify-end">
-      {/* Backdrop */}
+      {/* Blurred Backdrop covering entire screen */}
       <div
         className="fixed inset-0 bg-black/45 backdrop-blur-[7px] transition-opacity animate-fade-in"
-        onClick={onClose}
+        onClick={handleClose}
         aria-hidden="true"
       />
 
-      {/* Drawer Panel */}
+      {/* Drawer Panel - Full Viewport Height matching AddWebsiteDrawer & CreateTaskDrawer */}
       <div
         className="relative z-10 w-full max-w-[500px] h-screen bg-white dark:bg-[#12151F] border-l border-gray-200 dark:border-neutral-800 shadow-2xl flex flex-col justify-between animate-slide-in-right select-text"
         role="dialog"
         aria-modal="true"
       >
         <form onSubmit={handleSubmit} className="h-full flex flex-col justify-between">
-          {/* Header & Fields container */}
+          {/* Header & Fields container (Scrollable) */}
           <div className="px-8 pt-8 pb-4 space-y-5 overflow-y-auto flex-1">
             {/* Header */}
             <div className="flex items-start justify-between pb-1">
               <div>
                 <h2 className="text-[20px] font-bold text-gray-900 dark:text-white tracking-tight leading-snug">
-                  Edit User: {member.name}
+                  Edit user
                 </h2>
                 <p className="text-[13px] text-gray-500 dark:text-neutral-400 mt-0.5">
                   Update role permissions, squad assignment, and account status.
@@ -172,7 +178,7 @@ export function EditUserDrawer({
               </div>
               <button
                 type="button"
-                onClick={onClose}
+                onClick={handleClose}
                 className="rounded-[6px] p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 aria-label="Close"
               >
@@ -181,17 +187,19 @@ export function EditUserDrawer({
             </div>
 
             {/* Field 1: Full name */}
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 pt-1">
               <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
                 Full name
               </label>
               <input
                 type="text"
                 required
+                placeholder="e.g. Sneha Kulkarni"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 className={inputClasses}
                 disabled={!canManage}
+                autoFocus
               />
             </div>
 
@@ -203,6 +211,7 @@ export function EditUserDrawer({
               <input
                 type="email"
                 required
+                placeholder="sneha@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={inputClasses}
@@ -223,6 +232,7 @@ export function EditUserDrawer({
               <input
                 type="text"
                 required
+                placeholder="Enter password..."
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={inputClasses}
@@ -308,7 +318,7 @@ export function EditUserDrawer({
               </div>
             </div>
 
-            {/* Delete Confirmation Box if triggered */}
+            {/* Delete Confirmation Box */}
             {confirmDelete && (
               <div className="p-4 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 space-y-3 animate-enter">
                 <div className="flex items-start gap-2.5 text-rose-800 dark:text-rose-200">
@@ -340,14 +350,14 @@ export function EditUserDrawer({
             )}
           </div>
 
-          {/* Bottom Actions */}
-          <div className="px-8 py-5 flex items-center justify-between bg-white dark:bg-[#12151F] shrink-0 border-t border-gray-100 dark:border-neutral-800">
+          {/* Bottom Actions - Exactly matching AddWebsiteDrawer / CreateTaskDrawer */}
+          <div className="px-8 py-6 flex items-center justify-between bg-white dark:bg-[#12151F] shrink-0 border-t border-gray-100 dark:border-neutral-800">
             {/* Delete button (Left) */}
             {canManage && !isSelf ? (
               <button
                 type="button"
                 onClick={() => setConfirmDelete(true)}
-                className="h-10 px-3.5 rounded-lg border border-rose-200 dark:border-rose-900 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-[13px] font-medium flex items-center gap-1.5 transition-colors"
+                className="h-10 px-3.5 rounded-lg border border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-[13px] font-medium flex items-center gap-1.5 transition-colors"
               >
                 <Trash2 className="h-4 w-4" /> Delete user
               </button>
@@ -356,10 +366,10 @@ export function EditUserDrawer({
             )}
 
             {/* Cancel & Save (Right) */}
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={onClose}
+                onClick={handleClose}
                 className="h-10 px-5 rounded-lg border border-gray-200 dark:border-neutral-700 text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-[13px] font-medium transition-colors"
               >
                 Cancel

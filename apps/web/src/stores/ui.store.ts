@@ -2,10 +2,11 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 type Theme = 'light' | 'dark' | 'system'
-export type FormDrawerType = 'add-website' | 'create-task' | 'add-user' | null
+export type FormDrawerType = 'add-website' | 'create-task' | 'add-user' | 'edit-user' | null
 
 export interface FormDrawerData {
   websiteId?: string
+  member?: any
 }
 
 interface UIState {

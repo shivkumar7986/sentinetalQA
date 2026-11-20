@@ -7,6 +7,7 @@ import { CommandMenu } from './CommandMenu'
 import { AddWebsiteDrawer } from '@/components/forms/AddWebsiteDrawer'
 import { CreateTaskDrawer } from '@/components/forms/CreateTaskDrawer'
 import { AddUserDrawer } from '@/components/forms/AddUserDrawer'
+import { EditUserDrawer } from '@/components/forms/EditUserDrawer'
 import { useUIStore } from '@/stores/ui.store'
 import { cn } from '@/lib/utils'
 
@@ -43,6 +44,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <AddWebsiteDrawer />
       <CreateTaskDrawer />
       <AddUserDrawer />
+      <EditUserDrawer />
     </div>
   )
 }

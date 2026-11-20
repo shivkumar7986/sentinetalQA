@@ -154,7 +154,6 @@ export function AdminDashboard({
   const [roleOpen, setRoleOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"team" | "runs">("team");
   const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS);
-  const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -657,7 +656,7 @@ export function AdminDashboard({
                               variant="secondary"
                               size="sm"
                               type="button"
-                              onClick={() => setEditingMember(m)}
+                              onClick={() => openFormDrawer('edit-user', { member: m })}
                               className="h-7 text-[11px] px-2.5"
                             >
                               Edit
@@ -780,13 +779,6 @@ export function AdminDashboard({
           </Card>
         </div>
       </div>
-
-      {/* Edit User Drawer */}
-      <EditUserDrawer
-        open={Boolean(editingMember)}
-        member={editingMember}
-        onClose={() => setEditingMember(null)}
-      />
 
       {/* Delete User Confirmation Modal */}
       {memberToDelete && (

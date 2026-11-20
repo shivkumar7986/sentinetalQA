@@ -11,6 +11,8 @@ import {
   Share2,
   Download,
   ArrowLeftRight,
+  ArrowUpRight,
+  ExternalLink,
   Check,
   X,
   Clock,
@@ -18,6 +20,7 @@ import {
 } from 'lucide-react'
 import { mockClient } from '@/mocks/mockClient'
 import type { Run } from '@/mocks/data/runs.mock'
+import type { Task } from '@/mocks/data/tasks.mock'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -44,6 +47,7 @@ interface CaseOutcome {
 export default function ReportDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const [run, setRun] = useState<Run | null>(null)
+  const [task, setTask] = useState<Task | null>(null)
   const [loading, setLoading] = useState(true)
   const [shareOpen, setShareOpen] = useState(false)
   const [shareLink, setShareLink] = useState('')
@@ -74,6 +78,12 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
     setLoading(true)
     const data = await mockClient.getRunById(params.id)
     setRun(data)
+    if (data?.taskId) {
+      const taskData = await mockClient.getTaskById(data.taskId)
+      setTask(taskData)
+    } else {
+      setTask(null)
+    }
     setLoading(false)
   }
 
@@ -154,20 +164,38 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
     )
   }
 
-  const isFailed = run?.status === 'failed' || params.id === 'run-940'
-  const isPassed = run?.status === 'passed' && params.id !== 'run-940'
+  const isFailed = run ? run.status === 'failed' : params.id === 'run-940'
+  const isPassed = run ? run.status === 'passed' : params.id !== 'run-940'
   const currentRunId = run?.id || params.id || 'run-940'
+  const targetTaskId = run?.taskId || task?.id || 'tsk-201'
+  const targetTaskTitle = run?.taskTitle || task?.title || 'Dispatcher role redirect & Tracking verification'
+  const targetWebsiteName = run?.websiteName || task?.websiteName || 'Logistics Portal'
+  const targetPlanId = run?.planId || task?.currentPlanId || 'plan-1'
+  const passRateDisplay = run?.passRate !== undefined ? `${run.passRate}%` : '71.4%'
+  const totalCases = run?.totalCases || 5
+  const passedCases = run?.passedCases || 3
+  const durationDisplay = run?.durationMs ? `${(run.durationMs / 1000).toFixed(2)}s` : '19.30s'
 
   return (
     <div className="space-y-5">
-      {/* Top Banner Row: Reports / run-id + Immutable Report badge + Preview sample dropdown */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-gray-100">
-        <div className="flex items-center gap-2.5">
+      {/* Top Banner Row: Reports / run-id + Immutable Report badge + Related Task + Preview sample dropdown */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-gray-100">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <span className="text-[13px] text-gray-500 font-medium">
             Reports / <span className="text-gray-900 font-semibold">{currentRunId}</span>
           </span>
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono text-amber-700 bg-amber-50 border border-amber-200">
             <Lock className="h-3 w-3" /> Immutable Report
+          </span>
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
+            <span className="text-indigo-400 font-normal">Related Task:</span>
+            <Link
+              href={`/tasks/${targetTaskId}`}
+              className="font-mono font-semibold hover:underline flex items-center gap-0.5"
+            >
+              {targetTaskId}
+              <ArrowUpRight className="h-3 w-3" />
+            </Link>
           </span>
         </div>
 
@@ -178,11 +206,11 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
             onChange={(e) => handleSelectSample(e.target.value)}
             className="h-8 px-2.5 text-[12px] font-mono font-medium bg-white border border-gray-200 rounded-md text-gray-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
           >
-            <option value="run-940">run-940 (Failed)</option>
-            <option value="run-941">run-941 (Passed)</option>
-            <option value="run-939">run-939 (Passed)</option>
-            <option value="run-937">run-937 (Passed)</option>
-            <option value="run-936">run-936 (Error)</option>
+            <option value="run-940">run-940 (Failed - tsk-201)</option>
+            <option value="run-941">run-941 (Passed - tsk-200)</option>
+            <option value="run-939">run-939 (Passed - tsk-199)</option>
+            <option value="run-937">run-937 (Passed - tsk-201)</option>
+            <option value="run-936">run-936 (Error - tsk-198)</option>
           </select>
         </div>
       </div>
@@ -192,7 +220,7 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
         <div>
           <div className="flex items-center gap-2.5 flex-wrap">
             <h1 className="text-[20px] font-bold text-gray-900 tracking-tight">
-              Dispatcher role redirect & Tracking verification
+              {targetTaskTitle}
             </h1>
             {isFailed ? (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-[#FEE2E2] text-[#DC2626] border border-rose-200">
@@ -203,16 +231,56 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
                 ✓ Passed
               </span>
             )}
-            <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-[#E0F2FE] text-[#0284C7]">
-              STAGING
+            <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-[#E0F2FE] text-[#0284C7] uppercase">
+              {run?.environment || 'STAGING'}
             </span>
           </div>
-          <p className="text-[12px] text-gray-400 font-mono mt-1">
-            {currentRunId} · Logistics Portal · Plan v2 · http-executor · 2026-11-19 14:10:04 IST
-          </p>
+
+          {/* Connected Context: Task, Website, Plan, Trigger Meta */}
+          <div className="flex items-center gap-2 mt-2 flex-wrap text-[12px]">
+            <span className="text-gray-500 font-medium">Task:</span>
+            <Link
+              href={`/tasks/${targetTaskId}`}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-50 hover:bg-indigo-100 text-[#4F46E5] font-medium border border-indigo-200/80 transition-colors shadow-2xs"
+            >
+              <span className="font-mono font-semibold">{targetTaskId}</span>
+              <span className="text-indigo-300">·</span>
+              <span className="font-medium text-gray-800">{targetTaskTitle}</span>
+              <ArrowUpRight className="h-3.5 w-3.5 text-[#4F46E5] shrink-0" />
+            </Link>
+
+            <span className="text-gray-300">|</span>
+            <span className="text-gray-500 font-medium">Website:</span>
+            <span className="text-gray-800 font-medium">{targetWebsiteName}</span>
+
+            {targetPlanId && (
+              <>
+                <span className="text-gray-300">|</span>
+                <span className="text-gray-500 font-medium">Plan:</span>
+                <Link
+                  href={`/plans/${targetPlanId}`}
+                  className="font-mono text-gray-700 hover:text-indigo-600 hover:underline flex items-center gap-0.5"
+                >
+                  {targetPlanId}
+                  <ArrowUpRight className="h-3 w-3 text-gray-400" />
+                </Link>
+              </>
+            )}
+
+            <span className="text-gray-300">|</span>
+            <span className="text-gray-400 font-mono text-[11px]">
+              Run: {currentRunId} · {run?.executor || 'http-executor'} · {run?.dateLabel || 'Today'}
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
+          <Link
+            href={`/tasks/${targetTaskId}`}
+            className="px-3 py-1.5 text-[12px] font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5"
+          >
+            <ExternalLink className="h-3.5 w-3.5 text-gray-500" /> View Task
+          </Link>
           <Link
             href="/reports/compare"
             className="px-3.5 py-1.5 text-[12px] font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5"
@@ -248,7 +316,7 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
             PASS RATE
           </div>
           <div className="text-[22px] font-bold text-[#DC2626] mt-0.5">
-            71.4%
+            {passRateDisplay}
           </div>
           <div className="text-[11px] text-red-500 font-mono mt-0.5">
             -28.6% vs run-937
@@ -261,7 +329,7 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
             CASES
           </div>
           <div className="text-[20px] font-bold text-gray-900 mt-0.5">
-            3 / 5 Passed
+            {passedCases} / {totalCases} Passed
           </div>
           <div className="text-[11px] text-gray-400 mt-0.5">
             Atomic verifications
@@ -287,7 +355,7 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
             DURATION
           </div>
           <div className="text-[20px] font-bold text-gray-900 font-mono mt-0.5">
-            19.30s
+            {durationDisplay}
           </div>
           <div className="text-[11px] text-gray-400 mt-0.5">
             End-to-end execution

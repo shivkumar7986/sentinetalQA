@@ -67,7 +67,9 @@ export default function DashboardPage() {
   })
 
   // Dynamic Metrics
-  const totalWebsites = websites.length
+  const activeWebsites = websites.filter((w) => w.status !== 'archived')
+  const archivedWebsitesCount = websites.length - activeWebsites.length
+  const totalWebsites = activeWebsites.length
   const activeTasks = tasks.filter((t) => t.status !== 'archived').length
   const totalRuns = runs.length
   const passedRunsCount = runs.filter((r) => r.status === 'passed').length
@@ -232,10 +234,14 @@ export default function DashboardPage() {
           <span className="text-[12px] font-medium text-[var(--text-muted)]">Registered websites</span>
           <div className="flex items-baseline justify-between mt-2">
             <span className="mono-data text-[28px] font-bold text-[var(--text)] leading-none">
-              {loading ? '—' : totalWebsites}
+              {loading ? '—' : activeWebsites.length}
             </span>
             <span className="text-[12px] text-[var(--text-muted)]">
-              {totalWebsites === 1 ? '1 active app' : `${totalWebsites} active apps`}
+              {archivedWebsitesCount > 0
+                ? `${activeWebsites.length} active (${archivedWebsitesCount} archived)`
+                : activeWebsites.length === 1
+                  ? '1 active app'
+                  : `${activeWebsites.length} active apps`}
             </span>
           </div>
         </Card>
@@ -442,7 +448,7 @@ export default function DashboardPage() {
                         </td>
                         <td className="py-3 px-4">
                           <Link
-                            href={`/runs/${run.id}`}
+                            href={`/reports/${run.id}`}
                             className="font-medium text-[var(--text)] hover:text-[var(--primary)] transition-colors block leading-snug"
                           >
                             {run.taskTitle}

@@ -278,10 +278,18 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                           <span
                             className={cn(
                               'text-[12px] font-medium flex items-center gap-1',
-                              isApproved ? 'text-[var(--success)]' : 'text-amber-500'
+                              isApproved
+                                ? 'text-[var(--success)]'
+                                : p.status === 'rejected'
+                                ? 'text-[var(--danger)]'
+                                : 'text-amber-500'
                             )}
                           >
-                            {isApproved ? '✓ Approved' : 'In review'}
+                            {isApproved
+                              ? '✓ Approved'
+                              : p.status === 'rejected'
+                              ? '✕ Rejected'
+                              : 'In review'}
                           </span>
                           <span className="text-[12px] text-[var(--text-muted)]">
                             {p.cases?.length || 0} cases · {totalSteps} steps
@@ -429,6 +437,8 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                   <p className="text-[13px] font-medium text-[var(--text)]">
                     {p.status === 'approved'
                       ? `Approved Plan v${p.version}`
+                      : p.status === 'rejected'
+                      ? `Rejected Plan v${p.version}`
                       : `Generated Plan v${p.version}`}
                   </p>
                   <p className="text-[11px] text-[var(--text-muted)] mt-0.5">

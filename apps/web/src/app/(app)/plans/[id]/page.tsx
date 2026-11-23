@@ -377,13 +377,28 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
     }
   }
 
-  function handleReject() {
-    toast.error(`Plan v${plan?.version || 1} rejected`)
-    const destTaskId = plan?.taskId || task?.id
-    if (destTaskId) {
-      router.push(`/tasks/${destTaskId}`)
-    } else {
-      router.push('/tasks')
+  async function handleReject() {
+    if (!plan) return
+    if (isApproved) {
+      toast.info('This plan is already approved and locked.')
+      return
+    }
+    if (isRejected) {
+      toast.info('This plan is already rejected.')
+      return
+    }
+    if (!canApprove) {
+      toast.error('Permission Denied', {
+        description: `Your active role (${meta.label}) cannot reject plans. Switch to QA Lead or Admin in the topbar.`,
+      })
+      return
+    }
+    try {
+      await mockClient.rejectPlan(plan.id)
+      setPlan((prev) => (prev ? { ...prev, status: 'rejected' } : null))
+      toast.success(`Plan v${plan.version || 1} has been rejected.`)
+    } catch {
+      toast.error('Failed to reject plan')
     }
   }
 
@@ -441,6 +456,7 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
   }
 
   const isApproved = plan?.status === 'approved'
+  const isRejected = plan?.status === 'rejected'
 
   const validationTypeCounts = cases.reduce((acc, c) => {
     c.steps?.forEach((s) => {
@@ -464,6 +480,10 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
             {isApproved ? (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 ✓ Approved
+              </span>
+            ) : isRejected ? (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                ✕ Rejected
               </span>
             ) : (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
@@ -490,29 +510,36 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
           >
             ✦ Regenerate with feedback
           </Button>
-          {!isApproved && (
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={handleReject}
-            >
-              ✕ Reject
-            </Button>
-          )}
+
           {isApproved ? (
             <span className="px-4 py-1.5 text-[13px] font-medium rounded-lg flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 select-none shadow-xs">
               ✓ Plan Approved & Locked
             </span>
+          ) : isRejected ? (
+            <span className="px-4 py-1.5 text-[13px] font-medium rounded-lg flex items-center gap-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 select-none shadow-xs">
+              ✕ Plan Rejected
+            </span>
           ) : (
-            <Button
-              variant="primary"
-              size="sm"
-              disabled={!canApprove}
-              onClick={handleApprove}
-              title={!canApprove ? 'Plan approval requires QA Lead or Admin role' : undefined}
-            >
-              ✓ Approve & Finalize {!canApprove && '(Lead/Admin only)'}
-            </Button>
+            <>
+              <Button
+                variant="danger"
+                size="sm"
+                disabled={!canApprove}
+                onClick={handleReject}
+                title={!canApprove ? 'Plan rejection requires QA Lead or Admin role' : undefined}
+              >
+                ✕ Reject {!canApprove && '(Lead/Admin only)'}
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                disabled={!canApprove}
+                onClick={handleApprove}
+                title={!canApprove ? 'Plan approval requires QA Lead or Admin role' : undefined}
+              >
+                ✓ Approve & Finalize {!canApprove && '(Lead/Admin only)'}
+              </Button>
+            </>
           )}
         </div>
       </div>

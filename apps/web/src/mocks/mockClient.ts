@@ -333,8 +333,23 @@ export const mockClient = {
 
   approvePlan: async (planId: string): Promise<TestPlan> => {
     const allPlans = loadState(STORAGE_KEYS.plans, INITIAL_PLANS)
-    const plan = allPlans[planId]
-    if (!plan) throw new Error('Plan not found')
+    let plan = allPlans[planId]
+    if (!plan) {
+      const rawTasks = loadState<Task[]>(STORAGE_KEYS.tasks, INITIAL_TASKS)
+      const foundTask = rawTasks.find((t) => t.currentPlanId === planId)
+      plan = {
+        id: planId,
+        taskId: foundTask?.id || 't-1',
+        version: 1,
+        status: 'approved',
+        generatedBy: 'ai',
+        summary: foundTask?.title || 'Generated Plan',
+        createdAt: new Date().toISOString(),
+        engine: 'ollama',
+        model: 'ollama/qwen2.5:14b',
+        cases: [],
+      }
+    }
     plan.status = 'approved'
     plan.approvedAt = new Date().toISOString()
     plan.approvedById = 'user-current'
@@ -342,7 +357,9 @@ export const mockClient = {
     saveState(STORAGE_KEYS.plans, allPlans)
 
     // Update task status
-    await mockClient.updateTask(plan.taskId, { status: 'approved' })
+    if (plan.taskId) {
+      await mockClient.updateTask(plan.taskId, { status: 'approved' })
+    }
 
     const actor = getCurrentActor()
     mockClient.createAuditLog({
@@ -352,6 +369,53 @@ export const mockClient = {
       entity: `${plan.taskId} (v${plan.version})`,
       diffPreview: `status: "in_review" → "approved"\napprovedBy: "${actor.name}"\nplanId: "${plan.id}"`,
     })
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('testing_agent_plans_changed'))
+      window.dispatchEvent(new CustomEvent('testing_agent_tasks_changed'))
+    }
+
+    return plan
+  },
+
+  rejectPlan: async (planId: string): Promise<TestPlan> => {
+    const allPlans = loadState(STORAGE_KEYS.plans, INITIAL_PLANS)
+    let plan = allPlans[planId]
+    if (!plan) {
+      const rawTasks = loadState<Task[]>(STORAGE_KEYS.tasks, INITIAL_TASKS)
+      const foundTask = rawTasks.find((t) => t.currentPlanId === planId)
+      plan = {
+        id: planId,
+        taskId: foundTask?.id || 't-1',
+        version: 1,
+        status: 'rejected',
+        generatedBy: 'ai',
+        summary: foundTask?.title || 'Generated Plan',
+        createdAt: new Date().toISOString(),
+        engine: 'ollama',
+        model: 'ollama/qwen2.5:14b',
+        cases: [],
+      }
+    }
+    plan.status = 'rejected'
+    plan.rejectedAt = new Date().toISOString()
+    plan.rejectedById = 'user-current'
+    allPlans[planId] = plan
+    saveState(STORAGE_KEYS.plans, allPlans)
+
+    const actor = getCurrentActor()
+    mockClient.createAuditLog({
+      actor: actor.name,
+      actorRole: actor.role,
+      action: 'plan.rejected',
+      entity: `${plan.taskId} (v${plan.version})`,
+      diffPreview: `status: "in_review" → "rejected"\nrejectedBy: "${actor.name}"\nplanId: "${plan.id}"`,
+    })
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('testing_agent_plans_changed'))
+      window.dispatchEvent(new CustomEvent('testing_agent_tasks_changed'))
+    }
 
     return plan
   },

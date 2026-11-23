@@ -40,6 +40,8 @@ export interface TestPlan {
   feedbackNote?: string
   approvedById?: string
   approvedAt?: string
+  rejectedById?: string
+  rejectedAt?: string
   createdAt: string
   engine: 'ollama' | 'gemini'
   model: string

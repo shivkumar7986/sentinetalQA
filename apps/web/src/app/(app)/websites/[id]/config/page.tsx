@@ -220,7 +220,7 @@ export default function WebsiteConfigPage({
   const [editingRule, setEditingRule] = useState<BusinessRule | null>(null);
   const [ruleForm, setRuleForm] = useState<{
     text: string;
-    priority: "P1" | "P2";
+    priority: "P1" | "P2" | "P3";
     tag: string;
   }>({
     text: "",
@@ -449,7 +449,11 @@ export default function WebsiteConfigPage({
     setRuleForm({
       text: rule.text,
       priority:
-        rule.priority === "P1" || rule.priority === "high" ? "P1" : "P2",
+        rule.priority === "P1" || rule.priority === "high"
+          ? "P1"
+          : rule.priority === "P3" || rule.priority === "low"
+            ? "P3"
+            : "P2",
       tag: rule.tag || "Custom",
     });
     setRuleModalOpen(true);
@@ -1159,6 +1163,10 @@ export default function WebsiteConfigPage({
                     <span className="mono-data text-[11px] font-bold px-2 py-0.5 rounded-[4px] bg-[#FEE2E2] text-[#DC2626] dark:bg-rose-950/40 dark:text-rose-400 shrink-0">
                       P1
                     </span>
+                  ) : rule.priority === "P3" || rule.priority === "low" ? (
+                    <span className="mono-data text-[11px] font-bold px-2 py-0.5 rounded-[4px] bg-[#E0E7FF] text-[#4F46E5] dark:bg-indigo-950/40 dark:text-indigo-400 shrink-0">
+                      P3
+                    </span>
                   ) : (
                     <span className="mono-data text-[11px] font-bold px-2 py-0.5 rounded-[4px] bg-[#FEF3C7] text-[#D97706] dark:bg-amber-950/40 dark:text-amber-400 shrink-0">
                       P2
@@ -1756,13 +1764,14 @@ export default function WebsiteConfigPage({
               onChange={(e) =>
                 setRuleForm((p) => ({
                   ...p,
-                  priority: e.target.value as "P1" | "P2",
+                  priority: e.target.value as "P1" | "P2" | "P3",
                 }))
               }
               className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all cursor-pointer"
             >
               <option value="P1">P1 (Critical Assertion)</option>
               <option value="P2">P2 (Standard Invariant)</option>
+              <option value="P3">P3 (Minor / Informational)</option>
             </select>
           </div>
 

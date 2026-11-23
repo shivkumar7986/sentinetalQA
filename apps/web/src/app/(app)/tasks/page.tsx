@@ -112,7 +112,7 @@ function TasksPageContent() {
           className={`gap-1.5 font-medium shrink-0 self-start sm:self-auto rounded-[8px] px-4 py-2 text-[13px] shadow-none ${
             canCreate
               ? 'bg-[#4F46E5] hover:bg-[#4338CA] text-white cursor-pointer'
-              : 'bg-gray-200 dark:bg-neutral-800 text-gray-400 dark:text-neutral-500 cursor-not-allowed opacity-80'
+              : 'bg-[var(--surface-elevated)] border border-[var(--border)] text-[var(--text-muted)] cursor-not-allowed opacity-60'
           }`}
           title={!canCreate ? 'Viewer role is read-only' : undefined}
         >

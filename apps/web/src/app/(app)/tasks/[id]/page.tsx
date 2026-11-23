@@ -205,37 +205,37 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
           {/* Card 1: Natural-Language Prompt */}
           <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-none">
             <div className="flex items-center justify-between">
-              <h2 className="text-[14px] font-semibold text-gray-900 dark:text-white">
+              <h2 className="text-[14px] font-semibold text-[var(--text)]">
                 Natural-Language Prompt
               </h2>
               <div className="flex items-center gap-1.5">
-                <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-300">
+                <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-[var(--surface-elevated)] border border-[var(--border)] text-[var(--text-muted)]">
                   {task.websiteName || 'Web App'}
                 </span>
-                <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-gray-100 dark:bg-neutral-800 text-gray-600 dark:text-gray-300">
+                <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-[var(--surface-elevated)] border border-[var(--border)] text-[var(--text-muted)]">
                   {roleName}
                 </span>
               </div>
             </div>
 
-            <p className="text-[13px] text-gray-700 dark:text-neutral-300 leading-relaxed mt-3 mb-4">
+            <p className="text-[13px] text-[var(--text)] leading-relaxed mt-3 mb-4">
               {promptText}
             </p>
 
-            <div className="border-t border-gray-100 dark:border-neutral-800 pt-3 flex flex-wrap items-center gap-y-2 gap-x-6 text-[12px] text-gray-500 dark:text-neutral-400 font-mono">
+            <div className="border-t border-[var(--border)] pt-3 flex flex-wrap items-center gap-y-2 gap-x-6 text-[12px] text-[var(--text-muted)] font-mono">
               <div>
                 <span>Target Website: </span>
-                <span className="text-gray-900 dark:text-white font-semibold">
+                <span className="text-[var(--text)] font-semibold">
                   {task.websiteName || 'Logistics Portal'}
                 </span>
               </div>
               <div>
                 <span>Role: </span>
-                <span className="text-gray-900 dark:text-white font-semibold">{roleName}</span>
+                <span className="text-[var(--text)] font-semibold">{roleName}</span>
               </div>
               <div>
                 <span>Engine: </span>
-                <span className="text-gray-900 dark:text-white font-semibold">{engineText}</span>
+                <span className="text-[var(--text)] font-semibold">{engineText}</span>
               </div>
             </div>
           </div>
@@ -244,10 +244,10 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
           <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-none">
             <div className="flex items-center justify-between mb-3.5">
               <div className="flex items-center gap-2">
-                <h2 className="text-[14px] font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-[14px] font-semibold text-[var(--text)]">
                   Plan Versions
                 </h2>
-                <span className="text-[12px] text-gray-400 font-mono">({plans.length})</span>
+                <span className="text-[12px] text-[var(--text-muted)] font-mono">({plans.length})</span>
               </div>
               <Button
                 variant="secondary"
@@ -278,7 +278,7 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                           <span
                             className={cn(
                               'text-[12px] font-medium flex items-center gap-1',
-                              isApproved ? 'text-[#16A34A]' : 'text-amber-600'
+                              isApproved ? 'text-[var(--success)]' : 'text-amber-500'
                             )}
                           >
                             {isApproved ? '✓ Approved' : 'In review'}
@@ -297,7 +297,7 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                           </Link>
                         </Button>
                       </div>
-                      <div className="text-[11px] text-gray-400 dark:text-neutral-500 font-mono mt-1.5">
+                      <div className="text-[11px] text-[var(--text-muted)] font-mono mt-1.5">
                         Engine: {p.engine} · {p.tokensUsed || 1250} tok
                       </div>
                     </div>
@@ -305,19 +305,21 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                 })}
               </div>
             ) : (
-              <div className="text-center py-8 border border-dashed border-gray-200 dark:border-neutral-800 rounded-lg">
-                <p className="text-[13px] text-gray-500 dark:text-neutral-400 font-medium">
+              <div className="text-center py-8 border border-dashed border-[var(--border)] rounded-lg">
+                <p className="text-[13px] text-[var(--text-muted)] font-medium">
                   No test plans generated yet for this task.
                 </p>
-                <p className="text-[12px] text-gray-400 dark:text-neutral-500 mt-1">
+                <p className="text-[12px] text-[var(--text-muted)] mt-1">
                   Click below to compile this natural-language prompt into executable test cases.
                 </p>
-                <button
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => openFormDrawer('generate-plan', { task })}
-                  className="mt-3.5 px-3.5 py-1.5 text-[12px] font-medium text-white bg-[#4F46E5] hover:bg-[#4338CA] rounded-lg transition-colors inline-flex items-center gap-1.5 shadow-sm"
+                  className="mt-3.5 gap-1.5"
                 >
                   <Sparkles className="h-3.5 w-3.5" /> Generate First Plan Version
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -325,10 +327,10 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
           {/* Card 3: Run History */}
           <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-none">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[14px] font-semibold text-gray-900 dark:text-white">
+              <h2 className="text-[14px] font-semibold text-[var(--text)]">
                 Run History
               </h2>
-              <span className="text-[12px] text-gray-400 font-mono">{runs.length} runs</span>
+              <span className="text-[12px] text-[var(--text-muted)] font-mono">{runs.length} runs</span>
             </div>
 
             {runs.length > 0 ? (
@@ -354,10 +356,10 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                             className={cn(
                               'inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium',
                               r.status === 'passed'
-                                ? 'bg-[#DCFCE7] text-[#16A34A]'
+                                ? 'bg-[var(--success-tint)] text-[var(--success)]'
                                 : r.status === 'running'
-                                ? 'bg-sky-100 text-sky-700'
-                                : 'bg-rose-100 text-rose-700'
+                                ? 'bg-[var(--info-tint)] text-[var(--info)]'
+                                : 'bg-[var(--danger-tint)] text-[var(--danger)]'
                             )}
                           >
                             {r.status === 'passed'
@@ -388,11 +390,11 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                 </table>
               </div>
             ) : (
-              <div className="text-center py-8 border border-dashed border-gray-200 dark:border-neutral-800 rounded-lg">
-                <p className="text-[13px] text-gray-500 dark:text-neutral-400 font-medium">
+              <div className="text-center py-8 border border-dashed border-[var(--border)] rounded-lg">
+                <p className="text-[13px] text-[var(--text-muted)] font-medium">
                   No test runs executed yet.
                 </p>
-                <p className="text-[12px] text-gray-400 dark:text-neutral-500 mt-1">
+                <p className="text-[12px] text-[var(--text-muted)] mt-1">
                   Once a plan is generated and run, execution metrics and step logs will appear
                   here.
                 </p>
@@ -404,18 +406,18 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
         {/* Right Column (1 col): Dynamic Activity */}
         <div className="lg:col-span-1 space-y-5">
           <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-none">
-            <h2 className="text-[14px] font-semibold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-[14px] font-semibold text-[var(--text)] mb-4">
               Activity
             </h2>
 
-            <div className="relative pl-6 space-y-5 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[1px] before:bg-gray-200 dark:before:bg-neutral-800">
+            <div className="relative pl-6 space-y-5 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[1px] before:bg-[var(--border)]">
               {runs.map((r) => (
                 <div key={r.id} className="relative">
-                  <span className="absolute -left-6 top-1.5 h-2 w-2 rounded-full bg-[#7C3AED] ring-4 ring-white dark:ring-[#12151F]" />
-                  <p className="text-[13px] font-medium text-gray-900 dark:text-white">
+                  <span className="absolute -left-6 top-1.5 h-2 w-2 rounded-full bg-[#7C3AED] ring-4 ring-[var(--surface)]" />
+                  <p className="text-[13px] font-medium text-[var(--text)]">
                     Run {r.id} {r.status} ({r.passRate || 100}% passed)
                   </p>
-                  <p className="text-[11px] text-gray-400 dark:text-neutral-500 mt-0.5">
+                  <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
                     Runner Worker
                   </p>
                 </div>
@@ -423,24 +425,24 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
 
               {plans.map((p) => (
                 <div key={p.id} className="relative">
-                  <span className="absolute -left-6 top-1.5 h-2 w-2 rounded-full bg-indigo-500 ring-4 ring-white dark:ring-[#12151F]" />
-                  <p className="text-[13px] font-medium text-gray-900 dark:text-white">
+                  <span className="absolute -left-6 top-1.5 h-2 w-2 rounded-full bg-indigo-500 ring-4 ring-[var(--surface)]" />
+                  <p className="text-[13px] font-medium text-[var(--text)]">
                     {p.status === 'approved'
                       ? `Approved Plan v${p.version}`
                       : `Generated Plan v${p.version}`}
                   </p>
-                  <p className="text-[11px] text-gray-400 dark:text-neutral-500 mt-0.5">
+                  <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
                     AI Compiler
                   </p>
                 </div>
               ))}
 
               <div className="relative">
-                <span className="absolute -left-6 top-1.5 h-2 w-2 rounded-full bg-emerald-500 ring-4 ring-white dark:ring-[#12151F]" />
-                <p className="text-[13px] font-medium text-gray-900 dark:text-white">
+                <span className="absolute -left-6 top-1.5 h-2 w-2 rounded-full bg-emerald-500 ring-4 ring-[var(--surface)]" />
+                <p className="text-[13px] font-medium text-[var(--text)]">
                   Created task {displayId}
                 </p>
-                <p className="text-[11px] text-gray-400 dark:text-neutral-500 mt-0.5">
+                <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
                   Task Creator · {task.updatedAtLabel || 'Recently'}
                 </p>
               </div>

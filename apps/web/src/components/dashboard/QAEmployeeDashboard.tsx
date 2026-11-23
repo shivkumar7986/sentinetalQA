@@ -93,7 +93,7 @@ export function QAEmployeeDashboard({
       title: "Invoice GST rounding boundary check",
       statusBadge: "✎ Draft",
       badgeClass:
-        "bg-gray-100 text-gray-600 dark:bg-neutral-800 dark:text-neutral-400",
+        "bg-[var(--surface-elevated)] border border-[var(--border)] text-[var(--text-muted)]",
       website: "Billing Admin",
       environment: "qa" as EnvValue,
       planVersion: "Plan —",
@@ -434,14 +434,14 @@ export function QAEmployeeDashboard({
                 {/* Passed */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-[12px]">
-                    <span className="text-gray-600 dark:text-gray-300">
+                    <span className="text-[var(--text-muted)]">
                       Passed
                     </span>
-                    <span className="mono-data font-semibold text-gray-900 dark:text-white">
+                    <span className="mono-data font-semibold text-[var(--text)]">
                       16 (84.2%)
                     </span>
                   </div>
-                  <div className="h-1.5 w-full bg-gray-100 dark:bg-neutral-800 rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-[var(--track-bg)] rounded-full overflow-hidden">
                     <div
                       className="h-full bg-emerald-500 rounded-full"
                       style={{ width: "84.2%" }}
@@ -452,14 +452,14 @@ export function QAEmployeeDashboard({
                 {/* Failed */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-[12px]">
-                    <span className="text-gray-600 dark:text-gray-300">
+                    <span className="text-[var(--text-muted)]">
                       Failed
                     </span>
-                    <span className="mono-data font-semibold text-gray-900 dark:text-white">
+                    <span className="mono-data font-semibold text-[var(--text)]">
                       2 (10.5%)
                     </span>
                   </div>
-                  <div className="h-1.5 w-full bg-gray-100 dark:bg-neutral-800 rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-[var(--track-bg)] rounded-full overflow-hidden">
                     <div
                       className="h-full bg-rose-500 rounded-full"
                       style={{ width: "10.5%" }}
@@ -470,14 +470,14 @@ export function QAEmployeeDashboard({
                 {/* Error / Skipped */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-[12px]">
-                    <span className="text-gray-600 dark:text-gray-300">
+                    <span className="text-[var(--text-muted)]">
                       Error / Skipped
                     </span>
-                    <span className="mono-data font-semibold text-gray-900 dark:text-white">
+                    <span className="mono-data font-semibold text-[var(--text)]">
                       1 (5.3%)
                     </span>
                   </div>
-                  <div className="h-1.5 w-full bg-gray-100 dark:bg-neutral-800 rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-[var(--track-bg)] rounded-full overflow-hidden">
                     <div
                       className="h-full bg-amber-500 rounded-full"
                       style={{ width: "5.3%" }}
@@ -509,7 +509,7 @@ export function QAEmployeeDashboard({
         {/* Left: My Recent Runs */}
         <div className="lg:col-span-8">
           <Card className="p-0 overflow-hidden">
-            <div className="p-4 border-b border-gray-100 dark:border-neutral-800 flex items-center justify-between">
+            <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
               <h2 className="text-[14px] font-bold text-gray-900 dark:text-white">
                 My Recent Runs
               </h2>

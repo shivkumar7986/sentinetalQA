@@ -150,9 +150,9 @@ export default function WebsiteDetailPage({ params }: { params: { id: string } }
               {Math.round((checklist.filter((c) => c.complete).length / checklist.length) * 100)}%
             </span>
           </div>
-          <div className="w-full h-1.5 bg-gray-100 dark:bg-neutral-800 rounded-full overflow-hidden">
+          <div className="w-full h-1.5 bg-[var(--track-bg)] rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#4F46E5] transition-all duration-300 rounded-full"
+              className="h-full bg-[var(--primary)] transition-all duration-300 rounded-full"
               style={{
                 width: `${(checklist.filter((c) => c.complete).length / checklist.length) * 100}%`,
               }}
@@ -202,8 +202,8 @@ export default function WebsiteDetailPage({ params }: { params: { id: string } }
               <span className={cn(
                 'text-[10px] font-mono font-medium px-1.5 py-0.5 rounded shrink-0 ml-1.5',
                 item.complete
-                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400'
-                  : 'bg-gray-100 dark:bg-neutral-800 text-gray-500'
+                  ? 'bg-[var(--success-tint)] text-[var(--success)]'
+                  : 'bg-[var(--surface-elevated)] border border-[var(--border)] text-[var(--text-muted)]'
               )}>
                 {item.detail}
               </span>

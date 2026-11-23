@@ -236,7 +236,7 @@ export default function LoginPage() {
                   <div className="flex items-start justify-between w-full">
                     <div className="flex items-center gap-2">
                       <div
-                        className={`h-7 w-7 rounded-md flex items-center justify-center shrink-0 bg-white dark:bg-neutral-800 shadow-sm ${card.text}`}
+                        className={`h-7 w-7 rounded-md flex items-center justify-center shrink-0 bg-[var(--surface)] border border-[var(--border)] shadow-sm ${card.text}`}
                       >
                         <Icon className="h-4 w-4" />
                       </div>

@@ -416,7 +416,7 @@ export function QALeadDashboard({
                         {item.statusText}
                       </span>
                     </div>
-                    <div className="h-1.5 w-full bg-gray-100 dark:bg-neutral-800 rounded-full overflow-hidden">
+                    <div className="h-1.5 w-full bg-[var(--track-bg)] rounded-full overflow-hidden">
                       <div
                         className={cn('h-full rounded-full transition-all duration-300', item.color)}
                         style={{ width: `${item.percent}%` }}
@@ -446,7 +446,7 @@ export function QALeadDashboard({
         {/* Left: Recent Team Runs */}
         <div className="lg:col-span-8">
           <Card className="p-0 overflow-hidden">
-            <div className="p-4 border-b border-gray-100 dark:border-neutral-800 flex items-center justify-between">
+            <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
               <h2 className="text-[14px] font-bold text-gray-900 dark:text-white">
                 Recent Team Runs
               </h2>
@@ -544,7 +544,7 @@ export function QALeadDashboard({
             </div>
 
             {/* Bottom Timeline Labels */}
-            <div className="flex justify-between items-center text-[11px] mono-data text-gray-400 dark:text-neutral-500 pt-2 border-t border-gray-100 dark:border-neutral-800">
+            <div className="flex justify-between items-center text-[11px] mono-data text-[var(--text-muted)] pt-2 border-t border-[var(--border)]">
               <span>14d ago</span>
               <span>Today</span>
             </div>

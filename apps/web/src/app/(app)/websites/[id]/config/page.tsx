@@ -660,7 +660,7 @@ export default function WebsiteConfigPage({
             variant="secondary"
             size="md"
             asChild
-            className="h-9 px-3.5 text-[13px] font-medium border border-[var(--border)] bg-[var(--surface)] hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-lg transition-colors"
+            className="h-9 px-3.5 text-[13px] font-medium border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--hover-subtle)] hover:border-[var(--border-hover)] text-[var(--text)] rounded-lg transition-colors"
           >
             <Link href={`/websites/${params.id}`}>← Overview</Link>
           </Button>
@@ -716,7 +716,7 @@ export default function WebsiteConfigPage({
             >
               <span>{t.label}</span>
               {t.count !== null && (
-                <span className="text-[11px] font-medium text-gray-500 dark:text-neutral-400 bg-gray-100 dark:bg-neutral-800 px-1.5 py-0.2 rounded-full">
+                <span className="text-[11px] font-medium text-[var(--text-muted)] bg-[var(--hover-subtle)] border border-[var(--border)] px-1.5 py-0.2 rounded-full">
                   {t.count}
                 </span>
               )}
@@ -770,22 +770,22 @@ export default function WebsiteConfigPage({
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-neutral-800/80">
+              <tbody className="divide-y divide-[var(--border)]">
                 {config.roles.map((role) => (
                   <tr
                     key={role.id}
-                    className="hover:bg-gray-50/70 dark:hover:bg-neutral-800/40 transition-colors"
+                    className="hover:bg-[var(--hover-row)] transition-colors"
                   >
-                    <td className="py-3.5 px-6 font-bold text-gray-900 dark:text-white">
+                    <td className="py-3.5 px-6 font-bold text-[var(--text)]">
                       {role.name}
                     </td>
-                    <td className="py-3.5 px-4 text-gray-600 dark:text-neutral-300">
+                    <td className="py-3.5 px-4 text-[var(--text-muted)]">
                       {role.description}
                     </td>
-                    <td className="py-3.5 px-4 mono-data text-gray-800 dark:text-neutral-200">
+                    <td className="py-3.5 px-4 mono-data text-[var(--text)]">
                       {role.landingPath}
                     </td>
-                    <td className="py-3.5 px-4 text-gray-600 dark:text-neutral-300">
+                    <td className="py-3.5 px-4 text-[var(--text-muted)]">
                       {Array.isArray(role.allowedModules)
                         ? role.allowedModules.join(", ")
                         : role.allowedModules}
@@ -796,20 +796,20 @@ export default function WebsiteConfigPage({
                           <button
                             type="button"
                             onClick={() => handleOpenEditRole(role)}
-                            className="h-7 px-3 text-[12px] font-medium border border-[var(--border)] bg-[var(--surface)] text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
+                            className="h-7 px-3 text-[12px] font-medium border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] hover:bg-[var(--hover-subtle)] hover:border-[var(--border-hover)] rounded-[4px] cursor-pointer transition-colors"
                           >
                             Edit
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDeleteRole(role.id, role.name)}
-                            className="h-7 px-3 text-[12px] font-medium border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-neutral-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 rounded-[4px] cursor-pointer"
+                            className="h-7 px-3 text-[12px] font-medium border border-[var(--danger)]/30 bg-[var(--danger-tint)] text-[var(--danger)] hover:bg-[var(--danger)] hover:text-white rounded-[4px] cursor-pointer transition-colors"
                           >
                             Delete
                           </button>
                         </div>
                       ) : (
-                        <span className="text-[11px] text-gray-400 dark:text-neutral-500 font-medium italic">
+                        <span className="text-[11px] text-[var(--text-muted)] font-medium italic">
                           Locked
                         </span>
                       )}
@@ -886,22 +886,22 @@ export default function WebsiteConfigPage({
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-neutral-800/80">
+              <tbody className="divide-y divide-[var(--border)]">
                 {config.modules.map((mod) => (
                   <tr
                     key={mod.id}
-                    className="hover:bg-gray-50/70 dark:hover:bg-neutral-800/40 transition-colors"
+                    className="hover:bg-[var(--hover-row)] transition-colors"
                   >
-                    <td className="py-3.5 px-6 font-bold text-gray-900 dark:text-white">
+                    <td className="py-3.5 px-6 font-bold text-[var(--text)]">
                       {mod.name}
                     </td>
-                    <td className="py-3.5 px-4 mono-data text-gray-800 dark:text-neutral-200">
+                    <td className="py-3.5 px-4 mono-data text-[var(--text)]">
                       {mod.path}
                     </td>
-                    <td className="py-3.5 px-4 mono-data text-gray-600 dark:text-neutral-400">
+                    <td className="py-3.5 px-4 mono-data text-[var(--text-muted)]">
                       {mod.expectedHeading || "—"}
                     </td>
-                    <td className="py-3.5 px-4 text-gray-600 dark:text-neutral-300">
+                    <td className="py-3.5 px-4 text-[var(--text-muted)]">
                       {mod.navigationPath ||
                         (mod.navPath ? mod.navPath.join(" → ") : "Direct URL")}
                     </td>
@@ -911,20 +911,20 @@ export default function WebsiteConfigPage({
                           <button
                             type="button"
                             onClick={() => handleOpenEditModule(mod)}
-                            className="h-7 px-3 text-[12px] font-medium border border-[var(--border)] bg-[var(--surface)] text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
+                            className="h-7 px-3 text-[12px] font-medium border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] hover:bg-[var(--hover-subtle)] hover:border-[var(--border-hover)] rounded-[4px] cursor-pointer transition-colors"
                           >
                             Edit
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDeleteModule(mod.id, mod.name)}
-                            className="h-7 px-3 text-[12px] font-medium border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-neutral-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 rounded-[4px] cursor-pointer"
+                            className="h-7 px-3 text-[12px] font-medium border border-[var(--danger)]/30 bg-[var(--danger-tint)] text-[var(--danger)] hover:bg-[var(--danger)] hover:text-white rounded-[4px] cursor-pointer transition-colors"
                           >
                             Delete
                           </button>
                         </div>
                       ) : (
-                        <span className="text-[11px] text-gray-400 dark:text-neutral-500 font-medium italic">
+                        <span className="text-[11px] text-[var(--text-muted)] font-medium italic">
                           Locked
                         </span>
                       )}
@@ -1186,7 +1186,7 @@ export default function WebsiteConfigPage({
 
                   {/* Tag Pill */}
                   {rule.tag && (
-                    <span className="text-[11px] text-gray-500 dark:text-neutral-400 bg-gray-100 dark:bg-neutral-800 px-2 py-0.5 rounded-full shrink-0">
+                    <span className="text-[11px] text-[var(--text-muted)] bg-[var(--hover-subtle)] border border-[var(--border)] px-2 py-0.5 rounded-full shrink-0">
                       {rule.tag}
                     </span>
                   )}
@@ -1294,7 +1294,7 @@ export default function WebsiteConfigPage({
                       (prev) => prev + " Ignore cookie consent banners.",
                     )
                   }
-                  className="px-2.5 py-1 rounded-full border border-[var(--border)] bg-[var(--surface)] text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="px-2.5 py-1 rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] hover:bg-[var(--hover-subtle)] hover:border-[var(--border-hover)] cursor-pointer transition-colors"
                 >
                   + Ignore cookie banners
                 </button>
@@ -1307,7 +1307,7 @@ export default function WebsiteConfigPage({
                         " Wait for Tracking table hydration before asserting.",
                     )
                   }
-                  className="px-2.5 py-1 rounded-full border border-[var(--border)] bg-[var(--surface)] text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="px-2.5 py-1 rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] hover:bg-[var(--hover-subtle)] hover:border-[var(--border-hover)] cursor-pointer transition-colors"
                 >
                   + Wait for async hydration
                 </button>
@@ -1318,7 +1318,7 @@ export default function WebsiteConfigPage({
                       (prev) => prev + " Read-only assertions only.",
                     )
                   }
-                  className="px-2.5 py-1 rounded-full border border-[var(--border)] bg-[var(--surface)] text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="px-2.5 py-1 rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] hover:bg-[var(--hover-subtle)] hover:border-[var(--border-hover)] cursor-pointer transition-colors"
                 >
                   + Read-only assertions
                 </button>
@@ -1405,22 +1405,22 @@ export default function WebsiteConfigPage({
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-neutral-800/80">
+              <tbody className="divide-y divide-[var(--border)]">
                 {config.credentials.map((cred) => (
                   <tr
                     key={cred.roleId}
-                    className="hover:bg-gray-50/70 dark:hover:bg-neutral-800/40 transition-colors"
+                    className="hover:bg-[var(--hover-row)] transition-colors"
                   >
-                    <td className="py-3.5 px-6 font-bold text-gray-900 dark:text-white">
+                    <td className="py-3.5 px-6 font-bold text-[var(--text)]">
                       {cred.roleName}
                     </td>
-                    <td className="py-3.5 px-4 mono-data text-gray-700 dark:text-neutral-300">
+                    <td className="py-3.5 px-4 mono-data text-[var(--text)]">
                       {cred.usernameMasked}
                     </td>
-                    <td className="py-3.5 px-4 mono-data text-gray-400">
+                    <td className="py-3.5 px-4 mono-data text-[var(--text-muted)]">
                       {cred.secretMasked || "••••••••••••"}
                     </td>
-                    <td className="py-3.5 px-4 text-gray-500 dark:text-neutral-400">
+                    <td className="py-3.5 px-4 text-[var(--text-muted)]">
                       {cred.lastUpdated}
                     </td>
                     <td className="py-3.5 px-6 text-right">
@@ -1429,7 +1429,7 @@ export default function WebsiteConfigPage({
                           <button
                             type="button"
                             onClick={() => handleOpenEditCredential(cred)}
-                            className="h-7 px-3 text-[12px] font-medium border border-[var(--border)] bg-[var(--surface)] text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
+                            className="h-7 px-3 text-[12px] font-medium border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] hover:bg-[var(--hover-subtle)] hover:border-[var(--border-hover)] rounded-[4px] cursor-pointer transition-colors"
                           >
                             Replace
                           </button>
@@ -1438,13 +1438,13 @@ export default function WebsiteConfigPage({
                             onClick={() =>
                               handleRemoveCredential(cred.roleId, cred.roleName)
                             }
-                            className="h-7 px-3 text-[12px] font-medium border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-neutral-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 rounded-[4px] cursor-pointer"
+                            className="h-7 px-3 text-[12px] font-medium border border-[var(--danger)]/30 bg-[var(--danger-tint)] text-[var(--danger)] hover:bg-[var(--danger)] hover:text-white rounded-[4px] cursor-pointer transition-colors"
                           >
                             Remove
                           </button>
                         </div>
                       ) : (
-                        <span className="text-[11px] text-gray-400 dark:text-neutral-500 font-medium italic">
+                        <span className="text-[11px] text-[var(--text-muted)] font-medium italic">
                           Locked
                         </span>
                       )}
@@ -1502,10 +1502,10 @@ export default function WebsiteConfigPage({
                   {/* Timeline dot */}
                   <span
                     className={cn(
-                      "absolute -left-[21px] top-4.5 h-2 w-2 rounded-full ring-4 ring-white dark:ring-neutral-900",
+                      "absolute -left-[21px] top-4.5 h-2 w-2 rounded-full ring-4 ring-[var(--surface)]",
                       isActive
                         ? "bg-[#4F46E5]"
-                        : "bg-gray-300 dark:bg-neutral-700",
+                        : "bg-[var(--border)]",
                     )}
                   />
 
@@ -1519,17 +1519,17 @@ export default function WebsiteConfigPage({
                             "mono-data text-[11px] font-bold px-2 py-0.5 rounded-[4px] border shrink-0",
                             isActive
                               ? "border-[#4F46E5]/40 text-[#4F46E5] bg-[#EEF2FF] dark:bg-indigo-950/40"
-                              : "border-gray-200 text-gray-500 bg-gray-50 dark:bg-neutral-800 dark:text-neutral-400",
+                              : "border-[var(--border)] text-[var(--text-muted)] bg-[var(--surface-elevated)]",
                           )}
                         >
                           v{ver.version}
                         </span>
 
                         <div>
-                          <h3 className="font-bold text-[13px] text-gray-900 dark:text-white leading-snug">
+                          <h3 className="font-bold text-[13px] text-[var(--text)] leading-snug">
                             {ver.title || ver.summary}
                           </h3>
-                          <p className="text-[12px] text-gray-500 dark:text-neutral-400 mt-0.5">
+                          <p className="text-[12px] text-[var(--text-muted)] mt-0.5">
                             {ver.author} · {ver.category || "General"} ·{" "}
                             {ver.createdAt}
                           </p>
@@ -1547,7 +1547,7 @@ export default function WebsiteConfigPage({
                                 [ver.version]: !prev[ver.version],
                               }))
                             }
-                            className="h-8 px-3 text-[12px] font-medium border border-[var(--border)] bg-[var(--surface)] hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px] transition-colors cursor-pointer"
+                            className="h-8 px-3 text-[12px] font-medium border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--hover-subtle)] hover:border-[var(--border-hover)] text-[var(--text)] rounded-[6px] transition-colors cursor-pointer"
                           >
                             {isDiffVisible ? "Hide diff" : "View diff"}
                           </button>
@@ -1561,7 +1561,7 @@ export default function WebsiteConfigPage({
                           <button
                             type="button"
                             onClick={() => handleRestoreVersion(ver)}
-                            className="h-8 px-3 text-[12px] font-medium border border-[var(--border)] bg-[var(--surface)] hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px] transition-colors flex items-center gap-1.5 cursor-pointer"
+                            className="h-8 px-3 text-[12px] font-medium border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--hover-subtle)] hover:border-[var(--border-hover)] text-[var(--text)] rounded-[6px] transition-colors flex items-center gap-1.5 cursor-pointer"
                           >
                             <RotateCcw className="h-3 w-3" /> Restore
                           </button>
@@ -1571,7 +1571,7 @@ export default function WebsiteConfigPage({
 
                     {/* Diff Viewer */}
                     {isDiffVisible && ver.diff && (
-                      <div className="mt-3 p-3 rounded-lg border border-gray-200 dark:border-neutral-800 bg-gray-50/70 dark:bg-neutral-800/40 font-mono text-[12px] text-gray-700 dark:text-neutral-300 whitespace-pre leading-relaxed">
+                      <div className="mt-3 p-3 rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] font-mono text-[12px] text-[var(--text)] whitespace-pre leading-relaxed">
                         {ver.diff}
                       </div>
                     )}

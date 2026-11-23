@@ -36,6 +36,24 @@ function saveState<T>(key: string, data: T): void {
   } catch {}
 }
 
+function getCurrentActor(): { name: string; role: UserRole } {
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('testing-agent-auth')
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (parsed?.state?.user) {
+          return {
+            name: parsed.state.user.name || 'Alex Chen',
+            role: (parsed.state.user.role || 'admin') as UserRole,
+          }
+        }
+      }
+    } catch {}
+  }
+  return { name: 'Alex Chen', role: 'admin' }
+}
+
 export const mockClient = {
   // Websites
   getWebsites: async (): Promise<Website[]> => {
@@ -58,6 +76,16 @@ export const mockClient = {
     }
     const updated = [newSite, ...all]
     saveState(STORAGE_KEYS.websites, updated)
+
+    const actor = getCurrentActor()
+    mockClient.createAuditLog({
+      actor: actor.name,
+      actorRole: actor.role,
+      action: 'website.created',
+      entity: `${newSite.name} (${newSite.environment.toUpperCase()})`,
+      diffPreview: `baseUrl: "${newSite.baseUrl}"\nloginUrl: "${newSite.loginUrl}"\nenvironment: "${newSite.environment}"`,
+    })
+
     return newSite
   },
 
@@ -126,6 +154,16 @@ export const mockClient = {
     }
     allConfigs[websiteId] = updated
     saveState(STORAGE_KEYS.configs, allConfigs)
+
+    const actor = getCurrentActor()
+    mockClient.createAuditLog({
+      actor: actor.name,
+      actorRole: actor.role,
+      action: 'website.config_updated',
+      entity: `${websiteId} (v${newVersion})`,
+      diffPreview: `version: ${current.version} → ${newVersion}\nsummary: "${summaryText}"`,
+    })
+
     return updated
   },
 
@@ -154,6 +192,16 @@ export const mockClient = {
     }
     const updated = [newTask, ...all]
     saveState(STORAGE_KEYS.tasks, updated)
+
+    const actor = getCurrentActor()
+    mockClient.createAuditLog({
+      actor: actor.name,
+      actorRole: actor.role,
+      action: 'task.created',
+      entity: `${newTask.title} (${newTask.id})`,
+      diffPreview: `website: "${newTask.websiteName}"\nrole: "${newTask.role || 'User'}"\npriority: "${newTask.priority || 'P1'}"\nengine: "${newTask.engine || 'ollama'}"`,
+    })
+
     return newTask
   },
 
@@ -260,6 +308,15 @@ export const mockClient = {
       window.dispatchEvent(new CustomEvent('testing_agent_tasks_changed'))
     }
 
+    const actor = getCurrentActor()
+    mockClient.createAuditLog({
+      actor: actor.name,
+      actorRole: actor.role,
+      action: feedback ? 'plan.regenerated' : 'plan.generated',
+      entity: `${task.title} (v${nextVersion})`,
+      diffPreview: `version: ${nextVersion}\ncasesCompiled: ${newPlan.cases.length}\nengine: "${newPlan.engine}/${newPlan.model}"\ndirective: "${feedback || 'Initial compilation from task prompt'}"`,
+    })
+
     return newPlan
   },
 
@@ -284,6 +341,16 @@ export const mockClient = {
 
     // Update task status
     await mockClient.updateTask(plan.taskId, { status: 'approved' })
+
+    const actor = getCurrentActor()
+    mockClient.createAuditLog({
+      actor: actor.name,
+      actorRole: actor.role,
+      action: 'plan.approved',
+      entity: `${plan.taskId} (v${plan.version})`,
+      diffPreview: `status: "in_review" → "approved"\napprovedBy: "${actor.name}"\nplanId: "${plan.id}"`,
+    })
+
     return plan
   },
 
@@ -394,6 +461,16 @@ export const mockClient = {
       window.dispatchEvent(new CustomEvent('testing_agent_runs_changed'))
       window.dispatchEvent(new CustomEvent('testing_agent_tasks_changed'))
     }
+
+    const actor = getCurrentActor()
+    mockClient.createAuditLog({
+      actor: actor.name,
+      actorRole: actor.role,
+      action: 'run.executed',
+      entity: `${newRun.id} (#${newRun.runNumber})`,
+      diffPreview: `task: "${task.title}"\nplan: "${planId}"\nstatus: "passed"\npassRate: 100%\nduration: ${(totalDuration / 1000).toFixed(2)}s`,
+    })
+
     return newRun
   },
 
@@ -432,6 +509,16 @@ export const mockClient = {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('testing_agent_members_changed'))
     }
+
+    const actor = getCurrentActor()
+    mockClient.createAuditLog({
+      actor: actor.name,
+      actorRole: actor.role,
+      action: 'user.invited',
+      entity: `${newMember.name} (${newMember.email})`,
+      diffPreview: `role: "${newMember.role}"\nstatus: "${newMember.status}"\ninvitedBy: "${actor.name}"`,
+    })
+
     return newMember
   },
 
@@ -444,16 +531,37 @@ export const mockClient = {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('testing_agent_members_changed'))
     }
+
+    const actor = getCurrentActor()
+    mockClient.createAuditLog({
+      actor: actor.name,
+      actorRole: actor.role,
+      action: updates.role ? 'user.role_changed' : 'user.updated',
+      entity: `${all[idx].name} (${all[idx].email})`,
+      diffPreview: Object.entries(updates).map(([k, v]) => `${k}: "${v}"`).join('\n'),
+    })
+
     return all[idx]
   },
 
   deleteMember: async (id: string): Promise<boolean> => {
     const all = await mockClient.getMembers()
+    const target = all.find((m) => m.id === id)
     const updated = all.filter((m) => m.id !== id)
     saveState(STORAGE_KEYS.members, updated)
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('testing_agent_members_changed'))
     }
+
+    const actor = getCurrentActor()
+    mockClient.createAuditLog({
+      actor: actor.name,
+      actorRole: actor.role,
+      action: 'user.deleted',
+      entity: `${target?.name || id} (${target?.email || ''})`,
+      diffPreview: `status: "deleted"\nrole: "${target?.role || 'unknown'}"\ndeletedBy: "${actor.name}"`,
+    })
+
     return true
   },
 
@@ -479,6 +587,9 @@ export const mockClient = {
     }
     const updated = [newLog, ...all]
     saveState(STORAGE_KEYS.auditLogs, updated)
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('testing_agent_audit_changed'))
+    }
     return newLog
   },
 }

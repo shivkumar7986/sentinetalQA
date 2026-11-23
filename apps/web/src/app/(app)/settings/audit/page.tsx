@@ -31,10 +31,9 @@ export default function AuditSettingsPage() {
   const [actionFilter, setActionFilter] = useState('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
-  // Load audit logs based on role
+  // Load audit logs based on role and listen for real-time updates
   useEffect(() => {
     async function loadLogs() {
-      setLoading(true)
       const data = await mockClient.getAuditLogs(user?.role)
       setLogs(data)
       setLoading(false)
@@ -42,6 +41,15 @@ export default function AuditSettingsPage() {
     if (user?.role && user?.role !== 'qa_engineer') {
       loadLogs()
     }
+
+    const handleAuditChange = () => {
+      if (user?.role && user?.role !== 'qa_engineer') {
+        mockClient.getAuditLogs(user?.role).then(setLogs)
+      }
+    }
+
+    window.addEventListener('testing_agent_audit_changed', handleAuditChange)
+    return () => window.removeEventListener('testing_agent_audit_changed', handleAuditChange)
   }, [user?.role])
 
   function handleExportCsv() {

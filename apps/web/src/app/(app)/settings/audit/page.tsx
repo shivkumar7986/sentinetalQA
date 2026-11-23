@@ -119,7 +119,7 @@ export default function AuditSettingsPage() {
             size="md"
             type="button"
             onClick={handleExportCsv}
-            className="h-10 px-4 text-[13px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-lg transition-colors gap-1.5"
+            className="h-10 px-4 text-[13px] gap-1.5"
           >
             <Download className="h-4 w-4" /> Export CSV
           </Button>
@@ -163,7 +163,7 @@ export default function AuditSettingsPage() {
             placeholder="Filter by user, action, or entity..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-10 w-full px-3.5 text-[13px] bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-[8px] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
+            className="h-10 w-full px-3.5 text-[13px] bg-[var(--surface)] border border-[var(--border)] rounded-[8px] text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--border-hover)] transition-colors"
           />
         </div>
 
@@ -172,7 +172,7 @@ export default function AuditSettingsPage() {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value as 'all' | UserRole)}
-            className="h-10 px-3.5 pr-8 text-[13px] bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-[8px] text-gray-800 dark:text-neutral-200 focus:outline-none focus:border-[#4F46E5] appearance-none cursor-pointer transition-colors"
+            className="h-10 px-3.5 pr-8 text-[13px] bg-[var(--surface)] border border-[var(--border)] rounded-[8px] text-[var(--text)] focus:outline-none focus:border-[var(--border-hover)] appearance-none cursor-pointer transition-colors"
           >
             <option value="all">
               {isAdmin ? 'All roles (Admin, Lead, Emp)' : 'All squad roles (Lead, Emp)'}
@@ -181,7 +181,7 @@ export default function AuditSettingsPage() {
             <option value="qa_lead">QA Lead only</option>
             <option value="qa_engineer">QA Employee only</option>
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--text-muted)] pointer-events-none" />
         </div>
 
         {/* Action Filter Dropdown */}
@@ -189,7 +189,7 @@ export default function AuditSettingsPage() {
           <select
             value={actionFilter}
             onChange={(e) => setActionFilter(e.target.value)}
-            className="h-10 px-3.5 pr-8 text-[13px] bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-[8px] text-gray-800 dark:text-neutral-200 focus:outline-none focus:border-[#4F46E5] appearance-none cursor-pointer transition-colors"
+            className="h-10 px-3.5 pr-8 text-[13px] bg-[var(--surface)] border border-[var(--border)] rounded-[8px] text-[var(--text)] focus:outline-none focus:border-[var(--border-hover)] appearance-none cursor-pointer transition-colors"
           >
             <option value="all">All actions ({availableActions.length})</option>
             {availableActions.map((act) => (
@@ -198,16 +198,16 @@ export default function AuditSettingsPage() {
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--text-muted)] pointer-events-none" />
         </div>
       </div>
 
       {/* Audit Log Table Card */}
-      <div className="rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden shadow-none">
+      <div className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-none">
         <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-neutral-800 text-[11px] font-semibold text-gray-400 dark:text-neutral-500 uppercase tracking-wider">
+              <tr className="border-b border-[var(--border)] text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 <th className="text-left py-3.5 px-6 font-semibold">TIMESTAMP</th>
                 <th className="text-left py-3.5 px-4 font-semibold">ACTOR</th>
                 <th className="text-left py-3.5 px-4 font-semibold">ROLE</th>
@@ -216,10 +216,10 @@ export default function AuditSettingsPage() {
                 <th className="text-right py-3.5 px-6 font-semibold">DIFF</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-neutral-800/80">
+            <tbody className="divide-y divide-[var(--border)]">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-gray-400 dark:text-neutral-500 text-[13px]">
+                  <td colSpan={6} className="py-12 text-center text-[var(--text-muted)] text-[13px]">
                     No audit records match your filters.
                   </td>
                 </tr>
@@ -228,14 +228,14 @@ export default function AuditSettingsPage() {
                   const isExpanded = expandedId === log.id
                   return (
                     <React.Fragment key={log.id}>
-                      <tr className="hover:bg-gray-50/70 dark:hover:bg-neutral-800/40 transition-colors">
+                      <tr className="hover:bg-[var(--hover-row)] transition-colors">
                         {/* Timestamp */}
-                        <td className="py-3.5 px-6 mono-data text-[12px] text-gray-500 dark:text-neutral-400">
+                        <td className="py-3.5 px-6 mono-data text-[12px] text-[var(--text-muted)]">
                           {log.timestamp}
                         </td>
 
                         {/* Actor */}
-                        <td className="py-3.5 px-4 font-bold text-gray-900 dark:text-white">
+                        <td className="py-3.5 px-4 font-bold text-[var(--text)]">
                           {log.actor}
                         </td>
 
@@ -245,12 +245,12 @@ export default function AuditSettingsPage() {
                         </td>
 
                         {/* Action */}
-                        <td className="py-3.5 px-4 mono-data text-[13px] text-[#4F46E5] dark:text-indigo-400 font-medium">
+                        <td className="py-3.5 px-4 mono-data text-[13px] text-[var(--primary)] font-medium">
                           {log.action}
                         </td>
 
                         {/* Entity */}
-                        <td className="py-3.5 px-4 mono-data text-[13px] text-gray-700 dark:text-neutral-300">
+                        <td className="py-3.5 px-4 mono-data text-[13px] text-[var(--text)]">
                           {log.entity}
                         </td>
 
@@ -259,7 +259,7 @@ export default function AuditSettingsPage() {
                           <button
                             type="button"
                             onClick={() => setExpandedId(isExpanded ? null : log.id)}
-                            className="inline-flex items-center gap-1 text-[12px] font-medium text-gray-500 hover:text-gray-900 dark:text-neutral-400 dark:hover:text-white transition-colors select-none cursor-pointer"
+                            className="inline-flex items-center gap-1 text-[12px] font-medium text-[var(--text-muted)] hover:text-[var(--text)] transition-colors select-none cursor-pointer"
                           >
                             <span>Inspect</span>
                             <ChevronDown
@@ -274,9 +274,9 @@ export default function AuditSettingsPage() {
 
                       {/* Expandable Diff Viewer */}
                       {isExpanded && log.diffPreview && (
-                        <tr className="bg-gray-50/80 dark:bg-neutral-800/30">
-                          <td colSpan={6} className="px-6 py-3 border-b border-gray-100 dark:border-neutral-800">
-                            <pre className="mono-data text-[12px] text-gray-700 dark:text-neutral-300 bg-white dark:bg-neutral-900 p-3 rounded-lg border border-gray-200 dark:border-neutral-800 overflow-x-auto whitespace-pre leading-relaxed">
+                        <tr className="bg-[var(--hover-subtle)]">
+                          <td colSpan={6} className="px-6 py-3 border-b border-[var(--border)]">
+                            <pre className="mono-data text-[12px] text-[var(--text)] bg-[var(--surface)] p-3 rounded-lg border border-[var(--border)] overflow-x-auto whitespace-pre leading-relaxed">
                               {log.diffPreview}
                             </pre>
                           </td>

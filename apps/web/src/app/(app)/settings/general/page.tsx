@@ -89,8 +89,8 @@ export default function GeneralSettingsPage() {
       />
 
       {/* Card 1: Execution & Governance */}
-      <form onSubmit={handleSave} className="rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 space-y-6 shadow-none">
-        <h2 className="text-[15px] font-semibold text-gray-900 dark:text-white">
+      <form onSubmit={handleSave} className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] p-6 space-y-6 shadow-none">
+        <h2 className="text-[15px] font-semibold text-[var(--text)]">
           Execution & Governance
         </h2>
 
@@ -98,26 +98,26 @@ export default function GeneralSettingsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* Step timeout */}
           <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-[13px] font-medium text-[var(--text-muted)]">
               Step timeout (ms)
             </label>
             <input
               type="number"
               value={stepTimeout}
               onChange={(e) => setStepTimeout(e.target.value)}
-              className="w-full h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
+              className="w-full h-10 px-3.5 text-[13px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] focus:outline-none focus:border-[var(--border-hover)] transition-colors"
             />
           </div>
 
           {/* JSON schema repair retries */}
           <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-[13px] font-medium text-[var(--text-muted)]">
               JSON schema repair retries
             </label>
             <select
               value={repairRetries}
               onChange={(e) => setRepairRetries(e.target.value)}
-              className="w-full h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
+              className="w-full h-10 px-3.5 text-[13px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] focus:outline-none focus:border-[var(--border-hover)] transition-colors"
             >
               <option value="2 retries (recommended)">2 retries (recommended)</option>
               <option value="1 retry">1 retry</option>
@@ -128,13 +128,13 @@ export default function GeneralSettingsPage() {
 
           {/* Audit & report retention */}
           <div className="space-y-1.5">
-            <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-[13px] font-medium text-[var(--text-muted)]">
               Audit & report retention
             </label>
             <select
               value={retention}
               onChange={(e) => setRetention(e.target.value)}
-              className="w-full h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
+              className="w-full h-10 px-3.5 text-[13px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] focus:outline-none focus:border-[var(--border-hover)] transition-colors"
             >
               <option value="365 days">365 days</option>
               <option value="180 days">180 days</option>
@@ -147,10 +147,10 @@ export default function GeneralSettingsPage() {
         {/* Require separate approver row */}
         <div className="flex items-center justify-between pt-2">
           <div>
-            <p className="text-[13px] font-medium text-gray-900 dark:text-white">
+            <p className="text-[13px] font-medium text-[var(--text)]">
               Require separate approver
             </p>
-            <p className="text-[12px] text-gray-500 dark:text-neutral-400 mt-0.5">
+            <p className="text-[12px] text-[var(--text-muted)] mt-0.5">
               Prevent task authors from approving their own AI-generated test plans.
             </p>
           </div>
@@ -163,19 +163,20 @@ export default function GeneralSettingsPage() {
 
         {/* Save button */}
         <div className="flex justify-end pt-2">
-          <button
+          <Button
             type="submit"
-            className="h-10 px-5 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-[13px] font-medium transition-colors shadow-none"
+            variant="primary"
+            size="md"
           >
             Save changes
-          </button>
+          </Button>
         </div>
       </form>
 
       {/* Card 2: Workspace API Tokens */}
-      <div className="rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden shadow-none">
-        <div className="p-5 flex items-center justify-between border-b border-gray-100 dark:border-neutral-800">
-          <h2 className="text-[15px] font-semibold text-gray-900 dark:text-white">
+      <div className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-none">
+        <div className="p-5 flex items-center justify-between border-b border-[var(--border)]">
+          <h2 className="text-[15px] font-semibold text-[var(--text)]">
             Workspace API Tokens
           </h2>
           <Button
@@ -183,7 +184,6 @@ export default function GeneralSettingsPage() {
             size="sm"
             type="button"
             onClick={handleCreateToken}
-            className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px]"
           >
             + New token
           </Button>
@@ -192,30 +192,30 @@ export default function GeneralSettingsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead>
-              <tr className="border-b border-gray-100 dark:border-neutral-800 text-[11px] font-semibold text-gray-400 dark:text-neutral-500 uppercase tracking-wider">
+              <tr className="border-b border-[var(--border)] text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 <th className="text-left py-3.5 px-6 font-semibold">LABEL</th>
                 <th className="text-left py-3.5 px-4 font-semibold">TOKEN PREFIX</th>
                 <th className="text-left py-3.5 px-4 font-semibold">CREATED</th>
                 <th className="text-right py-3.5 px-6 font-semibold">ACTION</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-neutral-800/80">
+            <tbody className="divide-y divide-[var(--border)]">
               {tokens.map((token) => (
-                <tr key={token.id} className="hover:bg-gray-50/70 dark:hover:bg-neutral-800/40 transition-colors">
-                  <td className="py-3.5 px-6 font-semibold text-[13px] text-gray-900 dark:text-white">
+                <tr key={token.id} className="hover:bg-[var(--hover-row)] transition-colors">
+                  <td className="py-3.5 px-6 font-semibold text-[13px] text-[var(--text)]">
                     {token.label}
                   </td>
-                  <td className="py-3.5 px-4 mono-data text-[12px] text-gray-500 dark:text-neutral-400">
+                  <td className="py-3.5 px-4 mono-data text-[12px] text-[var(--text-muted)]">
                     {token.prefix}
                   </td>
-                  <td className="py-3.5 px-4 text-[12px] text-gray-500 dark:text-neutral-400">
+                  <td className="py-3.5 px-4 text-[12px] text-[var(--text-muted)]">
                     {token.created}
                   </td>
                   <td className="py-3.5 px-6 text-right">
                     <button
                       type="button"
                       onClick={() => handleRevokeToken(token.id, token.label)}
-                      className="h-7 px-3 text-[12px] font-medium border border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 bg-white dark:bg-neutral-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-[6px] transition-colors"
+                      className="h-7 px-3 text-[12px] font-medium border border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 bg-white dark:bg-[var(--surface)] hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-[6px] transition-colors"
                     >
                       Revoke
                     </button>

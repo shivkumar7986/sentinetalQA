@@ -109,10 +109,10 @@ export function AddUserDrawer({
   }
 
   const inputClasses =
-    'w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all'
+    'w-full h-11 px-3.5 text-[14px] rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all'
 
   const selectClasses =
-    'w-full h-11 px-3.5 pr-10 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white appearance-none focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all cursor-pointer'
+    'w-full h-11 px-3.5 pr-10 text-[14px] rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--text)] appearance-none focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all cursor-pointer'
 
   return (
     <div className="fixed inset-0 z-[100] flex justify-end">
@@ -125,7 +125,7 @@ export function AddUserDrawer({
 
       {/* Drawer Panel */}
       <div
-        className="relative z-10 w-full max-w-[500px] h-screen bg-white dark:bg-[#12151F] border-l border-gray-200 dark:border-neutral-800 shadow-2xl flex flex-col justify-between animate-slide-in-right select-text"
+        className="relative z-10 w-full max-w-[500px] h-screen bg-[var(--surface)] border-l border-[var(--border)] shadow-2xl flex flex-col justify-between animate-slide-in-right select-text"
         role="dialog"
         aria-modal="true"
       >
@@ -281,14 +281,14 @@ export function AddUserDrawer({
           </div>
 
           {/* Bottom Actions */}
-          <div className="px-8 py-6 flex items-center justify-end gap-3 bg-white dark:bg-[#12151F] shrink-0 border-t border-gray-100 dark:border-neutral-800">
+          <div className="px-8 py-6 flex items-center justify-end gap-3 bg-[var(--surface)] shrink-0 border-t border-[var(--border)]">
             <button
               type="button"
               onClick={() => {
                 resetForm()
                 handleClose()
               }}
-              className="h-10 px-5 rounded-lg border border-gray-200 dark:border-neutral-700 text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-[13px] font-medium transition-colors"
+              className="h-10 px-5 rounded-lg border border-[var(--border)] text-[var(--text)] bg-[var(--surface-elevated)] hover:bg-[var(--hover-subtle)] text-[13px] font-medium transition-colors"
             >
               Cancel
             </button>

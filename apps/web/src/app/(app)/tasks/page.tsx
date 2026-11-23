@@ -129,7 +129,7 @@ function TasksPageContent() {
             placeholder="Search testing goals..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-10 w-full px-3.5 text-[13px] bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-[8px] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
+            className="h-10 w-full px-3.5 text-[13px] bg-[var(--surface)] border border-[var(--border)] rounded-[8px] text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--border-hover)] transition-colors"
           />
         </div>
 
@@ -138,7 +138,7 @@ function TasksPageContent() {
           <select
             value={selectedWebsite}
             onChange={(e) => setSelectedWebsite(e.target.value)}
-            className="h-10 px-3.5 pr-8 text-[13px] bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-[8px] text-gray-800 dark:text-neutral-200 focus:outline-none focus:border-[#4F46E5] appearance-none cursor-pointer transition-colors"
+            className="h-10 px-3.5 pr-8 text-[13px] bg-[var(--surface)] border border-[var(--border)] rounded-[8px] text-[var(--text)] focus:outline-none focus:border-[var(--border-hover)] appearance-none cursor-pointer transition-colors"
           >
             <option value="all">All websites</option>
             {websiteOptions.map((name) => (
@@ -147,7 +147,7 @@ function TasksPageContent() {
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--text-muted)] pointer-events-none" />
         </div>
 
         {/* All statuses dropdown */}
@@ -155,7 +155,7 @@ function TasksPageContent() {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="h-10 px-3.5 pr-8 text-[13px] bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-[8px] text-gray-800 dark:text-neutral-200 focus:outline-none focus:border-[#4F46E5] appearance-none cursor-pointer transition-colors"
+            className="h-10 px-3.5 pr-8 text-[13px] bg-[var(--surface)] border border-[var(--border)] rounded-[8px] text-[var(--text)] focus:outline-none focus:border-[var(--border-hover)] appearance-none cursor-pointer transition-colors"
           >
             <option value="all">All statuses</option>
             <option value="approved">Approved</option>
@@ -163,7 +163,7 @@ function TasksPageContent() {
             <option value="in_review">In review</option>
             <option value="draft">Draft</option>
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--text-muted)] pointer-events-none" />
         </div>
       </div>
 
@@ -178,11 +178,11 @@ function TasksPageContent() {
           </Button>
         }
       >
-        <div className="rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden shadow-none">
+        <div className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-none">
           <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
               <thead>
-                <tr className="border-b border-gray-200 dark:border-neutral-800 text-[11px] font-semibold text-gray-400 dark:text-neutral-500 uppercase tracking-wider">
+                <tr className="border-b border-[var(--border)] text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                   <th className="text-left py-3.5 px-6 font-semibold">TASK GOAL</th>
                   <th className="text-left py-3.5 px-4 font-semibold">WEBSITE & ROLE</th>
                   <th className="text-left py-3.5 px-4 font-semibold">STATUS</th>
@@ -192,7 +192,7 @@ function TasksPageContent() {
                   <th className="text-right py-3.5 px-6 font-semibold">ACTIONS</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-neutral-800/80">
+              <tbody className="divide-y divide-[var(--border)]">
                 {filtered.map((task) => {
                   const displayId = task.displayId || task.id
                   const isInReview = task.status === 'in_review' || task.status === 'plan_generated'
@@ -200,27 +200,27 @@ function TasksPageContent() {
                   return (
                     <tr
                       key={task.id}
-                      className="hover:bg-gray-50/70 dark:hover:bg-neutral-800/40 transition-colors"
+                      className="hover:bg-[var(--hover-row)] transition-colors"
                     >
                       {/* Column 1: TASK GOAL */}
                       <td className="py-3.5 px-6">
                         <Link
                           href={`/tasks/${task.id}`}
-                          className="font-semibold text-[13px] text-gray-900 dark:text-white hover:text-[var(--primary)] transition-colors block leading-snug"
+                          className="font-semibold text-[13px] text-[var(--text)] hover:text-[var(--primary)] transition-colors block leading-snug"
                         >
                           {task.title}
                         </Link>
-                        <span className="mono-data text-[12px] text-gray-400 block mt-0.5">
+                        <span className="mono-data text-[12px] text-[var(--text-muted)] block mt-0.5">
                           {displayId}
                         </span>
                       </td>
 
                       {/* Column 2: WEBSITE & ROLE */}
                       <td className="py-3.5 px-4">
-                        <span className="text-[13px] font-medium text-gray-900 dark:text-white block leading-snug">
+                        <span className="text-[13px] font-medium text-[var(--text)] block leading-snug">
                           {task.websiteName}
                         </span>
-                        <span className="text-[12px] text-gray-500 dark:text-neutral-400 block mt-0.5">
+                        <span className="text-[12px] text-[var(--text-muted)] block mt-0.5">
                           Role: {task.roleName || 'Dispatcher'}
                         </span>
                       </td>
@@ -243,7 +243,7 @@ function TasksPageContent() {
                           </span>
                         )}
                         {task.status === 'draft' && (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-gray-100 text-gray-600 dark:bg-neutral-800 dark:text-neutral-400">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-[var(--hover-subtle)] text-[var(--text-muted)]">
                             <FileEdit className="h-3 w-3" /> Draft
                           </span>
                         )}
@@ -260,12 +260,12 @@ function TasksPageContent() {
                       </td>
 
                       {/* Column 4: AI ENGINE */}
-                      <td className="py-3.5 px-4 mono-data text-[13px] text-gray-600 dark:text-gray-300">
+                      <td className="py-3.5 px-4 mono-data text-[13px] text-[var(--text-muted)]">
                         {task.engineDisplay || task.model || 'ollama/qwen2.5:14b'}
                       </td>
 
                       {/* Column 5: LAST RUN */}
-                      <td className="py-3.5 px-4 mono-data text-[13px] font-medium text-gray-900 dark:text-white">
+                      <td className="py-3.5 px-4 mono-data text-[13px] font-medium text-[var(--text)]">
                         {task.lastRunId ? (
                           <Link
                             href={`/runs/${task.lastRunId}`}
@@ -274,12 +274,12 @@ function TasksPageContent() {
                             {task.lastRunId}
                           </Link>
                         ) : (
-                          <span className="text-gray-400 font-mono">—</span>
+                          <span className="text-[var(--text-muted)] font-mono">—</span>
                         )}
                       </td>
 
                       {/* Column 6: UPDATED */}
-                      <td className="py-3.5 px-4 text-[13px] text-gray-500 dark:text-neutral-400">
+                      <td className="py-3.5 px-4 text-[13px] text-[var(--text-muted)]">
                         {task.updatedAtLabel || 'Recently'}
                       </td>
 
@@ -291,7 +291,6 @@ function TasksPageContent() {
                               variant="secondary"
                               size="sm"
                               asChild
-                              className="h-8 px-3.5 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px]"
                             >
                               <Link href={task.currentPlanId ? `/plans/${task.currentPlanId}` : `/tasks/${task.id}`}>
                                 Review plan
@@ -302,7 +301,6 @@ function TasksPageContent() {
                               variant="secondary"
                               size="sm"
                               asChild
-                              className="h-8 px-3.5 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px]"
                             >
                               <Link href={`/tasks/${task.id}`}>
                                 Open
@@ -315,7 +313,6 @@ function TasksPageContent() {
                             size="sm"
                             type="button"
                             onClick={() => handleCloneTask(task)}
-                            className="h-8 px-3.5 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px]"
                           >
                             Clone
                           </Button>

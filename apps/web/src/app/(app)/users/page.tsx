@@ -169,11 +169,11 @@ export default function UsersPage() {
       )}
 
       {/* Users Table Card */}
-      <div className="rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden shadow-none">
+      <div className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-none">
         <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-neutral-800 text-[11px] font-semibold text-gray-400 dark:text-neutral-500 uppercase tracking-wider">
+              <tr className="border-b border-[var(--border)] text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 <th className="text-left py-3.5 px-6 font-semibold">MEMBER</th>
                 <th className="text-left py-3.5 px-4 font-semibold">EMAIL</th>
                 <th className="text-left py-3.5 px-4 font-semibold">PLATFORM ROLE</th>
@@ -182,7 +182,7 @@ export default function UsersPage() {
                 <th className="text-right py-3.5 px-6 font-semibold">ACTIONS</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-neutral-800/80">
+            <tbody className="divide-y divide-[var(--border)]">
               {visibleMembers.map((member) => {
                 const canEditThisRow = canManageUser(user?.role, member.role)
                 const isSelf = member.id === user?.id
@@ -190,14 +190,14 @@ export default function UsersPage() {
                 return (
                   <tr
                     key={member.id}
-                    className="hover:bg-gray-50/70 dark:hover:bg-neutral-800/40 transition-colors"
+                    className="hover:bg-[var(--hover-row)] transition-colors"
                   >
                     {/* Member Name */}
-                    <td className="py-3.5 px-6 font-bold text-gray-900 dark:text-white">
+                    <td className="py-3.5 px-6 font-bold text-[var(--text)]">
                       <div className="flex items-center gap-2">
                         <span>{member.name}</span>
                         {isSelf && (
-                          <span className="text-[10px] font-normal text-gray-400 bg-gray-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded">
+                          <span className="text-[10px] font-normal text-[var(--text-muted)] bg-[var(--hover-subtle)] px-1.5 py-0.5 rounded">
                             You
                           </span>
                         )}
@@ -205,7 +205,7 @@ export default function UsersPage() {
                     </td>
 
                     {/* Email */}
-                    <td className="py-3.5 px-4 mono-data text-[12px] text-gray-500 dark:text-neutral-400">
+                    <td className="py-3.5 px-4 mono-data text-[12px] text-[var(--text-muted)]">
                       {member.email}
                     </td>
 
@@ -217,14 +217,14 @@ export default function UsersPage() {
                           onChange={(e) =>
                             handleRoleChange(member.id, member.role, e.target.value as UserRole)
                           }
-                          className="h-8 px-2.5 text-[12px] font-medium rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-800 dark:text-neutral-200 focus:outline-none focus:border-[#4F46E5] cursor-pointer"
+                          className="h-8 px-2.5 text-[12px] font-medium rounded-md border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] focus:outline-none focus:border-[var(--border-hover)] cursor-pointer"
                         >
                           {isAdmin && <option value="admin">Admin</option>}
                           {isAdmin && <option value="qa_lead">QA Lead</option>}
                           <option value="qa_engineer">QA Employee</option>
                         </select>
                       ) : (
-                        <span className="inline-flex items-center text-[12px] font-medium text-gray-700 dark:text-neutral-300 px-2 py-1 rounded bg-gray-100 dark:bg-neutral-800 border border-gray-200/60 dark:border-neutral-700">
+                        <span className="inline-flex items-center text-[12px] font-medium text-[var(--text)] px-2 py-1 rounded bg-[var(--hover-subtle)] border border-[var(--border)]">
                           {member.role === 'admin'
                             ? 'Admin'
                             : member.role === 'qa_lead'
@@ -247,14 +247,14 @@ export default function UsersPage() {
                         </span>
                       )}
                       {member.status === 'disabled' && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-gray-100 text-gray-500 dark:bg-neutral-800 dark:text-neutral-400">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-[var(--hover-subtle)] text-[var(--text-muted)]">
                           Disabled
                         </span>
                       )}
                     </td>
 
                     {/* Last Login */}
-                    <td className="py-3.5 px-4 mono-data text-[12px] text-gray-500 dark:text-neutral-400">
+                    <td className="py-3.5 px-4 mono-data text-[12px] text-[var(--text-muted)]">
                       {member.lastLogin}
                     </td>
 
@@ -278,8 +278,8 @@ export default function UsersPage() {
                           onClick={() => handleToggleDisable(member)}
                           className={`h-8 px-2.5 text-[12px] font-medium border rounded-[6px] transition-colors ${
                             !canEditThisRow || isSelf
-                              ? 'border-gray-200 dark:border-neutral-800 text-gray-400 dark:text-neutral-600 bg-gray-50 dark:bg-neutral-800/50 cursor-not-allowed opacity-60'
-                              : 'border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 cursor-pointer'
+                              ? 'border-[var(--border)] text-[var(--text-muted)] bg-[var(--hover-subtle)] cursor-not-allowed opacity-60'
+                              : 'border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--hover-subtle)] hover:border-[var(--border-hover)] text-[var(--text)] cursor-pointer'
                           }`}
                           title={
                             isSelf
@@ -296,7 +296,7 @@ export default function UsersPage() {
                           <button
                             type="button"
                             onClick={() => openDeleteUserModal(member)}
-                            className="h-8 w-8 flex items-center justify-center rounded-[6px] border border-gray-200 dark:border-neutral-700 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                            className="h-8 w-8 flex items-center justify-center rounded-[6px] border border-[var(--border)] text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
                             title="Delete user"
                           >
                             <Trash2 className="h-3.5 w-3.5" />

@@ -455,29 +455,31 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-[20px] font-bold text-gray-900 tracking-tight">
+            <h1 className="text-[20px] font-bold text-[var(--text)] tracking-tight">
               Plan Review · {task?.title || plan?.summary || 'Test Plan'}
             </h1>
-            <span className="font-mono text-[11px] font-semibold text-gray-700 px-2 py-0.5 rounded border border-gray-300 bg-white">
+            <span className="font-mono text-[11px] font-semibold text-[var(--text-muted)] px-2 py-0.5 rounded border border-[var(--border)] bg-[var(--surface-elevated)]">
               v{plan?.version || 1}
             </span>
             {isApproved ? (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-[#DCFCE7] text-[#16A34A] border border-[#BBF7D0]">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 ✓ Approved
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-[#FEF3C7] text-[#D97706] border border-[#FDE68A]">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
                 ⏱ In review
               </span>
             )}
           </div>
-          <p className="text-[12px] text-gray-400 font-mono mt-1">
+          <p className="text-[12px] text-[var(--text-muted)] font-mono mt-1">
             {plan?.model || 'ollama/qwen2.5:14b'} · {plan?.tokensUsed || 1250} tokens · {plan?.engine || 'ai'} compiler
           </p>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() =>
               openFormDrawer('generate-plan', {
                 taskId: plan?.taskId || task?.id,
@@ -485,34 +487,32 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
                 currentVersion: plan?.version || 1,
               })
             }
-            className="px-3.5 py-1.5 text-[13px] font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5 shadow-none"
           >
             ✦ Regenerate with feedback
-          </button>
+          </Button>
           {!isApproved && (
-            <button
+            <Button
+              variant="danger"
+              size="sm"
               onClick={handleReject}
-              className="px-3.5 py-1.5 text-[13px] font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50/50 transition-colors flex items-center gap-1.5 shadow-none"
             >
               ✕ Reject
-            </button>
+            </Button>
           )}
           {isApproved ? (
-            <span className="px-4 py-1.5 text-[13px] font-medium rounded-lg flex items-center gap-1.5 bg-[#DCFCE7] text-[#16A34A] border border-[#BBF7D0] select-none shadow-xs">
+            <span className="px-4 py-1.5 text-[13px] font-medium rounded-lg flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 select-none shadow-xs">
               ✓ Plan Approved & Locked
             </span>
           ) : (
-            <button
+            <Button
+              variant="primary"
+              size="sm"
+              disabled={!canApprove}
               onClick={handleApprove}
-              className={`px-4 py-1.5 text-[13px] font-medium rounded-lg transition-colors flex items-center gap-1.5 shadow-sm ${
-                canApprove
-                  ? 'text-white bg-[#4F46E5] hover:bg-[#4338CA] cursor-pointer'
-                  : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed opacity-80'
-              }`}
               title={!canApprove ? 'Plan approval requires QA Lead or Admin role' : undefined}
             >
               ✓ Approve & Finalize {!canApprove && '(Lead/Admin only)'}
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -522,15 +522,17 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
         {/* Left Column (2 cols) */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-[14px] font-semibold text-gray-900">
+            <h2 className="text-[14px] font-semibold text-[var(--text)]">
               Test Cases ({cases.length})
             </h2>
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={handleAddCase}
-              className="px-2.5 py-1 text-[12px] font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+              className="h-8 text-[12px]"
             >
               + Add test case
-            </button>
+            </Button>
           </div>
 
           {/* List of Test Cases */}
@@ -542,7 +544,7 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
               return (
                 <div
                   key={c.id}
-                  className="rounded-xl border border-gray-200 bg-white p-4 shadow-none transition-all"
+                  className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-none transition-all"
                 >
                   {/* Case Header */}
                   <div className="flex items-start justify-between gap-3">
@@ -552,24 +554,24 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
                     >
                       <button
                         type="button"
-                        className="text-gray-400 hover:text-gray-600 mt-0.5 focus:outline-none"
+                        className="text-[var(--text-muted)] hover:text-[var(--text)] mt-0.5 focus:outline-none"
                       >
                         {isExpanded ? (
-                          <ChevronDown className="h-4 w-4 text-gray-600" />
+                          <ChevronDown className="h-4 w-4 text-[var(--text)]" />
                         ) : (
-                          <ChevronRight className="h-4 w-4 text-gray-400" />
+                          <ChevronRight className="h-4 w-4 text-[var(--text-muted)]" />
                         )}
                       </button>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-[12px] font-semibold text-gray-500">
+                          <span className="font-mono text-[12px] font-semibold text-[var(--text-muted)]">
                             {formattedIdx}
                           </span>
-                          <span className="text-[14px] font-semibold text-gray-900">
+                          <span className="text-[14px] font-semibold text-[var(--text)]">
                             {c.title}
                           </span>
                         </div>
-                        <p className="text-[12px] text-gray-500 mt-0.5">
+                        <p className="text-[12px] text-[var(--text-muted)] mt-0.5">
                           {c.objective || 'Confirm endpoint behavior'} · Expected: {c.expectedOutcome}
                         </p>
                       </div>
@@ -577,12 +579,12 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
 
                     <div className="flex items-center gap-3 shrink-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-[12px] text-gray-500">Optional</span>
+                        <span className="text-[12px] text-[var(--text-muted)]">Optional</span>
                         <button
                           type="button"
                           onClick={() => toggleOptional(c.id)}
                           className={`w-9 h-5 flex items-center rounded-full p-0.5 transition-colors ${
-                            c.isOptional ? 'bg-[#4F46E5]' : 'bg-gray-200'
+                            c.isOptional ? 'bg-[#4F46E5]' : 'bg-[var(--border)]'
                           }`}
                         >
                           <div
@@ -593,7 +595,7 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
                         </button>
                       </div>
 
-                      <span className="px-2 py-0.5 rounded-full text-[11px] font-medium text-gray-500 border border-gray-200">
+                      <span className="px-2 py-0.5 rounded-full text-[11px] font-medium text-[var(--text-muted)] border border-[var(--border)]">
                         {c.steps.length} steps
                       </span>
                     </div>
@@ -601,11 +603,11 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
 
                   {/* Expanded Step Details */}
                   {isExpanded && (
-                    <div className="mt-4 pt-3 border-t border-gray-100">
+                    <div className="mt-4 pt-3 border-t border-[var(--border)]">
                       <div className="overflow-x-auto">
                         <table className="w-full text-left text-[12px]">
                           <thead>
-                            <tr className="border-b border-gray-100 text-[11px] font-semibold uppercase text-gray-400 tracking-wider">
+                            <tr className="border-b border-[var(--border)] text-[11px] font-semibold uppercase text-[var(--text-muted)] tracking-wider">
                               <th className="pb-2 font-medium">ACTION</th>
                               <th className="pb-2 font-medium">VALIDATION TYPE</th>
                               <th className="pb-2 font-medium">TARGET</th>
@@ -613,19 +615,19 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
                               <th className="pb-2 font-medium text-right">ORDER / DEL</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-gray-50">
+                          <tbody className="divide-y divide-[var(--border)]">
                             {c.steps.map((step, sIdx) => {
                               const targetVal =
                                 step.target?.url || step.target?.selector || (sIdx === 0 ? '/login' : 'form#login')
                               const expectedVal =
                                 typeof step.expected === 'string'
-                                  ? step.expected
-                                  : step.expected?.text ||
-                                    (sIdx === 0 ? 'HTTP 200' : 'email, password, submit')
+                                   ? step.expected
+                                   : step.expected?.text ||
+                                     (sIdx === 0 ? 'HTTP 200' : 'email, password, submit')
 
                               return (
-                                <tr key={step.id} className="hover:bg-gray-50/50">
-                                  <td className="py-2.5 font-medium text-gray-800">
+                                <tr key={step.id} className="hover:bg-[var(--hover-row)]">
+                                  <td className="py-2.5 font-medium text-[var(--text)]">
                                     {step.action}
                                   </td>
                                   <td className="py-2.5">
@@ -645,7 +647,7 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
                                           })
                                         )
                                       }}
-                                      className="border border-gray-200 rounded px-2 py-1 text-[11px] font-mono text-gray-700 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                      className="border border-[var(--border)] rounded px-2 py-1 text-[11px] font-mono text-[var(--text)] bg-[var(--surface-elevated)] focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                     >
                                       <option value="route_check">route_check</option>
                                       <option value="form_structure">form_structure</option>
@@ -656,19 +658,19 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
                                       <option value="custom">custom</option>
                                     </select>
                                   </td>
-                                  <td className="py-2.5 font-mono text-gray-700">
+                                  <td className="py-2.5 font-mono text-[var(--text-muted)]">
                                     {targetVal}
                                   </td>
-                                  <td className="py-2.5 font-mono text-gray-700">
+                                  <td className="py-2.5 font-mono text-[var(--text-muted)]">
                                     {expectedVal}
                                   </td>
                                   <td className="py-2.5 text-right">
-                                    <div className="inline-flex items-center gap-1.5 text-gray-400">
+                                    <div className="inline-flex items-center gap-1.5 text-[var(--text-muted)]">
                                       <button
                                         type="button"
                                         disabled={sIdx === 0}
                                         onClick={() => handleMoveStep(c.id, sIdx, 'up')}
-                                        className="hover:text-gray-700 disabled:opacity-30 p-0.5"
+                                        className="hover:text-[var(--text)] disabled:opacity-30 p-0.5"
                                         title="Move up"
                                       >
                                         <ArrowUp className="h-3 w-3" />
@@ -677,7 +679,7 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
                                         type="button"
                                         disabled={sIdx === c.steps.length - 1}
                                         onClick={() => handleMoveStep(c.id, sIdx, 'down')}
-                                        className="hover:text-gray-700 disabled:opacity-30 p-0.5"
+                                        className="hover:text-[var(--text)] disabled:opacity-30 p-0.5"
                                         title="Move down"
                                       >
                                         <ArrowDown className="h-3 w-3" />
@@ -685,7 +687,7 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
                                       <button
                                         type="button"
                                         onClick={() => handleDeleteStep(c.id, step.id)}
-                                        className="hover:text-red-500 p-0.5 ml-1"
+                                        className="hover:text-red-400 p-0.5 ml-1"
                                         title="Delete step"
                                       >
                                         <X className="h-3 w-3" />
@@ -702,7 +704,7 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
                       <button
                         type="button"
                         onClick={() => handleAddStep(c.id)}
-                        className="mt-3 text-[12px] text-gray-600 hover:text-gray-900 font-medium flex items-center gap-1"
+                        className="mt-3 text-[12px] text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1"
                       >
                         + Add step
                       </button>
@@ -717,43 +719,43 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
         {/* Right Column (1 col) */}
         <div className="lg:col-span-1 space-y-4">
           {/* Card 1: Plan Summary */}
-          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-none">
-            <h2 className="text-[14px] font-semibold text-gray-900 mb-3.5">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-none">
+            <h2 className="text-[14px] font-semibold text-[var(--text)] mb-3.5">
               Plan Summary
             </h2>
 
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="rounded-lg bg-gray-50 border border-gray-100 p-3">
-                <div className="text-[11px] text-gray-500 mb-1">Test cases</div>
-                <div className="text-[20px] font-bold text-gray-900">{cases.length}</div>
+              <div className="rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] p-3">
+                <div className="text-[11px] text-[var(--text-muted)] mb-1">Test cases</div>
+                <div className="text-[20px] font-bold text-[var(--text)]">{cases.length}</div>
               </div>
-              <div className="rounded-lg bg-gray-50 border border-gray-100 p-3">
-                <div className="text-[11px] text-gray-500 mb-1">Total steps</div>
-                <div className="text-[20px] font-bold text-gray-900">{totalSteps}</div>
+              <div className="rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] p-3">
+                <div className="text-[11px] text-[var(--text-muted)] mb-1">Total steps</div>
+                <div className="text-[20px] font-bold text-[var(--text)]">{totalSteps}</div>
               </div>
             </div>
 
-            <div className="text-[12px] font-semibold text-gray-700 mb-2">
+            <div className="text-[12px] font-semibold text-[var(--text)] mb-2">
               Validation types
             </div>
             <div className="flex flex-wrap gap-1.5">
               {Object.entries(validationTypeCounts).map(([type, count]) => (
                 <span
                   key={type}
-                  className="px-2 py-0.5 rounded border border-gray-200 bg-white text-gray-600 text-[11px] font-mono"
+                  className="px-2 py-0.5 rounded border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--text-muted)] text-[11px] font-mono"
                 >
                   {type}: {count}
                 </span>
               ))}
               {Object.keys(validationTypeCounts).length === 0 && (
-                <span className="text-[11px] text-gray-400 font-mono">None specified</span>
+                <span className="text-[11px] text-[var(--text-muted)] font-mono">None specified</span>
               )}
             </div>
           </div>
 
           {/* Card 2: Version Diff */}
-          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-none">
-            <h2 className="text-[14px] font-semibold text-gray-900 mb-3">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-none">
+            <h2 className="text-[14px] font-semibold text-[var(--text)] mb-3">
               {plan?.version && plan.version > 1
                 ? `Version Diff (v${plan.version - 1} → v${plan.version})`
                 : 'Version Details (v1)'}
@@ -761,19 +763,19 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
 
             {plan?.version && plan.version > 1 ? (
               <div className="space-y-2 text-[12px] font-mono">
-                <p className="text-emerald-600">
+                <p className="text-emerald-400">
                   + Incremented to Plan v{plan.version}
                 </p>
-                <p className="text-gray-600 leading-relaxed font-sans text-[11px]">
+                <p className="text-[var(--text-muted)] leading-relaxed font-sans text-[11px]">
                   ~ {plan.summary || 'Compiled with updated directives'}
                 </p>
               </div>
             ) : (
               <div className="space-y-1.5 text-[12px]">
-                <p className="font-medium text-emerald-600 font-mono">
+                <p className="font-medium text-emerald-400 font-mono">
                   Initial Plan Compilation (v1)
                 </p>
-                <p className="text-[11px] text-gray-500 leading-relaxed">
+                <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
                   Compiled {cases.length} test cases and {totalSteps} validation steps from task prompt.
                 </p>
               </div>
@@ -781,18 +783,18 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
           </div>
 
           {/* Card 3: Reviewer Notes */}
-          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-none">
-            <h2 className="text-[14px] font-semibold text-gray-900 mb-3">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-none">
+            <h2 className="text-[14px] font-semibold text-[var(--text)] mb-3">
               Reviewer Notes
             </h2>
 
             <div className="space-y-2.5 mb-3.5">
               {notes.map((note, nIdx) => (
-                <div key={nIdx} className="rounded-lg bg-gray-50 border border-gray-100 p-2.5">
-                  <div className="text-[11px] font-medium text-gray-700">
+                <div key={nIdx} className="rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] p-2.5">
+                  <div className="text-[11px] font-medium text-[var(--text)]">
                     {note.author} · {note.time}
                   </div>
-                  <p className="text-[12px] text-gray-600 mt-1">
+                  <p className="text-[12px] text-[var(--text-muted)] mt-1">
                     {note.text}
                   </p>
                 </div>
@@ -805,14 +807,16 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
                 value={newNote}
                 onChange={(e) => setNewNote(e.target.value)}
                 placeholder="Add reviewer note..."
-                className="flex-1 px-3 py-1.5 text-[12px] border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="flex-1 px-3 py-1.5 text-[12px] border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--text)] rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
-              <button
+              <Button
                 type="submit"
-                className="px-3 py-1.5 text-[12px] font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                variant="secondary"
+                size="sm"
+                className="h-8 text-[12px]"
               >
                 Post
-              </button>
+              </Button>
             </form>
           </div>
         </div>
@@ -820,23 +824,23 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
 
       {/* Regenerate Modal */}
       <Dialog open={regenOpen} onOpenChange={setRegenOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md bg-[var(--surface)] border-[var(--border)] text-[var(--text)]">
           <DialogHeader>
-            <DialogTitle>Regenerate with Feedback</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-[var(--text)]">Regenerate with Feedback</DialogTitle>
+            <DialogDescription className="text-[var(--text-muted)]">
               Provide additional test guidance or prompt corrections for the AI engine to generate version 3.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleRegenerate} className="space-y-4 pt-2">
             <div>
-              <label className="text-xs font-medium text-gray-700 block mb-1">
+              <label className="text-xs font-medium text-[var(--text)] block mb-1">
                 Refinement Feedback
               </label>
               <textarea
                 value={regenFeedback}
                 onChange={(e) => setRegenFeedback(e.target.value)}
                 placeholder="e.g. Ensure we check the error boundary when token expires..."
-                className="w-full text-xs border border-gray-200 rounded-lg p-2.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="w-full text-xs border border-[var(--border)] bg-[var(--surface-elevated)] text-[var(--text)] rounded-lg p-2.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 rows={3}
                 required
               />
@@ -855,7 +859,6 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
                 variant="primary"
                 size="sm"
                 disabled={regenerating}
-                className="bg-[#4F46E5] hover:bg-[#4338CA] text-white"
               >
                 {regenerating ? 'Regenerating...' : 'Regenerate Plan'}
               </Button>

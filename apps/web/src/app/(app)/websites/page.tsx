@@ -114,7 +114,7 @@ function WebsitesPageContent() {
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Active / Archived Pill Toggle */}
           <div
-            className="flex items-center bg-[#F1F3F5] dark:bg-neutral-800 p-0.5 rounded-[6px] border border-transparent dark:border-neutral-700"
+            className="flex items-center bg-[var(--hover-subtle)] p-0.5 rounded-[6px] border border-[var(--border)]"
             role="tablist"
             aria-label="Filter status"
           >
@@ -126,7 +126,7 @@ function WebsitesPageContent() {
               className={cn(
                 'h-7 px-3 text-[12px] font-medium rounded-[4px] transition-colors select-none',
                 tab === 'active'
-                  ? 'bg-white dark:bg-neutral-900 text-[var(--text)] border border-gray-200/80 dark:border-neutral-700 font-semibold shadow-xs'
+                  ? 'bg-white dark:bg-[var(--surface)] text-[var(--text)] border border-gray-200/80 dark:border-[var(--border)] font-semibold shadow-xs'
                   : 'text-[var(--text-muted)] hover:text-[var(--text)]'
               )}
             >
@@ -140,7 +140,7 @@ function WebsitesPageContent() {
               className={cn(
                 'h-7 px-3 text-[12px] font-medium rounded-[4px] transition-colors select-none',
                 tab === 'archived'
-                  ? 'bg-white dark:bg-neutral-900 text-[var(--text)] border border-gray-200/80 dark:border-neutral-700 font-semibold shadow-xs'
+                  ? 'bg-white dark:bg-[var(--surface)] text-[var(--text)] border border-gray-200/80 dark:border-[var(--border)] font-semibold shadow-xs'
                   : 'text-[var(--text-muted)] hover:text-[var(--text)]'
               )}
             >
@@ -150,13 +150,13 @@ function WebsitesPageContent() {
 
           {/* Search Input */}
           <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--text-muted)]" />
             <input
               type="text"
               placeholder="Search name or URL..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-8 w-full pl-8 pr-3 text-[12px] bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-[6px] text-[var(--text)] placeholder:text-gray-400 focus:outline-none focus:border-[var(--primary)] transition-colors"
+              className="h-8 w-full pl-8 pr-3 text-[12px] bg-[var(--surface)] border border-[var(--border)] rounded-[6px] text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--border-hover)] transition-colors"
             />
           </div>
 
@@ -166,10 +166,10 @@ function WebsitesPageContent() {
               type="button"
               onClick={() => setEnvOpen((v) => !v)}
               className={cn(
-                'h-8 px-3 rounded-[6px] bg-white dark:bg-neutral-900 border text-[12px] font-medium text-[var(--text)] flex items-center gap-2 transition-colors select-none',
+                'h-8 px-3 rounded-[6px] bg-[var(--surface)] border text-[12px] font-medium text-[var(--text)] flex items-center gap-2 transition-colors select-none',
                 envOpen
                   ? 'border-[var(--primary)] ring-2 ring-[var(--ai-ring)]'
-                  : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300'
+                  : 'border-[var(--border)] hover:border-[var(--border-hover)]'
               )}
               aria-haspopup="listbox"
               aria-expanded={envOpen}
@@ -177,7 +177,7 @@ function WebsitesPageContent() {
               <span>{selectedEnv}</span>
               <ChevronDown
                 className={cn(
-                  'h-3.5 w-3.5 text-gray-400 transition-transform duration-150',
+                  'h-3.5 w-3.5 text-[var(--text-muted)] transition-transform duration-150',
                   envOpen && 'rotate-180'
                 )}
               />
@@ -188,7 +188,7 @@ function WebsitesPageContent() {
                 <div className="fixed inset-0 z-20" onClick={() => setEnvOpen(false)} />
                 <div
                   role="listbox"
-                  className="absolute left-0 top-full mt-1.5 w-44 rounded-[8px] bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 py-1 z-30 shadow-lg"
+                  className="absolute left-0 top-full mt-1.5 w-44 rounded-[8px] bg-[var(--surface)] border border-[var(--border)] py-1 z-30 shadow-lg"
                 >
                   {ENV_OPTIONS.map((opt) => {
                     const isSelected = selectedEnv === opt.label
@@ -213,7 +213,7 @@ function WebsitesPageContent() {
                           {opt.dot ? (
                             <span className={cn('h-2 w-2 rounded-full shrink-0', opt.dot)} />
                           ) : (
-                            <span className="h-2 w-2 rounded-full border border-gray-300 dark:border-neutral-600 shrink-0" />
+                            <span className="h-2 w-2 rounded-full border border-[var(--border)] shrink-0" />
                           )}
                           <span>{opt.label}</span>
                         </div>
@@ -228,14 +228,14 @@ function WebsitesPageContent() {
         </div>
 
         {/* Right: [ List | Grid ] Segmented Toggle */}
-        <div className="flex items-center bg-[#F1F3F5] dark:bg-neutral-800 p-0.5 rounded-[6px] border border-transparent dark:border-neutral-700 self-end md:self-auto">
+        <div className="flex items-center bg-[var(--hover-subtle)] p-0.5 rounded-[6px] border border-[var(--border)] self-end md:self-auto">
           <button
             type="button"
             onClick={() => setViewMode('list')}
             className={cn(
               'h-7 px-3 text-[12px] font-medium rounded-[4px] transition-colors select-none',
               viewMode === 'list'
-                ? 'bg-white dark:bg-neutral-900 text-[var(--text)] border border-gray-200/80 dark:border-neutral-700 font-semibold shadow-xs'
+                ? 'bg-white dark:bg-[var(--surface)] text-[var(--text)] border border-gray-200/80 dark:border-[var(--border)] font-semibold shadow-xs'
                 : 'text-[var(--text-muted)] hover:text-[var(--text)]'
             )}
           >
@@ -247,7 +247,7 @@ function WebsitesPageContent() {
             className={cn(
               'h-7 px-3 text-[12px] font-medium rounded-[4px] transition-colors select-none',
               viewMode === 'grid'
-                ? 'bg-white dark:bg-neutral-900 text-[var(--text)] border border-gray-200/80 dark:border-neutral-700 font-semibold shadow-xs'
+                ? 'bg-white dark:bg-[var(--surface)] text-[var(--text)] border border-gray-200/80 dark:border-[var(--border)] font-semibold shadow-xs'
                 : 'text-[var(--text-muted)] hover:text-[var(--text)]'
             )}
           >
@@ -275,11 +275,11 @@ function WebsitesPageContent() {
       >
         {viewMode === 'list' ? (
           /* Table View matching screenshot 1:1 */
-          <div className="rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden shadow-none">
+          <div className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-none">
             <div className="overflow-x-auto">
               <table className="w-full text-[13px]">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-neutral-800 text-[11px] font-semibold text-gray-400 dark:text-neutral-500 uppercase tracking-wider">
+                  <tr className="border-b border-[var(--border)] text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                     <th className="text-left py-3.5 px-6 font-semibold">WEBSITE</th>
                     <th className="text-left py-3.5 px-4 font-semibold">ENVIRONMENT</th>
                     <th className="text-left py-3.5 px-4 font-semibold">LAST RUN</th>
@@ -288,14 +288,14 @@ function WebsitesPageContent() {
                     <th className="text-right py-3.5 px-6 font-semibold">ACTIONS</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-neutral-800/80">
+                <tbody className="divide-y divide-[var(--border)]">
                   {filtered.map((site) => (
-                    <tr key={site.id} className="hover:bg-gray-50/70 dark:hover:bg-neutral-800/40 transition-colors">
+                    <tr key={site.id} className="hover:bg-[var(--hover-row)] transition-colors">
                       {/* Website Name & URL */}
                       <td className="py-3.5 px-6">
                         <Link
                           href={`/websites/${site.id}`}
-                          className="font-semibold text-[13px] text-gray-900 dark:text-white hover:text-[var(--primary)] transition-colors block leading-snug"
+                          className="font-semibold text-[13px] text-[var(--text)] hover:text-[var(--primary)] transition-colors block leading-snug"
                         >
                           {site.name}
                         </Link>
@@ -303,7 +303,7 @@ function WebsitesPageContent() {
                           href={site.baseUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="mono-data text-[12px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 inline-flex items-center gap-1 mt-0.5 transition-colors"
+                          className="mono-data text-[12px] text-[var(--text-muted)] hover:text-[var(--text)] inline-flex items-center gap-1 mt-0.5 transition-colors"
                         >
                           <span>{site.baseUrl}</span>
                           <ArrowUpRight className="h-3 w-3" />
@@ -328,7 +328,7 @@ function WebsitesPageContent() {
                           </span>
                         )}
                         {site.environment === 'dev' && (
-                          <span className="mono-data text-[11px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-[4px] bg-gray-100 text-gray-600 dark:bg-neutral-800 dark:text-neutral-400">
+                          <span className="mono-data text-[11px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-[4px] bg-[var(--hover-subtle)] text-[var(--text-muted)]">
                             DEV
                           </span>
                         )}
@@ -352,17 +352,17 @@ function WebsitesPageContent() {
                           </span>
                         )}
                         {!site.lastRunStatus && (
-                          <span className="text-[12px] text-gray-400">—</span>
+                          <span className="text-[12px] text-[var(--text-muted)]">—</span>
                         )}
                       </td>
 
                       {/* Tasks count */}
-                      <td className="py-3.5 px-4 mono-data font-medium text-[13px] text-gray-800 dark:text-neutral-200">
+                      <td className="py-3.5 px-4 mono-data font-medium text-[13px] text-[var(--text)]">
                         {site.taskCount}
                       </td>
 
                       {/* Updated */}
-                      <td className="py-3.5 px-4 mono-data text-[12px] text-gray-500 dark:text-neutral-400">
+                      <td className="py-3.5 px-4 mono-data text-[12px] text-[var(--text-muted)]">
                         {site.updatedAtLabel || 'Recently'}
                       </td>
 
@@ -373,7 +373,6 @@ function WebsitesPageContent() {
                             variant="secondary"
                             size="sm"
                             asChild
-                            className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px]"
                           >
                             <Link href={`/websites/${site.id}/config`}>{canManage ? 'Configure' : 'View config'}</Link>
                           </Button>
@@ -382,7 +381,6 @@ function WebsitesPageContent() {
                               variant="secondary"
                               size="sm"
                               onClick={() => handleToggleArchive(site)}
-                              className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px]"
                             >
                               {site.status === 'archived' ? 'Restore' : 'Archive'}
                             </Button>
@@ -401,13 +399,13 @@ function WebsitesPageContent() {
             {filtered.map((site) => (
               <div
                 key={site.id}
-                className="p-4 rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 flex flex-col justify-between hover:border-gray-300 dark:hover:border-neutral-700 transition-all"
+                className="p-4 rounded-[8px] border border-[var(--border)] bg-[var(--surface)] flex flex-col justify-between hover:border-[var(--border-hover)] transition-all"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-1.5">
                     <Link
                       href={`/websites/${site.id}`}
-                      className="font-semibold text-[14px] text-gray-900 dark:text-white hover:text-[var(--primary)] transition-colors leading-snug"
+                      className="font-semibold text-[14px] text-[var(--text)] hover:text-[var(--primary)] transition-colors leading-snug"
                     >
                       {site.name}
                     </Link>
@@ -432,15 +430,15 @@ function WebsitesPageContent() {
                     href={site.baseUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="mono-data text-[12px] text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 inline-flex items-center gap-1 mb-4 truncate"
+                    className="mono-data text-[12px] text-[var(--text-muted)] hover:text-[var(--text)] inline-flex items-center gap-1 mb-4 truncate"
                   >
                     <span>{site.baseUrl}</span>
                     <ArrowUpRight className="h-3 w-3 shrink-0" />
                   </a>
 
-                  <div className="flex items-center justify-between text-[12px] text-gray-500 dark:text-neutral-400 py-2 border-t border-gray-100 dark:border-neutral-800">
+                  <div className="flex items-center justify-between text-[12px] text-[var(--text-muted)] py-2 border-t border-[var(--border)]">
                     <span>
-                      Tasks: <b className="mono-data text-gray-900 dark:text-white">{site.taskCount}</b>
+                      Tasks: <b className="mono-data text-[var(--text)]">{site.taskCount}</b>
                     </span>
                     {site.lastRunStatus === 'passed' && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#DCFCE7] text-[#16A34A] dark:bg-emerald-950/40 dark:text-emerald-400">
@@ -455,12 +453,11 @@ function WebsitesPageContent() {
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-gray-100 dark:border-neutral-800 flex items-center justify-end gap-2">
+                <div className="pt-3 border-t border-[var(--border)] flex items-center justify-end gap-2">
                   <Button
                     variant="secondary"
                     size="sm"
                     asChild
-                    className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 rounded-[6px]"
                   >
                     <Link href={`/websites/${site.id}/config`}>{canManage ? 'Configure' : 'View config'}</Link>
                   </Button>
@@ -469,7 +466,6 @@ function WebsitesPageContent() {
                       variant="secondary"
                       size="sm"
                       onClick={() => handleToggleArchive(site)}
-                      className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 rounded-[6px]"
                     >
                       {site.status === 'archived' ? 'Restore' : 'Archive'}
                     </Button>

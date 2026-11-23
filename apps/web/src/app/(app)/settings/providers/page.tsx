@@ -7,6 +7,7 @@ import { SettingsNav } from '@/components/layout/SettingsNav'
 import { Check, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
 
 export default function ProvidersSettingsPage() {
   const router = useRouter()
@@ -69,22 +70,22 @@ export default function ProvidersSettingsPage() {
       {/* Row 1: Dual Provider Cards side-by-side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Card 1: Ollama (Local) */}
-        <div className="rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 flex flex-col justify-between space-y-5 shadow-none">
+        <div className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] p-6 flex flex-col justify-between space-y-5 shadow-none">
           <div className="space-y-5">
             {/* Top row */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                <span className="font-bold text-[15px] text-gray-900 dark:text-white">
+                <span className="font-bold text-[15px] text-[var(--text)]">
                   Ollama
                 </span>
-                <span className="text-[13px] text-gray-500 dark:text-neutral-400">
+                <span className="text-[13px] text-[var(--text-muted)]">
                   (Local)
                 </span>
               </div>
 
               {/* Default engine radio */}
-              <label className="flex items-center gap-2 text-[13px] text-gray-700 dark:text-gray-300 cursor-pointer select-none">
+              <label className="flex items-center gap-2 text-[13px] text-[var(--text)] cursor-pointer select-none">
                 <input
                   type="radio"
                   name="defaultEngine"
@@ -93,7 +94,7 @@ export default function ProvidersSettingsPage() {
                     setDefaultEngine('ollama')
                     toast.success('Ollama set as default engine')
                   }}
-                  className="h-4 w-4 text-[#4F46E5] focus:ring-[#4F46E5] cursor-pointer"
+                  className="h-4 w-4 text-[var(--primary)] focus:ring-[var(--ai-ring)] cursor-pointer"
                 />
                 <span>Default engine</span>
               </label>
@@ -101,33 +102,33 @@ export default function ProvidersSettingsPage() {
 
             {/* Base URL */}
             <div className="space-y-1.5">
-              <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+              <label className="block text-[13px] font-medium text-[var(--text-muted)]">
                 Base URL
               </label>
               <input
                 type="text"
                 value={ollamaUrl}
                 onChange={(e) => setOllamaUrl(e.target.value)}
-                className="w-full h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
+                className="w-full h-10 px-3.5 text-[13px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] focus:outline-none focus:border-[var(--border-hover)] transition-colors"
               />
             </div>
 
             {/* Default model dropdown */}
             <div className="space-y-1.5">
-              <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+              <label className="block text-[13px] font-medium text-[var(--text-muted)]">
                 Default model
               </label>
               <div className="relative">
                 <select
                   value={ollamaModel}
                   onChange={(e) => setOllamaModel(e.target.value)}
-                  className="w-full h-10 px-3.5 pr-8 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] appearance-none cursor-pointer transition-colors"
+                  className="w-full h-10 px-3.5 pr-8 text-[13px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] focus:outline-none focus:border-[var(--border-hover)] appearance-none cursor-pointer transition-colors"
                 >
                   <option value="qwen2.5:14b">qwen2.5:14b</option>
                   <option value="llama3.1:8b">llama3.1:8b</option>
                   <option value="mistral-nemo:12b">mistral-nemo:12b</option>
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)] pointer-events-none" />
               </div>
             </div>
           </div>
@@ -139,42 +140,44 @@ export default function ProvidersSettingsPage() {
             </span>
 
             <div className="flex items-center gap-2">
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 type="button"
                 onClick={testOllama}
                 disabled={ollamaTesting}
-                className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px] transition-colors"
               >
                 {ollamaTesting ? 'Testing...' : 'Test connection'}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
                 type="button"
                 onClick={() => handleSave('Ollama')}
-                className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none"
               >
                 Save
-              </button>
+              </Button>
             </div>
           </div>
         </div>
 
         {/* Card 2: Gemini (Cloud) */}
-        <div className="rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 flex flex-col justify-between space-y-5 shadow-none">
+        <div className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] p-6 flex flex-col justify-between space-y-5 shadow-none">
           <div className="space-y-5">
             {/* Top row */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                <span className="font-bold text-[15px] text-gray-900 dark:text-white">
+                <span className="font-bold text-[15px] text-[var(--text)]">
                   Gemini
                 </span>
-                <span className="text-[13px] text-gray-500 dark:text-neutral-400">
+                <span className="text-[13px] text-[var(--text-muted)]">
                   (Cloud)
                 </span>
               </div>
 
               {/* Default engine radio */}
-              <label className="flex items-center gap-2 text-[13px] text-gray-700 dark:text-gray-300 cursor-pointer select-none">
+              <label className="flex items-center gap-2 text-[13px] text-[var(--text)] cursor-pointer select-none">
                 <input
                   type="radio"
                   name="defaultEngine"
@@ -183,7 +186,7 @@ export default function ProvidersSettingsPage() {
                     setDefaultEngine('gemini')
                     toast.success('Gemini set as default engine')
                   }}
-                  className="h-4 w-4 text-[#4F46E5] focus:ring-[#4F46E5] cursor-pointer"
+                  className="h-4 w-4 text-[var(--primary)] focus:ring-[var(--ai-ring)] cursor-pointer"
                 />
                 <span>Default engine</span>
               </label>
@@ -191,7 +194,7 @@ export default function ProvidersSettingsPage() {
 
             {/* API Key */}
             <div className="space-y-1.5">
-              <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+              <label className="block text-[13px] font-medium text-[var(--text-muted)]">
                 API Key (encrypted at rest)
               </label>
               <div className="relative flex items-center">
@@ -199,12 +202,12 @@ export default function ProvidersSettingsPage() {
                   type={showGeminiKey ? 'text' : 'password'}
                   value={geminiKey}
                   onChange={(e) => setGeminiKey(e.target.value)}
-                  className="w-full h-10 px-3.5 pr-16 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
+                  className="w-full h-10 px-3.5 pr-16 text-[13px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] focus:outline-none focus:border-[var(--border-hover)] transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowGeminiKey((v) => !v)}
-                  className="absolute right-2 h-7 px-2.5 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[4px] transition-colors"
+                  className="absolute right-2 h-7 px-2.5 text-[12px] font-medium border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--hover-subtle)] text-[var(--text)] rounded-[4px] transition-colors"
                 >
                   {showGeminiKey ? 'Hide' : 'Show'}
                 </button>
@@ -213,20 +216,20 @@ export default function ProvidersSettingsPage() {
 
             {/* Default model dropdown */}
             <div className="space-y-1.5">
-              <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+              <label className="block text-[13px] font-medium text-[var(--text-muted)]">
                 Default model
               </label>
               <div className="relative">
                 <select
                   value={geminiModel}
                   onChange={(e) => setGeminiModel(e.target.value)}
-                  className="w-full h-10 px-3.5 pr-8 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] appearance-none cursor-pointer transition-colors"
+                  className="w-full h-10 px-3.5 pr-8 text-[13px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] focus:outline-none focus:border-[var(--border-hover)] appearance-none cursor-pointer transition-colors"
                 >
                   <option value="gemini-2.5-pro">gemini-2.5-pro</option>
                   <option value="gemini-2.5-flash">gemini-2.5-flash</option>
                   <option value="gemini-1.5-pro">gemini-1.5-pro</option>
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-muted)] pointer-events-none" />
               </div>
             </div>
           </div>
@@ -238,30 +241,32 @@ export default function ProvidersSettingsPage() {
             </span>
 
             <div className="flex items-center gap-2">
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 type="button"
                 onClick={testGemini}
                 disabled={geminiTesting}
-                className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px] transition-colors"
               >
                 {geminiTesting ? 'Testing...' : 'Test connection'}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
                 type="button"
                 onClick={() => handleSave('Gemini')}
-                className="h-8 px-3.5 text-[12px] font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-[6px] transition-colors shadow-none"
               >
                 Save
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       </div>
 
       {/* Row 2: AI Usage (Last 30 days) Table */}
-      <div className="rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden shadow-none">
-        <div className="p-5 border-b border-gray-100 dark:border-neutral-800">
-          <h2 className="text-[15px] font-semibold text-gray-900 dark:text-white">
+      <div className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-none">
+        <div className="p-5 border-b border-[var(--border)]">
+          <h2 className="text-[15px] font-semibold text-[var(--text)]">
             AI Usage (Last 30 days)
           </h2>
         </div>
@@ -269,7 +274,7 @@ export default function ProvidersSettingsPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead>
-              <tr className="border-b border-gray-100 dark:border-neutral-800 text-[11px] font-semibold text-gray-400 dark:text-neutral-500 uppercase tracking-wider">
+              <tr className="border-b border-[var(--border)] text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 <th className="text-left py-3.5 px-6 font-semibold">PROVIDER</th>
                 <th className="text-left py-3.5 px-4 font-semibold">MODEL</th>
                 <th className="text-left py-3.5 px-4 font-semibold">PLAN CALLS</th>
@@ -278,44 +283,44 @@ export default function ProvidersSettingsPage() {
                 <th className="text-left py-3.5 px-6 font-semibold">AVG LATENCY</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-neutral-800/80">
-              <tr className="hover:bg-gray-50/70 dark:hover:bg-neutral-800/40 transition-colors">
-                <td className="py-3.5 px-6 font-bold text-gray-900 dark:text-white">
+            <tbody className="divide-y divide-[var(--border)]">
+              <tr className="hover:bg-[var(--hover-row)] transition-colors">
+                <td className="py-3.5 px-6 font-bold text-[var(--text)]">
                   Ollama (Local)
                 </td>
-                <td className="py-3.5 px-4 mono-data text-gray-600 dark:text-gray-300">
+                <td className="py-3.5 px-4 mono-data text-[var(--text-muted)]">
                   qwen2.5:14b
                 </td>
-                <td className="py-3.5 px-4 mono-data text-gray-900 dark:text-white">
+                <td className="py-3.5 px-4 mono-data text-[var(--text)]">
                   184
                 </td>
-                <td className="py-3.5 px-4 mono-data text-gray-900 dark:text-white">
+                <td className="py-3.5 px-4 mono-data text-[var(--text)]">
                   312,480
                 </td>
-                <td className="py-3.5 px-4 mono-data text-gray-900 dark:text-white">
+                <td className="py-3.5 px-4 mono-data text-[var(--text)]">
                   3 / 0
                 </td>
-                <td className="py-3.5 px-6 mono-data text-gray-900 dark:text-white">
+                <td className="py-3.5 px-6 mono-data text-[var(--text)]">
                   1.8s
                 </td>
               </tr>
-              <tr className="hover:bg-gray-50/70 dark:hover:bg-neutral-800/40 transition-colors">
-                <td className="py-3.5 px-6 font-bold text-gray-900 dark:text-white">
+              <tr className="hover:bg-[var(--hover-row)] transition-colors">
+                <td className="py-3.5 px-6 font-bold text-[var(--text)]">
                   Gemini (Cloud)
                 </td>
-                <td className="py-3.5 px-4 mono-data text-gray-600 dark:text-gray-300">
+                <td className="py-3.5 px-4 mono-data text-[var(--text-muted)]">
                   gemini-2.5-pro
                 </td>
-                <td className="py-3.5 px-4 mono-data text-gray-900 dark:text-white">
+                <td className="py-3.5 px-4 mono-data text-[var(--text)]">
                   62
                 </td>
-                <td className="py-3.5 px-4 mono-data text-gray-900 dark:text-white">
+                <td className="py-3.5 px-4 mono-data text-[var(--text)]">
                   118,900
                 </td>
-                <td className="py-3.5 px-4 mono-data text-gray-900 dark:text-white">
+                <td className="py-3.5 px-4 mono-data text-[var(--text)]">
                   0 / 0
                 </td>
-                <td className="py-3.5 px-6 mono-data text-gray-900 dark:text-white">
+                <td className="py-3.5 px-6 mono-data text-[var(--text)]">
                   1.1s
                 </td>
               </tr>

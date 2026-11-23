@@ -192,16 +192,16 @@ export function QALeadDashboard({
               type="button"
               onClick={() => setEnvOpen((v) => !v)}
               className={cn(
-                'h-9 px-3.5 rounded-[6px] bg-white dark:bg-neutral-900 border text-[13px] font-medium text-gray-700 dark:text-gray-200 flex items-center gap-2 transition-colors select-none',
+                'h-9 px-3.5 rounded-[6px] bg-[var(--surface)] border border-[var(--border)] text-[13px] font-medium text-[var(--text)] flex items-center gap-2 transition-colors select-none',
                 envOpen
                   ? 'border-[#4F46E5] ring-2 ring-[#4F46E5]/20'
-                  : 'border-gray-200 dark:border-neutral-700 hover:border-gray-300'
+                  : 'hover:border-[var(--border-hover)]'
               )}
             >
               <span>{selectedEnv}</span>
               <ChevronDown
                 className={cn(
-                  'h-3.5 w-3.5 text-gray-400 transition-transform duration-150',
+                  'h-3.5 w-3.5 text-[var(--text-muted)] transition-transform duration-150',
                   envOpen && 'rotate-180'
                 )}
               />
@@ -211,7 +211,7 @@ export function QALeadDashboard({
               <>
                 <div className="fixed inset-0 z-20" onClick={() => setEnvOpen(false)} />
                 <div
-                  className="absolute left-0 sm:right-0 sm:left-auto top-full mt-1.5 w-48 rounded-[8px] bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 py-1 z-30 shadow-lg animate-enter"
+                  className="absolute left-0 sm:right-0 sm:left-auto top-full mt-1.5 w-48 rounded-[8px] bg-[var(--surface)] border border-[var(--border)] py-1 z-30 shadow-lg animate-enter"
                 >
                   {ENV_OPTIONS.map((opt) => {
                     const isSelected = selectedEnv === opt.label
@@ -227,7 +227,7 @@ export function QALeadDashboard({
                           'w-full text-left px-3.5 py-2 text-[12px] flex items-center justify-between transition-colors',
                           isSelected
                             ? 'bg-[#EEF2FF] dark:bg-indigo-950/40 text-[#4F46E5] font-semibold'
-                            : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-800'
+                            : 'text-[var(--text)] hover:bg-[var(--hover-row)]'
                         )}
                       >
                         <div className="flex items-center gap-2">
@@ -356,14 +356,14 @@ export function QALeadDashboard({
                 {LEAD_PLANS.map((plan) => (
                   <div
                     key={plan.id}
-                    className="p-3.5 rounded-lg border border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:border-gray-200 dark:hover:border-neutral-700 transition-colors flex items-center justify-between gap-4"
+                    className="p-3.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--border-hover)] transition-colors flex items-center justify-between gap-4"
                   >
                     <div className="min-w-0 space-y-1">
-                      <h3 className="font-semibold text-[13px] text-gray-900 dark:text-white truncate">
+                      <h3 className="font-semibold text-[13px] text-[var(--text)] truncate">
                         {plan.title}
                       </h3>
-                      <div className="flex items-center gap-2 text-[12px] text-gray-500 dark:text-neutral-400 flex-wrap">
-                        <span className="font-medium text-gray-700 dark:text-gray-300">
+                      <div className="flex items-center gap-2 text-[12px] text-[var(--text-muted)] flex-wrap">
+                        <span className="font-medium text-[var(--text)]">
                           {plan.website}
                         </span>
                         <EnvBadge env={plan.environment} />
@@ -380,7 +380,7 @@ export function QALeadDashboard({
 
                     <Button variant="secondary" size="sm" asChild className="shrink-0 h-8 px-3 text-[12px] gap-1">
                       <Link href={`/plans/${plan.id}`}>
-                        Review <ArrowUpRight className="h-3.5 w-3.5 text-gray-500" />
+                        Review <ArrowUpRight className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                       </Link>
                     </Button>
                   </div>
@@ -394,7 +394,7 @@ export function QALeadDashboard({
         <div className="lg:col-span-4">
           <Card className="p-5 flex flex-col justify-between min-h-[300px]">
             <div>
-              <h2 className="text-[14px] font-bold text-gray-900 dark:text-white mb-4">
+              <h2 className="text-[14px] font-bold text-[var(--text)] mb-4">
                 Website Config Readiness
               </h2>
 
@@ -402,7 +402,7 @@ export function QALeadDashboard({
                 {CONFIG_READINESS.map((item) => (
                   <div key={item.name} className="space-y-1.5">
                     <div className="flex items-center justify-between text-[12px]">
-                      <span className="font-medium text-gray-800 dark:text-gray-200">
+                      <span className="font-medium text-[var(--text)]">
                         {item.name}
                       </span>
                       <span
@@ -428,14 +428,14 @@ export function QALeadDashboard({
             </div>
 
             {/* Bottom action button */}
-            <div className="pt-4 mt-4 border-t border-gray-100 dark:border-neutral-800">
-              <button
-                type="button"
+            <div className="pt-4 mt-4 border-t border-[var(--border)]">
+              <Button
+                variant="secondary"
                 onClick={handleRerunLastApprovedPlan}
-                className="w-full h-9 rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 text-[12px] font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full h-9 text-[12px] gap-1.5"
               >
-                <RefreshCw className="h-3.5 w-3.5 text-gray-500" /> Re-run last approved plan
-              </button>
+                <RefreshCw className="h-3.5 w-3.5 text-[var(--text-muted)]" /> Re-run last approved plan
+              </Button>
             </div>
           </Card>
         </div>
@@ -458,7 +458,7 @@ export function QALeadDashboard({
             <div className="overflow-x-auto">
               <table className="w-full text-[13px]">
                 <thead>
-                  <tr className="border-b border-gray-100 dark:border-neutral-800 text-[11px] font-semibold text-gray-400 dark:text-neutral-500 uppercase tracking-wider">
+                  <tr className="border-b border-[var(--border)] text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                     <th className="text-left py-2.5 px-4 w-28">STATUS</th>
                     <th className="text-left py-2.5 px-4">TASK / WEBSITE</th>
                     <th className="text-left py-2.5 px-4">AUTHOR</th>
@@ -467,11 +467,11 @@ export function QALeadDashboard({
                     <th className="text-right py-2.5 px-4">STARTED</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:border-neutral-800">
+                <tbody className="divide-y divide-[var(--border)]">
                   {TEAM_RUNS.map((run) => (
                     <tr
                       key={run.id}
-                      className="hover:bg-gray-50/70 dark:hover:bg-neutral-800/40 transition-colors"
+                      className="hover:bg-[var(--hover-row)] transition-colors"
                     >
                       <td className="py-3 px-4">
                         {run.status === 'passed' ? (
@@ -487,27 +487,27 @@ export function QALeadDashboard({
                       <td className="py-3 px-4">
                         <Link
                           href={`/reports/${run.id}`}
-                          className="font-semibold text-gray-900 dark:text-white hover:text-[#4F46E5] transition-colors block leading-snug"
+                          className="font-semibold text-[var(--text)] hover:text-[var(--primary)] transition-colors block leading-snug"
                         >
                           {run.taskTitle}
                         </Link>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[11px] text-gray-500 dark:text-neutral-400">
+                          <span className="text-[11px] text-[var(--text-muted)]">
                             {run.websiteName}
                           </span>
                           <EnvBadge env={run.environment} />
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-[12px] text-gray-700 dark:text-gray-300">
+                      <td className="py-3 px-4 text-[12px] text-[var(--text)]">
                         {run.author}
                       </td>
-                      <td className="py-3 px-4 mono-data text-[12px] text-gray-600 dark:text-neutral-400">
+                      <td className="py-3 px-4 mono-data text-[12px] text-[var(--text-muted)]">
                         {run.engine}
                       </td>
-                      <td className="py-3 px-4 mono-data text-[12px] text-gray-800 dark:text-gray-200">
+                      <td className="py-3 px-4 mono-data text-[12px] text-[var(--text)]">
                         {run.duration}
                       </td>
-                      <td className="py-3 px-4 text-right text-[12px] text-gray-500 dark:text-neutral-400">
+                      <td className="py-3 px-4 text-right text-[12px] text-[var(--text-muted)]">
                         {run.started}
                       </td>
                     </tr>

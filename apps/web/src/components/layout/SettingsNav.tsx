@@ -44,7 +44,7 @@ export function SettingsNav({ action }: SettingsNavProps) {
       </div>
 
       {/* Tabs Row */}
-      <div className="flex items-center gap-6 border-b border-gray-200 dark:border-neutral-800 text-[13px]">
+      <div className="flex items-center gap-6 border-b border-[var(--border)] text-[13px]">
         {tabs.map((tab) => {
           const isActive =
             pathname === tab.href ||
@@ -56,8 +56,8 @@ export function SettingsNav({ action }: SettingsNavProps) {
               className={cn(
                 'flex items-center gap-1.5 pb-2.5 font-medium transition-colors select-none relative',
                 isActive
-                  ? 'text-gray-900 dark:text-white font-semibold border-b-2 border-[#4F46E5] -mb-[1px]'
-                  : 'text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'text-[var(--text)] font-semibold border-b-2 border-[#4F46E5] -mb-[1px]'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text)]'
               )}
             >
               <span>{tab.label}</span>

@@ -134,10 +134,10 @@ export default function ReportsPage() {
             disabled={selectedRunIds.length !== 2}
             onClick={handleCompare}
             className={cn(
-              'h-10 px-4 text-[13px] font-medium rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 transition-colors',
+              'h-10 px-4 text-[13px] font-medium rounded-lg transition-colors',
               selectedRunIds.length === 2
                 ? 'text-[#4F46E5] border-[#4F46E5] shadow-xs'
-                : 'text-gray-500 dark:text-neutral-400 opacity-80 cursor-not-allowed'
+                : 'opacity-70 cursor-not-allowed'
             )}
           >
             Compare ({selectedRunIds.length}/2)
@@ -167,7 +167,7 @@ export default function ReportsPage() {
               placeholder="Search run ID or task..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-10 w-full px-3.5 text-[13px] bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-[8px] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
+              className="h-10 w-full px-3.5 text-[13px] bg-[var(--surface)] border border-[var(--border)] rounded-[8px] text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--border-hover)] transition-colors"
             />
           </div>
 
@@ -176,7 +176,7 @@ export default function ReportsPage() {
             <select
               value={selectedWebsite}
               onChange={(e) => setSelectedWebsite(e.target.value)}
-              className="h-10 px-3.5 pr-8 text-[13px] bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-[8px] text-gray-800 dark:text-neutral-200 focus:outline-none focus:border-[#4F46E5] appearance-none cursor-pointer transition-colors"
+              className="h-10 px-3.5 pr-8 text-[13px] bg-[var(--surface)] border border-[var(--border)] rounded-[8px] text-[var(--text)] focus:outline-none focus:border-[var(--border-hover)] appearance-none cursor-pointer transition-colors"
             >
               <option value="all">All websites</option>
               {websiteOptions.map((w) => (
@@ -185,7 +185,7 @@ export default function ReportsPage() {
                 </option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--text-muted)] pointer-events-none" />
           </div>
 
           {/* All results dropdown */}
@@ -193,27 +193,27 @@ export default function ReportsPage() {
             <select
               value={selectedResult}
               onChange={(e) => setSelectedResult(e.target.value)}
-              className="h-10 px-3.5 pr-8 text-[13px] bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-[8px] text-gray-800 dark:text-neutral-200 focus:outline-none focus:border-[#4F46E5] appearance-none cursor-pointer transition-colors"
+              className="h-10 px-3.5 pr-8 text-[13px] bg-[var(--surface)] border border-[var(--border)] rounded-[8px] text-[var(--text)] focus:outline-none focus:border-[var(--border-hover)] appearance-none cursor-pointer transition-colors"
             >
               <option value="all">All results</option>
               <option value="passed">Passed</option>
               <option value="failed">Failed</option>
               <option value="error">Error</option>
             </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--text-muted)] pointer-events-none" />
           </div>
         </div>
 
         {/* Right: [ Date-wise | Task-wise ] Segmented Switch Toggle */}
-        <div className="flex items-center bg-[#F1F3F5] dark:bg-neutral-800 p-0.5 rounded-[8px] border border-transparent dark:border-neutral-700 self-end md:self-auto">
+        <div className="flex items-center bg-[var(--hover-subtle)] p-0.5 rounded-[8px] border border-[var(--border)] self-end md:self-auto">
           <button
             type="button"
             onClick={() => setViewGrouping('date')}
             className={cn(
               'h-8 px-3.5 text-[12px] font-medium rounded-[6px] transition-colors select-none',
               viewGrouping === 'date'
-                ? 'bg-white dark:bg-neutral-900 text-gray-900 dark:text-white border border-gray-200/80 dark:border-neutral-700 font-semibold shadow-xs'
-                : 'text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white'
+                ? 'bg-white dark:bg-[var(--surface)] text-[var(--text)] border border-gray-200/80 dark:border-[var(--border)] font-semibold shadow-xs'
+                : 'text-[var(--text-muted)] hover:text-[var(--text)]'
             )}
           >
             Date-wise
@@ -224,8 +224,8 @@ export default function ReportsPage() {
             className={cn(
               'h-8 px-3.5 text-[12px] font-medium rounded-[6px] transition-colors select-none',
               viewGrouping === 'task'
-                ? 'bg-white dark:bg-neutral-900 text-gray-900 dark:text-white border border-gray-200/80 dark:border-neutral-700 font-semibold shadow-xs'
-                : 'text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white'
+                ? 'bg-white dark:bg-[var(--surface)] text-[var(--text)] border border-gray-200/80 dark:border-[var(--border)] font-semibold shadow-xs'
+                : 'text-[var(--text-muted)] hover:text-[var(--text)]'
             )}
           >
             Task-wise
@@ -239,11 +239,11 @@ export default function ReportsPage() {
         isEmpty={displayedRuns.length === 0}
         emptyMessage="No execution reports match your filter criteria."
       >
-        <div className="rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden shadow-none">
+        <div className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-none">
           <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
               <thead>
-                <tr className="border-b border-gray-200 dark:border-neutral-800 text-[11px] font-semibold text-gray-400 dark:text-neutral-500 uppercase tracking-wider">
+                <tr className="border-b border-[var(--border)] text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                   <th className="w-12 py-3.5 pl-6 pr-2 text-left">
                     <span className="sr-only">Select</span>
                   </th>
@@ -257,7 +257,7 @@ export default function ReportsPage() {
                   <th className="text-right py-3.5 px-6 font-semibold">OPEN</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-neutral-800/80">
+              <tbody className="divide-y divide-[var(--border)]">
                 {displayedRuns.map((run) => {
                   const isChecked = selectedRunIds.includes(run.id)
                   const dateString =
@@ -268,8 +268,8 @@ export default function ReportsPage() {
                     <tr
                       key={run.id}
                       className={cn(
-                        'hover:bg-gray-50/70 dark:hover:bg-neutral-800/40 transition-colors',
-                        isChecked && 'bg-[#EEF0FF]/30 dark:bg-indigo-950/20'
+                        'hover:bg-[var(--hover-row)] transition-colors',
+                        isChecked && 'bg-[var(--primary-tint)]'
                       )}
                     >
                       {/* Checkbox */}
@@ -278,12 +278,12 @@ export default function ReportsPage() {
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => toggleSelect(run.id)}
-                          className="h-4 w-4 rounded border-gray-300 text-[#4F46E5] focus:ring-[#4F46E5] cursor-pointer"
+                          className="h-4 w-4 rounded border-[var(--border)] text-[var(--primary)] focus:ring-[var(--ai-ring)] cursor-pointer"
                         />
                       </td>
 
                       {/* RUN */}
-                      <td className="py-3.5 px-4 mono-data font-semibold text-[13px] text-gray-900 dark:text-white">
+                      <td className="py-3.5 px-4 mono-data font-semibold text-[13px] text-[var(--text)]">
                         <Link
                           href={`/reports/${run.id}`}
                           className="hover:text-[var(--primary)] transition-colors"
@@ -296,18 +296,18 @@ export default function ReportsPage() {
                       <td className="py-3.5 px-4">
                         <Link
                           href={`/reports/${run.id}`}
-                          className="font-semibold text-[13px] text-gray-900 dark:text-white hover:text-[var(--primary)] transition-colors block leading-snug"
+                          className="font-semibold text-[13px] text-[var(--text)] hover:text-[var(--primary)] transition-colors block leading-snug"
                         >
                           {run.taskTitle}
                         </Link>
-                        <span className="text-[12px] text-gray-400 block mt-0.5">
+                        <span className="text-[12px] text-[var(--text-muted)] block mt-0.5">
                           {run.websiteName}
                         </span>
                       </td>
 
                       {/* ENV Badge */}
                       <td className="py-3.5 px-4">
-                        <span className="mono-data text-[11px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-[4px] bg-gray-100 text-gray-600 dark:bg-neutral-800 dark:text-neutral-400 border border-gray-200/80 dark:border-neutral-700">
+                        <span className="mono-data text-[11px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-[4px] bg-[var(--hover-subtle)] text-[var(--text-muted)] border border-[var(--border)]">
                           {run.environment.toUpperCase()}
                         </span>
                       </td>
@@ -337,17 +337,17 @@ export default function ReportsPage() {
                       </td>
 
                       {/* PASS RATE */}
-                      <td className="py-3.5 px-4 mono-data font-semibold text-[13px] text-gray-900 dark:text-white">
+                      <td className="py-3.5 px-4 mono-data font-semibold text-[13px] text-[var(--text)]">
                         {run.passRate}%
                       </td>
 
                       {/* DURATION */}
-                      <td className="py-3.5 px-4 mono-data font-medium text-[13px] text-gray-900 dark:text-white">
+                      <td className="py-3.5 px-4 mono-data font-medium text-[13px] text-[var(--text)]">
                         {durationSeconds}
                       </td>
 
                       {/* DATE */}
-                      <td className="py-3.5 px-4 mono-data text-[12px] text-gray-500 dark:text-neutral-400">
+                      <td className="py-3.5 px-4 mono-data text-[12px] text-[var(--text-muted)]">
                         {dateString}
                       </td>
 
@@ -357,7 +357,6 @@ export default function ReportsPage() {
                           variant="secondary"
                           size="sm"
                           asChild
-                          className="h-8 px-4 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px]"
                         >
                           <Link href={`/reports/${run.id}`}>Open</Link>
                         </Button>

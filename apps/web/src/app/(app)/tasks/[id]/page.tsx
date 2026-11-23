@@ -11,6 +11,7 @@ import type { Run } from '@/mocks/data/runs.mock'
 import { toast } from 'sonner'
 import { useUIStore } from '@/stores/ui.store'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 export default function TaskDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -166,30 +167,34 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={handleArchiveTask}
-            className="px-3.5 py-1.5 text-[13px] font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors shadow-none"
           >
             Archive
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={handleCloneTask}
-            className="px-3.5 py-1.5 text-[13px] font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors shadow-none"
           >
             Clone
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => openFormDrawer('generate-plan', { task })}
-            className="px-3.5 py-1.5 text-[13px] font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors flex items-center gap-1.5 shadow-none"
           >
             <Sparkles className="h-3.5 w-3.5 text-indigo-500" /> Generate plan
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
             onClick={handleTriggerRun}
-            className="px-4 py-1.5 text-[13px] font-medium text-white bg-[#4F46E5] hover:bg-[#4338CA] rounded-lg transition-colors flex items-center gap-1.5 shadow-sm"
           >
             <Play className="h-3.5 w-3.5 fill-current" /> Run plan
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -198,7 +203,7 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
         {/* Left Column (2 cols) */}
         <div className="lg:col-span-2 space-y-5">
           {/* Card 1: Natural-Language Prompt */}
-          <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-[#12151F] p-5 shadow-none">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-none">
             <div className="flex items-center justify-between">
               <h2 className="text-[14px] font-semibold text-gray-900 dark:text-white">
                 Natural-Language Prompt
@@ -236,7 +241,7 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
           </div>
 
           {/* Card 2: Plan Versions */}
-          <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-[#12151F] p-5 shadow-none">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-none">
             <div className="flex items-center justify-between mb-3.5">
               <div className="flex items-center gap-2">
                 <h2 className="text-[14px] font-semibold text-gray-900 dark:text-white">
@@ -244,12 +249,13 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                 </h2>
                 <span className="text-[12px] text-gray-400 font-mono">({plans.length})</span>
               </div>
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => openFormDrawer('generate-plan', { task })}
-                className="px-2.5 py-1 text-[12px] font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-md hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
               >
                 + New version
-              </button>
+              </Button>
             </div>
 
             {plans.length > 0 ? (
@@ -262,11 +268,11 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                   return (
                     <div
                       key={p.id}
-                      className="rounded-lg border border-gray-200 dark:border-neutral-800 bg-white dark:bg-[#12151F] p-3.5 hover:border-gray-300 transition-colors"
+                      className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3.5 hover:border-[var(--border-hover)] transition-colors"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5 flex-wrap">
-                          <span className="font-mono font-bold text-[11px] text-gray-800 dark:text-gray-200 px-1.5 py-0.5 border border-gray-200 dark:border-neutral-700 rounded bg-gray-50 dark:bg-neutral-800">
+                          <span className="font-mono font-bold text-[11px] text-[var(--text)] px-1.5 py-0.5 border border-[var(--border)] rounded bg-[var(--hover-subtle)]">
                             v{p.version}
                           </span>
                           <span
@@ -277,16 +283,19 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                           >
                             {isApproved ? '✓ Approved' : 'In review'}
                           </span>
-                          <span className="text-[12px] text-gray-500 dark:text-neutral-400">
+                          <span className="text-[12px] text-[var(--text-muted)]">
                             {p.cases?.length || 0} cases · {totalSteps} steps
                           </span>
                         </div>
-                        <Link
-                          href={`/plans/${p.id}`}
-                          className="inline-flex items-center gap-1 px-3 py-1 text-[12px] font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-md hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          asChild
                         >
-                          Inspect plan ↗
-                        </Link>
+                          <Link href={`/plans/${p.id}`}>
+                            Inspect plan ↗
+                          </Link>
+                        </Button>
                       </div>
                       <div className="text-[11px] text-gray-400 dark:text-neutral-500 font-mono mt-1.5">
                         Engine: {p.engine} · {p.tokensUsed || 1250} tok
@@ -314,7 +323,7 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
           </div>
 
           {/* Card 3: Run History */}
-          <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-[#12151F] p-5 shadow-none">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-none">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-[14px] font-semibold text-gray-900 dark:text-white">
                 Run History
@@ -326,7 +335,7 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-[12px]">
                   <thead>
-                    <tr className="border-b border-gray-100 dark:border-neutral-800 text-[11px] font-semibold uppercase text-gray-400 tracking-wider">
+                    <tr className="border-b border-[var(--border)] text-[11px] font-semibold uppercase text-[var(--text-muted)] tracking-wider">
                       <th className="pb-2.5 font-medium">RUN ID</th>
                       <th className="pb-2.5 font-medium">STATUS</th>
                       <th className="pb-2.5 font-medium">PASS RATE</th>
@@ -334,10 +343,10 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                       <th className="pb-2.5 font-medium text-right">ACTION</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50 dark:divide-neutral-800/60">
+                  <tbody className="divide-y divide-[var(--border)]">
                     {runs.map((r) => (
-                      <tr key={r.id} className="hover:bg-gray-50/50 dark:hover:bg-neutral-800/40">
-                        <td className="py-3 font-mono font-medium text-gray-900 dark:text-white">
+                      <tr key={r.id} className="hover:bg-[var(--hover-row)]">
+                        <td className="py-3 font-mono font-medium text-[var(--text)]">
                           {r.id}
                         </td>
                         <td className="py-3">
@@ -358,19 +367,20 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                               : '✕ Failed'}
                           </span>
                         </td>
-                        <td className="py-3 font-semibold text-gray-900 dark:text-white">
+                        <td className="py-3 font-semibold text-[var(--text)]">
                           {r.passRate !== undefined ? `${r.passRate}%` : '0%'}
                         </td>
-                        <td className="py-3 font-mono text-gray-600 dark:text-neutral-400">
+                        <td className="py-3 font-mono text-[var(--text-muted)]">
                           {r.durationMs ? `${(r.durationMs / 1000).toFixed(2)}s` : '0.0s'}
                         </td>
                         <td className="py-3 text-right">
-                          <Link
-                            href={`/reports/${r.id}`}
-                            className="px-2.5 py-1 text-[12px] font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            asChild
                           >
-                            Open
-                          </Link>
+                            <Link href={`/reports/${r.id}`}>Open</Link>
+                          </Button>
                         </td>
                       </tr>
                     ))}
@@ -393,7 +403,7 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
 
         {/* Right Column (1 col): Dynamic Activity */}
         <div className="lg:col-span-1 space-y-5">
-          <div className="rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-[#12151F] p-5 shadow-none">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-none">
             <h2 className="text-[14px] font-semibold text-gray-900 dark:text-white mb-4">
               Activity
             </h2>

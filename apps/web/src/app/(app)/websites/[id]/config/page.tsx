@@ -84,7 +84,7 @@ function ConfigSideDrawer({
 
       {/* Slide-over Drawer Panel */}
       <div
-        className="relative z-10 w-full max-w-[500px] h-screen bg-white dark:bg-[#12151F] border-l border-gray-200 dark:border-neutral-800 shadow-2xl flex flex-col justify-between animate-slide-in-right select-text"
+        className="relative z-10 w-full max-w-[500px] h-screen bg-[var(--surface)] border-l border-[var(--border)] shadow-2xl flex flex-col justify-between animate-slide-in-right select-text"
         role="dialog"
         aria-modal="true"
       >
@@ -97,11 +97,11 @@ function ConfigSideDrawer({
             {/* Header */}
             <div className="flex items-start justify-between pb-1">
               <div>
-                <h2 className="text-[20px] font-bold text-gray-900 dark:text-white tracking-tight leading-snug flex items-center gap-1.5">
+                <h2 className="text-[20px] font-bold text-[var(--text)] tracking-tight leading-snug flex items-center gap-1.5">
                   <Sparkles className="h-4 w-4 text-[#4F46E5]" /> {title}
                 </h2>
                 {description && (
-                  <p className="text-[13px] text-gray-500 dark:text-neutral-400 mt-0.5">
+                  <p className="text-[13px] text-[var(--text-muted)] mt-0.5">
                     {description}
                   </p>
                 )}
@@ -109,7 +109,7 @@ function ConfigSideDrawer({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-[6px] p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer"
+                className="rounded-[6px] p-1 text-[var(--text-muted)] hover:text-[var(--text)] transition-colors cursor-pointer"
                 aria-label="Close"
               >
                 <X className="h-4 w-4" />
@@ -121,11 +121,11 @@ function ConfigSideDrawer({
           </div>
 
           {/* Bottom Actions matching CreateTaskDrawer */}
-          <div className="px-8 py-6 flex items-center justify-end gap-3 bg-white dark:bg-[#12151F] shrink-0 border-t border-gray-100 dark:border-neutral-800">
+          <div className="px-8 py-6 flex items-center justify-end gap-3 bg-[var(--surface)] shrink-0 border-t border-[var(--border)]">
             <button
               type="button"
               onClick={onClose}
-              className="h-10 px-5 rounded-lg border border-gray-200 dark:border-neutral-700 text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-[13px] font-medium transition-colors cursor-pointer"
+              className="h-10 px-5 rounded-lg border border-[var(--border)] text-[var(--text)] bg-[var(--surface)] hover:bg-[var(--hover-subtle)] text-[13px] font-medium transition-colors cursor-pointer"
             >
               Cancel
             </button>
@@ -660,7 +660,7 @@ export default function WebsiteConfigPage({
             variant="secondary"
             size="md"
             asChild
-            className="h-9 px-3.5 text-[13px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-lg transition-colors"
+            className="h-9 px-3.5 text-[13px] font-medium border border-[var(--border)] bg-[var(--surface)] hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-lg transition-colors"
           >
             <Link href={`/websites/${params.id}`}>← Overview</Link>
           </Button>
@@ -699,7 +699,7 @@ export default function WebsiteConfigPage({
       )}
 
       {/* 7 Tabs Navigation Row matching screenshots */}
-      <div className="flex items-center gap-6 border-b border-gray-200 dark:border-neutral-800 text-[13px] overflow-x-auto">
+      <div className="flex items-center gap-6 border-b border-[var(--border)] text-[13px] overflow-x-auto">
         {tabsList.map((t) => {
           const isActive = activeTab === t.id;
           return (
@@ -727,9 +727,9 @@ export default function WebsiteConfigPage({
 
       {/* TAB 1: ROLES */}
       {activeTab === "roles" && (
-        <div className="rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden shadow-none">
+        <div className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-none">
           {/* Card Header */}
-          <div className="p-6 pb-5 flex items-start justify-between border-b border-gray-100 dark:border-neutral-800">
+          <div className="p-6 pb-5 flex items-start justify-between border-b border-[var(--border)]">
             <div>
               <h2 className="text-[15px] font-bold text-gray-900 dark:text-white tracking-tight">
                 Website User Roles
@@ -754,7 +754,7 @@ export default function WebsiteConfigPage({
           <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
               <thead>
-                <tr className="border-b border-gray-100 dark:border-neutral-800 text-[11px] font-semibold text-gray-400 dark:text-neutral-500 uppercase tracking-wider">
+                <tr className="border-b border-[var(--border)] text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                   <th className="text-left py-3.5 px-6 font-semibold">ROLE</th>
                   <th className="text-left py-3.5 px-4 font-semibold">
                     DESCRIPTION
@@ -796,7 +796,7 @@ export default function WebsiteConfigPage({
                           <button
                             type="button"
                             onClick={() => handleOpenEditRole(role)}
-                            className="h-7 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
+                            className="h-7 px-3 text-[12px] font-medium border border-[var(--border)] bg-[var(--surface)] text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
                           >
                             Edit
                           </button>
@@ -822,13 +822,13 @@ export default function WebsiteConfigPage({
 
           {/* Bottom Version Note Bar */}
           {canEditConfig && (
-            <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
+            <div className="p-4 px-6 border-t border-[var(--border)] flex items-center gap-3 bg-[var(--surface)]">
               <input
                 type="text"
                 placeholder="Version note (e.g. Updated roles mapping)..."
                 value={versionNote}
                 onChange={(e) => setVersionNote(e.target.value)}
-                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
+                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
               />
               <button
                 type="button"
@@ -844,9 +844,9 @@ export default function WebsiteConfigPage({
 
       {/* TAB 2: MODULES */}
       {activeTab === "modules" && (
-        <div className="rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden shadow-none">
+        <div className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-none">
           {/* Card Header */}
-          <div className="p-6 pb-5 flex items-start justify-between border-b border-gray-100 dark:border-neutral-800">
+          <div className="p-6 pb-5 flex items-start justify-between border-b border-[var(--border)]">
             <div>
               <h2 className="text-[15px] font-bold text-gray-900 dark:text-white tracking-tight">
                 Application Modules & Routes
@@ -870,7 +870,7 @@ export default function WebsiteConfigPage({
           <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
               <thead>
-                <tr className="border-b border-gray-100 dark:border-neutral-800 text-[11px] font-semibold text-gray-400 dark:text-neutral-500 uppercase tracking-wider">
+                <tr className="border-b border-[var(--border)] text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                   <th className="text-left py-3.5 px-6 font-semibold">
                     MODULE
                   </th>
@@ -911,7 +911,7 @@ export default function WebsiteConfigPage({
                           <button
                             type="button"
                             onClick={() => handleOpenEditModule(mod)}
-                            className="h-7 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
+                            className="h-7 px-3 text-[12px] font-medium border border-[var(--border)] bg-[var(--surface)] text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
                           >
                             Edit
                           </button>
@@ -937,13 +937,13 @@ export default function WebsiteConfigPage({
 
           {/* Bottom Version Note Bar */}
           {canEditConfig && (
-            <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
+            <div className="p-4 px-6 border-t border-[var(--border)] flex items-center gap-3 bg-[var(--surface)]">
               <input
                 type="text"
                 placeholder="Version note (e.g. Updated modules mapping)..."
                 value={versionNote}
                 onChange={(e) => setVersionNote(e.target.value)}
-                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
+                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
               />
               <button
                 type="button"
@@ -959,9 +959,9 @@ export default function WebsiteConfigPage({
 
       {/* TAB 3: AUTH FLOW */}
       {activeTab === "auth" && (
-        <div className="rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden shadow-none">
+        <div className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-none">
           {/* Card Header */}
-          <div className="p-6 pb-5 border-b border-gray-100 dark:border-neutral-800">
+          <div className="p-6 pb-5 border-b border-[var(--border)]">
             <h2 className="text-[15px] font-bold text-gray-900 dark:text-white tracking-tight">
               Authentication Flow
             </h2>
@@ -986,7 +986,7 @@ export default function WebsiteConfigPage({
                     onChange={(e) =>
                       setAuthForm((p) => ({ ...p, authMethod: e.target.value }))
                     }
-                    className="w-full h-10 px-3.5 pr-8 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] appearance-none cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full h-10 px-3.5 pr-8 text-[13px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] appearance-none cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <option value="Form login (Email / Password)">
                       Form login (Email / Password)
@@ -1014,7 +1014,7 @@ export default function WebsiteConfigPage({
                       redirectTarget: e.target.value,
                     }))
                   }
-                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
@@ -1035,7 +1035,7 @@ export default function WebsiteConfigPage({
                       usernameSelector: e.target.value,
                     }))
                   }
-                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -1053,7 +1053,7 @@ export default function WebsiteConfigPage({
                       passwordSelector: e.target.value,
                     }))
                   }
-                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
@@ -1074,7 +1074,7 @@ export default function WebsiteConfigPage({
                       successIndicatorSelector: e.target.value,
                     }))
                   }
-                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full h-10 px-3.5 text-[13px] font-mono rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -1092,7 +1092,7 @@ export default function WebsiteConfigPage({
                       failureMessageSelector: e.target.value,
                     }))
                   }
-                  className="w-full h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full h-10 px-3.5 text-[13px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white focus:outline-none focus:border-[#4F46E5] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
@@ -1100,13 +1100,13 @@ export default function WebsiteConfigPage({
 
           {/* Bottom Version Note Bar */}
           {canEditConfig && (
-            <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
+            <div className="p-4 px-6 border-t border-[var(--border)] flex items-center gap-3 bg-[var(--surface)]">
               <input
                 type="text"
                 placeholder="Version note (e.g. Updated auth flow mapping)..."
                 value={versionNote}
                 onChange={(e) => setVersionNote(e.target.value)}
-                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
+                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
               />
               <button
                 type="button"
@@ -1122,9 +1122,9 @@ export default function WebsiteConfigPage({
 
       {/* TAB 4: BUSINESS RULES */}
       {activeTab === "rules" && (
-        <div className="rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden shadow-none">
+        <div className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-none">
           {/* Card Header */}
-          <div className="p-6 pb-5 flex items-start justify-between border-b border-gray-100 dark:border-neutral-800">
+          <div className="p-6 pb-5 flex items-start justify-between border-b border-[var(--border)]">
             <div>
               <h2 className="text-[15px] font-bold text-gray-900 dark:text-white tracking-tight">
                 Business Rules
@@ -1153,8 +1153,8 @@ export default function WebsiteConfigPage({
                 className={cn(
                   "p-3.5 rounded-lg border flex items-center justify-between gap-4 transition-colors",
                   rule.isActive
-                    ? "border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900"
-                    : "border-gray-100 dark:border-neutral-800 bg-gray-50/60 dark:bg-neutral-900/40 opacity-70",
+                    ? "border-[var(--border)] bg-[var(--surface)]"
+                    : "border-[var(--border)] bg-[var(--hover-subtle)] opacity-70",
                 )}
               >
                 <div className="flex items-center gap-3 min-w-0">
@@ -1228,13 +1228,13 @@ export default function WebsiteConfigPage({
 
           {/* Bottom Version Note Bar */}
           {canEditConfig && (
-            <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
+            <div className="p-4 px-6 border-t border-[var(--border)] flex items-center gap-3 bg-[var(--surface)]">
               <input
                 type="text"
                 placeholder="Version note (e.g. Updated business rules mapping)..."
                 value={versionNote}
                 onChange={(e) => setVersionNote(e.target.value)}
-                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
+                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
               />
               <button
                 type="button"
@@ -1250,9 +1250,9 @@ export default function WebsiteConfigPage({
 
       {/* TAB 5: INSTRUCTIONS */}
       {activeTab === "instructions" && (
-        <div className="rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden shadow-none">
+        <div className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-none">
           {/* Card Header */}
-          <div className="p-6 pb-5 border-b border-gray-100 dark:border-neutral-800">
+          <div className="p-6 pb-5 border-b border-[var(--border)]">
             <h2 className="text-[15px] font-bold text-gray-900 dark:text-white tracking-tight">
               Custom AI Instructions
             </h2>
@@ -1278,7 +1278,7 @@ export default function WebsiteConfigPage({
               value={instructionsText}
               onChange={(e) => setInstructionsText(e.target.value)}
               placeholder="Enter instructions appended directly to all AI agent reasoning loops..."
-              className="w-full p-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors resize-none leading-relaxed disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full p-3.5 text-[13px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors resize-none leading-relaxed disabled:opacity-60 disabled:cursor-not-allowed"
             />
 
             {/* Quick Insert Examples */}
@@ -1294,7 +1294,7 @@ export default function WebsiteConfigPage({
                       (prev) => prev + " Ignore cookie consent banners.",
                     )
                   }
-                  className="px-2.5 py-1 rounded-full border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="px-2.5 py-1 rounded-full border border-[var(--border)] bg-[var(--surface)] text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
                 >
                   + Ignore cookie banners
                 </button>
@@ -1307,7 +1307,7 @@ export default function WebsiteConfigPage({
                         " Wait for Tracking table hydration before asserting.",
                     )
                   }
-                  className="px-2.5 py-1 rounded-full border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="px-2.5 py-1 rounded-full border border-[var(--border)] bg-[var(--surface)] text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
                 >
                   + Wait for async hydration
                 </button>
@@ -1318,7 +1318,7 @@ export default function WebsiteConfigPage({
                       (prev) => prev + " Read-only assertions only.",
                     )
                   }
-                  className="px-2.5 py-1 rounded-full border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="px-2.5 py-1 rounded-full border border-[var(--border)] bg-[var(--surface)] text-gray-700 dark:text-neutral-300 hover:bg-gray-50 cursor-pointer transition-colors"
                 >
                   + Read-only assertions
                 </button>
@@ -1328,13 +1328,13 @@ export default function WebsiteConfigPage({
 
           {/* Bottom Version Note Bar */}
           {canEditConfig && (
-            <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
+            <div className="p-4 px-6 border-t border-[var(--border)] flex items-center gap-3 bg-[var(--surface)]">
               <input
                 type="text"
                 placeholder="Version note (e.g. Updated instructions mapping)..."
                 value={versionNote}
                 onChange={(e) => setVersionNote(e.target.value)}
-                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
+                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
               />
               <button
                 type="button"
@@ -1350,9 +1350,9 @@ export default function WebsiteConfigPage({
 
       {/* TAB 6: CREDENTIALS */}
       {activeTab === "credentials" && (
-        <div className="rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden shadow-none">
+        <div className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-none">
           {/* Card Header */}
-          <div className="p-6 pb-5 flex items-start justify-between border-b border-gray-100 dark:border-neutral-800">
+          <div className="p-6 pb-5 flex items-start justify-between border-b border-[var(--border)]">
             <div>
               <h2 className="text-[15px] font-bold text-gray-900 dark:text-white tracking-tight">
                 Role Credentials
@@ -1389,7 +1389,7 @@ export default function WebsiteConfigPage({
           <div className="overflow-x-auto mt-4">
             <table className="w-full text-[13px]">
               <thead>
-                <tr className="border-b border-gray-100 dark:border-neutral-800 text-[11px] font-semibold text-gray-400 dark:text-neutral-500 uppercase tracking-wider">
+                <tr className="border-b border-[var(--border)] text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                   <th className="text-left py-3.5 px-6 font-semibold">ROLE</th>
                   <th className="text-left py-3.5 px-4 font-semibold">
                     USERNAME / EMAIL
@@ -1429,7 +1429,7 @@ export default function WebsiteConfigPage({
                           <button
                             type="button"
                             onClick={() => handleOpenEditCredential(cred)}
-                            className="h-7 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
+                            className="h-7 px-3 text-[12px] font-medium border border-[var(--border)] bg-[var(--surface)] text-gray-700 dark:text-gray-200 hover:bg-gray-50 rounded-[4px] cursor-pointer"
                           >
                             Replace
                           </button>
@@ -1457,13 +1457,13 @@ export default function WebsiteConfigPage({
 
           {/* Bottom Version Note Bar */}
           {canEditConfig && (
-            <div className="p-4 px-6 border-t border-gray-100 dark:border-neutral-800 flex items-center gap-3 bg-white dark:bg-neutral-900">
+            <div className="p-4 px-6 border-t border-[var(--border)] flex items-center gap-3 bg-[var(--surface)]">
               <input
                 type="text"
                 placeholder="Version note (e.g. Updated credentials mapping)..."
                 value={versionNote}
                 onChange={(e) => setVersionNote(e.target.value)}
-                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
+                className="flex-1 h-10 px-3.5 text-[13px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#4F46E5] transition-colors"
               />
               <button
                 type="button"
@@ -1479,7 +1479,7 @@ export default function WebsiteConfigPage({
 
       {/* TAB 7: VERSIONS */}
       {activeTab === "versions" && (
-        <div className="rounded-[8px] border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden shadow-none p-6 space-y-6">
+        <div className="rounded-[8px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden shadow-none p-6 space-y-6">
           {/* Card Header */}
           <div>
             <h2 className="text-[15px] font-bold text-gray-900 dark:text-white tracking-tight">
@@ -1510,7 +1510,7 @@ export default function WebsiteConfigPage({
                   />
 
                   {/* Version Item Card */}
-                  <div className="p-4 rounded-lg border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/50">
+                  <div className="p-4 rounded-lg border border-[var(--border)] bg-[var(--surface)]/50">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div className="flex items-start gap-3">
                         {/* Version tag badge */}
@@ -1547,7 +1547,7 @@ export default function WebsiteConfigPage({
                                 [ver.version]: !prev[ver.version],
                               }))
                             }
-                            className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px] transition-colors cursor-pointer"
+                            className="h-8 px-3 text-[12px] font-medium border border-[var(--border)] bg-[var(--surface)] hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px] transition-colors cursor-pointer"
                           >
                             {isDiffVisible ? "Hide diff" : "View diff"}
                           </button>
@@ -1561,7 +1561,7 @@ export default function WebsiteConfigPage({
                           <button
                             type="button"
                             onClick={() => handleRestoreVersion(ver)}
-                            className="h-8 px-3 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px] transition-colors flex items-center gap-1.5 cursor-pointer"
+                            className="h-8 px-3 text-[12px] font-medium border border-[var(--border)] bg-[var(--surface)] hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px] transition-colors flex items-center gap-1.5 cursor-pointer"
                           >
                             <RotateCcw className="h-3 w-3" /> Restore
                           </button>
@@ -1604,7 +1604,7 @@ export default function WebsiteConfigPage({
               setRoleForm((p) => ({ ...p, name: e.target.value }))
             }
             placeholder="e.g. Dispatcher, Billing Specialist, Auditor"
-            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
+            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
             autoFocus
           />
         </div>
@@ -1620,7 +1620,7 @@ export default function WebsiteConfigPage({
               setRoleForm((p) => ({ ...p, description: e.target.value }))
             }
             placeholder="e.g. Operates dispatch orders and fleet assign"
-            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
+            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
           />
         </div>
 
@@ -1635,7 +1635,7 @@ export default function WebsiteConfigPage({
               setRoleForm((p) => ({ ...p, landingPath: e.target.value }))
             }
             placeholder="e.g. /dashboard or /orders"
-            className="w-full h-11 px-3.5 text-[14px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
+            className="w-full h-11 px-3.5 text-[14px] font-mono rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
           />
         </div>
 
@@ -1650,7 +1650,7 @@ export default function WebsiteConfigPage({
               setRoleForm((p) => ({ ...p, allowedModules: e.target.value }))
             }
             placeholder="e.g. Dashboard, Orders, Tracking"
-            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
+            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
           />
         </div>
       </ConfigSideDrawer>
@@ -1676,7 +1676,7 @@ export default function WebsiteConfigPage({
               setModuleForm((p) => ({ ...p, name: e.target.value }))
             }
             placeholder="e.g. Tracking, Orders, Invoices"
-            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
+            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
             autoFocus
           />
         </div>
@@ -1693,7 +1693,7 @@ export default function WebsiteConfigPage({
               setModuleForm((p) => ({ ...p, path: e.target.value }))
             }
             placeholder="e.g. /tracking or /invoices"
-            className="w-full h-11 px-3.5 text-[14px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
+            className="w-full h-11 px-3.5 text-[14px] font-mono rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
           />
         </div>
 
@@ -1708,7 +1708,7 @@ export default function WebsiteConfigPage({
               setModuleForm((p) => ({ ...p, expectedHeading: e.target.value }))
             }
             placeholder="e.g. Live Shipment Tracking"
-            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
+            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
           />
         </div>
 
@@ -1723,7 +1723,7 @@ export default function WebsiteConfigPage({
               setModuleForm((p) => ({ ...p, navigationPath: e.target.value }))
             }
             placeholder="e.g. Sidebar → Logistics → Tracking"
-            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
+            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
           />
         </div>
       </ConfigSideDrawer>
@@ -1749,7 +1749,7 @@ export default function WebsiteConfigPage({
               setRuleForm((p) => ({ ...p, text: e.target.value }))
             }
             placeholder="e.g. Dispatcher role cannot access /billing/invoices without OTP"
-            className="w-full p-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 resize-none leading-relaxed transition-all"
+            className="w-full p-3.5 text-[13px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 resize-none leading-relaxed transition-all"
             autoFocus
           />
         </div>
@@ -1767,7 +1767,7 @@ export default function WebsiteConfigPage({
                   priority: e.target.value as "P1" | "P2" | "P3",
                 }))
               }
-              className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all cursor-pointer"
+              className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all cursor-pointer"
             >
               <option value="P1">P1 (Critical Assertion)</option>
               <option value="P2">P2 (Standard Invariant)</option>
@@ -1786,7 +1786,7 @@ export default function WebsiteConfigPage({
                 setRuleForm((p) => ({ ...p, tag: e.target.value }))
               }
               placeholder="e.g. Auth, Routing, Data"
-              className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
+              className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
             />
           </div>
         </div>
@@ -1810,7 +1810,7 @@ export default function WebsiteConfigPage({
             onChange={(e) =>
               setCredForm((p) => ({ ...p, roleName: e.target.value }))
             }
-            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all cursor-pointer"
+            className="w-full h-11 px-3.5 text-[14px] rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all cursor-pointer"
           >
             {config.roles.length > 0 ? (
               config.roles.map((r) => (
@@ -1840,7 +1840,7 @@ export default function WebsiteConfigPage({
               setCredForm((p) => ({ ...p, usernameMasked: e.target.value }))
             }
             placeholder="e.g. dispatcher@acme.internal"
-            className="w-full h-11 px-3.5 text-[14px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
+            className="w-full h-11 px-3.5 text-[14px] font-mono rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
             autoFocus
           />
         </div>
@@ -1858,7 +1858,7 @@ export default function WebsiteConfigPage({
               setCredForm((p) => ({ ...p, secretMasked: e.target.value }))
             }
             placeholder="••••••••••••"
-            className="w-full h-11 px-3.5 text-[14px] font-mono rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
+            className="w-full h-11 px-3.5 text-[14px] font-mono rounded-lg border border-[var(--border)] bg-[var(--surface)] text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all"
           />
         </div>
       </ConfigSideDrawer>

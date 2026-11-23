@@ -76,14 +76,17 @@ export function CreateTaskDrawer({
         websiteName: selectedSite?.name || 'Logistics Portal',
         title,
         instruction,
+        prompt: instruction,
         role,
+        roleName: role,
         engine,
-        status: 'plan_generated',
+        engineDisplay: `${engine}/qwen2.5:14b`,
+        status: 'draft',
       })
       toast.success('Task created successfully')
       handleClose()
       if (propOnSuccess) propOnSuccess()
-      router.push(`/plans/p-${created.id}`)
+      router.push(`/tasks/${created.id}`)
     } catch {
       toast.error('Failed to create task')
     } finally {

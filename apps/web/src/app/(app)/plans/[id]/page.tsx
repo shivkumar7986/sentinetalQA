@@ -175,20 +175,79 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
         setCases(p.cases)
       }
     } else {
-      // Mock plan wrapper for display
-      setPlan({
-        id: params.id,
-        taskId: 'tsk-201',
-        version: 2,
-        status: 'in_review',
-        generatedBy: 'ai',
-        summary: 'Verify login and open Tracking',
-        createdAt: new Date().toISOString(),
-        engine: 'ollama',
-        model: 'ollama/qwen2.5:14b',
-        tokensUsed: 1420,
-        cases: DEFAULT_CASES,
-      })
+      // Look up associated task if params.id corresponds to a task
+      const possibleTaskId = params.id.startsWith('p-') ? params.id.replace('p-', '') : params.id
+      const associatedTask = await mockClient.getTaskById(possibleTaskId)
+
+      if (associatedTask) {
+        const dynamicCases: TestCase[] = [
+          {
+            id: `case-${Date.now()}-1`,
+            position: 1,
+            title: `Verify ${associatedTask.websiteName || 'Application'} Entry Point`,
+            objective: `Ensure target route is accessible and loads HTTP 200`,
+            expectedOutcome: `Page renders without errors or redirect loop`,
+            isOptional: false,
+            steps: [
+              {
+                id: `step-${Date.now()}-1`,
+                position: 1,
+                action: 'Open application endpoint',
+                validationType: 'route_check',
+                target: { url: '/' },
+                expected: { status: 200 },
+              },
+            ],
+          },
+          {
+            id: `case-${Date.now()}-2`,
+            position: 2,
+            title: `Execute Goal: ${associatedTask.title}`,
+            objective: associatedTask.prompt || associatedTask.instruction || 'Execute workflow steps',
+            expectedOutcome: `Goal interactions execute cleanly and pass assertion checks`,
+            isOptional: false,
+            steps: [
+              {
+                id: `step-${Date.now()}-2`,
+                position: 1,
+                action: 'Perform form inputs and interaction sequence',
+                validationType: 'form_structure',
+                target: { selector: 'body' },
+                expected: { success: true },
+              },
+            ],
+          },
+        ]
+        setCases(dynamicCases)
+        setPlan({
+          id: params.id,
+          taskId: associatedTask.id,
+          version: 1,
+          status: 'in_review',
+          generatedBy: 'ai',
+          summary: `AI generated test plan for goal: "${associatedTask.title}"`,
+          createdAt: associatedTask.createdAt || new Date().toISOString(),
+          engine: (associatedTask.providerKind === 'gemini' ? 'gemini' : 'ollama') as 'gemini' | 'ollama',
+          model: associatedTask.model || associatedTask.engineDisplay || 'ollama/qwen2.5:14b',
+          tokensUsed: 1250,
+          cases: dynamicCases,
+        })
+      } else {
+        // Fallback demo plan
+        setPlan({
+          id: params.id,
+          taskId: 'tsk-201',
+          version: 2,
+          status: 'in_review',
+          generatedBy: 'ai',
+          summary: 'Verify login and open Tracking',
+          createdAt: new Date().toISOString(),
+          engine: 'ollama',
+          model: 'ollama/qwen2.5:14b',
+          tokensUsed: 1420,
+          cases: DEFAULT_CASES,
+        })
+      }
     }
     setLoading(false)
   }

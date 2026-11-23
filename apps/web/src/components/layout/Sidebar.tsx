@@ -11,8 +11,6 @@ import {
   Settings,
   Sun,
   Moon,
-  PanelLeftClose,
-  PanelLeft,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/stores/ui.store'
@@ -49,8 +47,8 @@ export function Sidebar() {
         sidebarCollapsed ? 'w-14' : 'w-56'
       )}
     >
-      {/* Top Header: Brand & Collapse Toggle */}
-      <div className="h-14 flex items-center justify-between px-3.5 border-b border-[var(--border)] shrink-0">
+      {/* Top Header: Brand */}
+      <div className="h-14 flex items-center px-3.5 border-b border-[var(--border)] shrink-0">
         <Link href="/dashboard" className="flex items-center gap-2.5 min-w-0" title="Testing Agent">
           <div className="h-7 w-7 rounded-[6px] bg-[var(--primary)] flex items-center justify-center text-white shrink-0">
             <LayoutGrid className="h-4 w-4 text-white" />
@@ -61,17 +59,6 @@ export function Sidebar() {
             </span>
           )}
         </Link>
-
-        {!sidebarCollapsed && (
-          <button
-            onClick={toggleSidebar}
-            className="text-[var(--text-muted)] hover:text-[var(--text)] p-1 rounded transition-colors"
-            title="Collapse sidebar"
-            aria-label="Collapse sidebar"
-          >
-            <PanelLeftClose className="h-4 w-4" />
-          </button>
-        )}
       </div>
 
       {/* Navigation Links */}

@@ -54,7 +54,6 @@ const PATH_LABELS: Record<string, string> = {
   runs: 'Runs',
   reports: 'Reports',
   settings: 'Settings',
-  notifications: 'Notifications',
   new: 'New',
   config: 'Configuration',
   general: 'General',
@@ -202,11 +201,6 @@ function getBreadcrumbItems(pathname: string, dynamicParentId?: string | null): 
   // Module 7: Users (/users)
   if (module === 'users') {
     return [rootItem, { label: 'Users' }]
-  }
-
-  // Module 8: Notifications (/notifications)
-  if (module === 'notifications') {
-    return [rootItem, { label: 'Notifications' }]
   }
 
   // Generic fallback for any other nested route

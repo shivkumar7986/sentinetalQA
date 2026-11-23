@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import {
   Bell,
   X,
@@ -15,7 +14,6 @@ import {
   PlusCircle,
   Globe,
   ArrowRight,
-  ExternalLink,
   Clock,
   Layers,
 } from 'lucide-react'
@@ -304,14 +302,9 @@ export function NotificationsDrawer({
 
         {/* Footer */}
         <div className="p-4 px-6 border-t border-[var(--border)] bg-[var(--surface)] flex items-center justify-between">
-          <Link
-            href="/notifications"
-            onClick={handleClose}
-            className="text-[12px] font-semibold text-[var(--primary)] hover:underline inline-flex items-center gap-1"
-          >
-            <span>Open Notification Center</span>
-            <ExternalLink className="h-3.5 w-3.5" />
-          </Link>
+          <span className="text-[12px] text-[var(--text-muted)]">
+            {unreadCount > 0 ? `${unreadCount} unread alert${unreadCount > 1 ? 's' : ''}` : 'All caught up'}
+          </span>
           <Button
             variant="secondary"
             size="sm"

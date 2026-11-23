@@ -143,6 +143,7 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
   const { can, meta } = usePermissions()
   const canApprove = can('plan.approve')
   const [plan, setPlan] = useState<TestPlan | null>(null)
+  const [task, setTask] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [cases, setCases] = useState<TestCase[]>(DEFAULT_CASES)
   const [expandedCases, setExpandedCases] = useState<Record<string, boolean>>({
@@ -150,13 +151,7 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
   })
 
   // Reviewer notes state
-  const [notes, setNotes] = useState<Array<{ author: string; time: string; text: string }>>([
-    {
-      author: 'Riya Sharma',
-      time: '20m ago',
-      text: 'Added optional flag on case 05 pending staging data seed.',
-    },
-  ])
+  const [notes, setNotes] = useState<Array<{ author: string; time: string; text: string }>>([])
   const [newNote, setNewNote] = useState('')
 
   // Regenerate dialog
@@ -175,6 +170,19 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
       setPlan(p)
       if (p.cases && p.cases.length > 0) {
         setCases(p.cases)
+      }
+      if (p.taskId) {
+        const t = await mockClient.getTaskById(p.taskId)
+        if (t) setTask(t)
+      }
+      if (params.id === 'plan-1') {
+        setNotes([
+          {
+            author: 'Riya Sharma',
+            time: '20m ago',
+            text: 'Added optional flag on case 05 pending staging data seed.',
+          },
+        ])
       }
     } else {
       // Look up associated task if params.id corresponds to a task
@@ -418,6 +426,13 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
 
   const isApproved = plan?.status === 'approved'
 
+  const validationTypeCounts = cases.reduce((acc, c) => {
+    c.steps?.forEach((s) => {
+      acc[s.validationType] = (acc[s.validationType] || 0) + 1
+    })
+    return acc
+  }, {} as Record<string, number>)
+
   return (
     <div className="space-y-6">
       {/* Top Header */}
@@ -425,10 +440,10 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-[20px] font-bold text-gray-900 tracking-tight">
-              Plan Review · Verify login and open Tracking
+              Plan Review · {task?.title || plan?.summary || 'Test Plan'}
             </h1>
             <span className="font-mono text-[11px] font-semibold text-gray-700 px-2 py-0.5 rounded border border-gray-300 bg-white">
-              v2
+              v{plan?.version || 1}
             </span>
             {isApproved ? (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-[#DCFCE7] text-[#16A34A] border border-[#BBF7D0]">
@@ -441,7 +456,7 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
             )}
           </div>
           <p className="text-[12px] text-gray-400 font-mono mt-1">
-            ollama/qwen2.5:14b · 1,420 tokens · 1.9s generation · Config v4
+            {plan?.model || 'ollama/qwen2.5:14b'} · {plan?.tokensUsed || 1250} tokens · {plan?.engine || 'ai'} compiler
           </p>
         </div>
 
@@ -692,44 +707,47 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
               Validation types
             </div>
             <div className="flex flex-wrap gap-1.5">
-              <span className="px-2 py-0.5 rounded border border-gray-200 bg-white text-gray-600 text-[11px] font-mono">
-                route_check: 1
-              </span>
-              <span className="px-2 py-0.5 rounded border border-gray-200 bg-white text-gray-600 text-[11px] font-mono">
-                form_structure: 2
-              </span>
-              <span className="px-2 py-0.5 rounded border border-gray-200 bg-white text-gray-600 text-[11px] font-mono">
-                auth_response: 1
-              </span>
-              <span className="px-2 py-0.5 rounded border border-gray-200 bg-white text-gray-600 text-[11px] font-mono">
-                redirect: 1
-              </span>
-              <span className="px-2 py-0.5 rounded border border-gray-200 bg-white text-gray-600 text-[11px] font-mono">
-                navigation: 1
-              </span>
-              <span className="px-2 py-0.5 rounded border border-gray-200 bg-white text-gray-600 text-[11px] font-mono">
-                heading: 1
-              </span>
+              {Object.entries(validationTypeCounts).map(([type, count]) => (
+                <span
+                  key={type}
+                  className="px-2 py-0.5 rounded border border-gray-200 bg-white text-gray-600 text-[11px] font-mono"
+                >
+                  {type}: {count}
+                </span>
+              ))}
+              {Object.keys(validationTypeCounts).length === 0 && (
+                <span className="text-[11px] text-gray-400 font-mono">None specified</span>
+              )}
             </div>
           </div>
 
-          {/* Card 2: Version Diff (v1 → v2) */}
+          {/* Card 2: Version Diff */}
           <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-none">
             <h2 className="text-[14px] font-semibold text-gray-900 mb-3">
-              Version Diff (v1 → v2)
+              {plan?.version && plan.version > 1
+                ? `Version Diff (v${plan.version - 1} → v${plan.version})`
+                : 'Version Details (v1)'}
             </h2>
 
-            <div className="space-y-2 text-[12px] font-mono">
-              <p className="text-emerald-600">
-                + Added Tracking heading assertion (h1)
-              </p>
-              <p className="text-amber-600">
-                ~ Updated Dispatcher redirect target: /dashboard
-              </p>
-              <p className="text-gray-400">
-                = Login form_structure unchanged
-              </p>
-            </div>
+            {plan?.version && plan.version > 1 ? (
+              <div className="space-y-2 text-[12px] font-mono">
+                <p className="text-emerald-600">
+                  + Incremented to Plan v{plan.version}
+                </p>
+                <p className="text-gray-600 leading-relaxed font-sans text-[11px]">
+                  ~ {plan.summary || 'Compiled with updated directives'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1.5 text-[12px]">
+                <p className="font-medium text-emerald-600 font-mono">
+                  Initial Plan Compilation (v1)
+                </p>
+                <p className="text-[11px] text-gray-500 leading-relaxed">
+                  Compiled {cases.length} test cases and {totalSteps} validation steps from task prompt.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Card 3: Reviewer Notes */}

@@ -228,7 +228,8 @@ function getBreadcrumbItems(pathname: string, dynamicParentId?: string | null): 
 
 export function Topbar() {
   const pathname = usePathname()
-  const { toggleSidebar, setCommandMenuOpen } = useUIStore()
+  const { toggleSidebar, setCommandMenuOpen, openFormDrawer } = useUIStore()
+  const [unreadCount, setUnreadCount] = React.useState(0)
   const [parentTaskId, setParentTaskId] = React.useState<string | null>(() => {
     if (typeof window === 'undefined') return null
     const segments = pathname.split('/').filter(Boolean)
@@ -282,6 +283,24 @@ export function Topbar() {
       window.removeEventListener('testing_agent_runs_changed', resolveParent)
     }
   }, [pathname])
+
+  React.useEffect(() => {
+    let mounted = true
+    async function loadNotifCount() {
+      try {
+        const notifs = await mockClient.getNotifications()
+        if (mounted) {
+          setUnreadCount(notifs.filter((n) => !n.read).length)
+        }
+      } catch {}
+    }
+    loadNotifCount()
+    window.addEventListener('testing_agent_notifications_changed', loadNotifCount)
+    return () => {
+      mounted = false
+      window.removeEventListener('testing_agent_notifications_changed', loadNotifCount)
+    }
+  }, [])
 
   const breadcrumbs = getBreadcrumbItems(pathname, parentTaskId)
 
@@ -366,18 +385,18 @@ export function Topbar() {
           <span className="text-[var(--text-muted)]">Ready</span>
         </div>
 
-        {/* Notification Bell Button */}
+        {/* Notification Bell Button: Opens Notifications Side Drawer */}
         <Button
           variant="secondary"
           size="sm"
-          className="h-8 w-8 p-0 rounded-[6px] relative"
-          asChild
-          aria-label="Notifications"
+          className="h-8 w-8 p-0 rounded-[6px] relative cursor-pointer"
+          onClick={() => openFormDrawer('notifications')}
+          aria-label="Open Notifications"
         >
-          <Link href="/notifications">
-            <Bell className="h-4 w-4 text-[var(--text-muted)]" />
-            <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
-          </Link>
+          <Bell className="h-4 w-4 text-[var(--text-muted)]" />
+          {unreadCount > 0 && (
+            <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-[var(--primary)] ring-2 ring-[var(--surface)]" />
+          )}
         </Button>
 
         <div className="h-4 w-px bg-[var(--border)]" />

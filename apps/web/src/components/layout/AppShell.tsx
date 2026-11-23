@@ -10,6 +10,7 @@ import { AddUserDrawer } from '@/components/forms/AddUserDrawer'
 import { EditUserDrawer } from '@/components/forms/EditUserDrawer'
 import { DeleteUserModal } from '@/components/forms/DeleteUserModal'
 import { GeneratePlanDrawer } from '@/components/forms/GeneratePlanDrawer'
+import { NotificationsDrawer } from '@/components/forms/NotificationsDrawer'
 import { useUIStore } from '@/stores/ui.store'
 import { cn } from '@/lib/utils'
 
@@ -48,6 +49,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <AddUserDrawer />
       <EditUserDrawer />
       <GeneratePlanDrawer />
+      <NotificationsDrawer />
       <DeleteUserModal />
     </div>
   )

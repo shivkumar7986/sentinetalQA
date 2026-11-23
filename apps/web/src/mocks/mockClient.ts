@@ -5,6 +5,7 @@ import { INITIAL_PLANS, type TestPlan, type TestCase, type TestStep } from './da
 import { INITIAL_RUNS, type Run, type StepLog } from './data/runs.mock'
 import { INITIAL_MEMBERS, type Member } from './data/users.mock'
 import { INITIAL_AUDIT_LOGS, type AuditItem } from './data/audit.mock'
+import { INITIAL_NOTIFICATIONS, type NotificationItem } from './data/notifications.mock'
 import type { UserRole } from '@/stores/auth.store'
 
 const STORAGE_KEYS = {
@@ -15,6 +16,7 @@ const STORAGE_KEYS = {
   runs: 'testing_agent_mock_runs',
   members: 'testing_agent_mock_members_v3',
   auditLogs: 'testing_agent_mock_audit_logs',
+  notifications: 'testing_agent_mock_notifications',
 }
 
 function loadState<T>(key: string, fallback: T): T {
@@ -591,6 +593,31 @@ export const mockClient = {
       window.dispatchEvent(new CustomEvent('testing_agent_audit_changed'))
     }
     return newLog
+  },
+
+  // Notifications
+  getNotifications: async (): Promise<NotificationItem[]> => {
+    return loadState<NotificationItem[]>(STORAGE_KEYS.notifications, INITIAL_NOTIFICATIONS)
+  },
+
+  markNotificationRead: async (id: string): Promise<NotificationItem[]> => {
+    const all = loadState<NotificationItem[]>(STORAGE_KEYS.notifications, INITIAL_NOTIFICATIONS)
+    const updated = all.map((n) => (n.id === id ? { ...n, read: true } : n))
+    saveState(STORAGE_KEYS.notifications, updated)
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('testing_agent_notifications_changed'))
+    }
+    return updated
+  },
+
+  markAllNotificationsRead: async (): Promise<NotificationItem[]> => {
+    const all = loadState<NotificationItem[]>(STORAGE_KEYS.notifications, INITIAL_NOTIFICATIONS)
+    const updated = all.map((n) => ({ ...n, read: true }))
+    saveState(STORAGE_KEYS.notifications, updated)
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('testing_agent_notifications_changed'))
+    }
+    return updated
   },
 }
 

@@ -8,6 +8,7 @@ export type FormDrawerType =
   | 'add-user'
   | 'edit-user'
   | 'generate-plan'
+  | 'notifications'
   | null
 
 export interface FormDrawerData {

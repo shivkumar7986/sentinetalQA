@@ -13,10 +13,11 @@ export interface Task {
   providerKind?: 'ollama' | 'gemini' | 'hybrid'
   model?: string
   engineDisplay?: string
-  priority?: 'high' | 'medium' | 'low'
+  priority?: 'P0' | 'P1' | 'P2' | 'P3' | 'high' | 'medium' | 'low'
   tags?: string[]
   status: 'draft' | 'in_review' | 'plan_generated' | 'approved' | 'running' | 'completed' | 'failed' | 'archived'
   lastRunId?: string
+  lastRunPassRate?: number
   updatedAtLabel?: string
   currentPlanId?: string
   createdAt: string

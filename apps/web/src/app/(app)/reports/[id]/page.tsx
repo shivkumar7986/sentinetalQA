@@ -19,6 +19,7 @@ import {
   Plus,
 } from 'lucide-react'
 import { mockClient } from '@/mocks/mockClient'
+import { cn } from '@/lib/utils'
 import type { Run } from '@/mocks/data/runs.mock'
 import type { Task } from '@/mocks/data/tasks.mock'
 import { toast } from 'sonner'
@@ -171,10 +172,12 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
   const targetTaskTitle = run?.taskTitle || task?.title || 'Dispatcher role redirect & Tracking verification'
   const targetWebsiteName = run?.websiteName || task?.websiteName || 'Logistics Portal'
   const targetPlanId = run?.planId || task?.currentPlanId || 'plan-1'
-  const passRateDisplay = run?.passRate !== undefined ? `${run.passRate}%` : '71.4%'
-  const totalCases = run?.totalCases || 5
-  const passedCases = run?.passedCases || 3
-  const durationDisplay = run?.durationMs ? `${(run.durationMs / 1000).toFixed(2)}s` : '19.30s'
+  const passRateDisplay = run?.passRate !== undefined ? `${run.passRate}%` : '100%'
+  const totalCases = run?.totalCases || (run?.stepLogs?.length) || 3
+  const passedCases = run?.passedCases !== undefined ? run.passedCases : (isPassed ? totalCases : Math.max(0, totalCases - 1))
+  const durationDisplay = run?.durationMs ? `${(run.durationMs / 1000).toFixed(2)}s` : '1.42s'
+  const totalSteps = run?.stepLogs?.length || 3
+  const passedSteps = run?.stepLogs?.filter((s) => s.status === 'passed').length || (isPassed ? totalSteps : Math.max(0, totalSteps - 1))
 
   return (
     <div className="space-y-5">
@@ -315,11 +318,21 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
           <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
             PASS RATE
           </div>
-          <div className="text-[22px] font-bold text-[#DC2626] mt-0.5">
+          <div
+            className={cn(
+              'text-[22px] font-bold mt-0.5',
+              isPassed ? 'text-[#16A34A]' : 'text-[#DC2626]'
+            )}
+          >
             {passRateDisplay}
           </div>
-          <div className="text-[11px] text-red-500 font-mono mt-0.5">
-            -28.6% vs run-937
+          <div
+            className={cn(
+              'text-[11px] font-mono mt-0.5',
+              isPassed ? 'text-emerald-600' : 'text-red-500'
+            )}
+          >
+            {isPassed ? '100% assertions satisfied' : '-28.6% vs baseline'}
           </div>
         </div>
 
@@ -342,10 +355,10 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
             STEPS
           </div>
           <div className="text-[20px] font-bold text-gray-900 mt-0.5">
-            7 Total
+            {totalSteps} Total
           </div>
           <div className="text-[11px] text-gray-400 font-mono mt-0.5">
-            5 Passed · 1 Failed · 1 Skipped
+            {passedSteps} Passed · {Math.max(0, totalSteps - passedSteps)} Failed
           </div>
         </div>
 
@@ -368,10 +381,10 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
             AI ENGINE
           </div>
           <div className="text-[14px] font-bold text-gray-900 font-mono mt-1">
-            ollama/qwen2.5:14b
+            {task?.model || task?.engineDisplay || 'ollama/qwen2.5:14b'}
           </div>
           <div className="text-[11px] text-gray-400 mt-0.5">
-            Approved Plan v2
+            Plan Execution Result
           </div>
         </div>
       </div>
@@ -424,13 +437,56 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
 
       {/* Main 2-Column Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Left Column: Per-Case Outcomes (5) */}
+        {/* Left Column: Per-Case Outcomes */}
         <div className="lg:col-span-2 space-y-3">
           <h2 className="text-[14px] font-semibold text-gray-900 mb-2">
-            Per-Case Outcomes (5)
+            Per-Case Outcomes ({run?.stepLogs && run.stepLogs.length > 0 ? run.stepLogs.length : 5})
           </h2>
 
-          {/* Case 01 */}
+          {run?.stepLogs && run.stepLogs.length > 0 ? (
+            run.stepLogs.map((log, idx) => {
+              const num = String(idx + 1).padStart(2, '0')
+              const isLogExpanded = expandedCases[num] !== false
+              return (
+                <div key={log.id} className="rounded-xl border border-gray-200 bg-white p-3.5 shadow-none">
+                  <div
+                    className="flex items-center justify-between cursor-pointer"
+                    onClick={() => toggleCase(num)}
+                  >
+                    <div className="flex items-center gap-2">
+                      {isLogExpanded ? (
+                        <ChevronDown className="h-4 w-4 text-gray-400" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                      )}
+                      <span className="font-mono text-[12px] font-semibold text-gray-500">{num}</span>
+                      <span className="text-[13px] font-medium text-gray-900">{log.caseTitle || log.action}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[12px] text-gray-400 font-mono">{log.durationMs}ms</span>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#DCFCE7] text-[#16A34A]">
+                        ✓ Passed
+                      </span>
+                    </div>
+                  </div>
+
+                  {isLogExpanded && (
+                    <div className="mt-3 pt-3 border-t border-gray-100 space-y-2">
+                      <div className="flex items-center justify-between text-[11px] font-mono text-gray-500">
+                        <span>Validation: {log.validationType}</span>
+                        <span>HTTP {log.responseSummary?.statusCode || 200} OK</span>
+                      </div>
+                      <p className="text-[12px] text-gray-700 bg-gray-50 p-2.5 rounded-lg border border-gray-100 leading-relaxed font-sans">
+                        {log.checkPerformed}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )
+            })
+          ) : (
+            <>
+              {/* Case 01 */}
           <div className="rounded-xl border border-gray-200 bg-white p-3.5 shadow-none">
             <div
               className="flex items-center justify-between cursor-pointer"
@@ -742,6 +798,8 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
               </div>
             )}
           </div>
+            </>
+          )}
         </div>
 
         {/* Right Column: Chronological Timeline */}
@@ -752,12 +810,31 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
                 Chronological Timeline
               </h2>
               <span className="text-[13px] text-gray-500 font-mono font-medium">
-                7 steps
+                {run?.stepLogs && run.stepLogs.length > 0 ? run.stepLogs.length : 7} steps
               </span>
             </div>
 
             <div className="relative pl-7 space-y-5 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[1px] before:bg-gray-200">
-              {/* Step 1 */}
+              {run?.stepLogs && run.stepLogs.length > 0 ? (
+                run.stepLogs.map((log, idx) => (
+                  <div key={log.id} className="relative flex items-start justify-between gap-2">
+                    <span className="absolute left-[7px] -translate-x-1/2 top-1.5 h-2 w-2 rounded-full bg-[#10B981] ring-4 ring-white" />
+                    <div>
+                      <p className="text-[13px] font-medium text-gray-900">
+                        {String(idx + 1).padStart(2, '0')}. {log.caseTitle || log.action}
+                      </p>
+                      <p className="text-[12px] text-gray-400 font-mono mt-0.5">
+                        {log.validationType}
+                      </p>
+                    </div>
+                    <span className="text-[12px] text-gray-500 font-mono shrink-0">
+                      {log.durationMs}ms
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <>
+                  {/* Step 1 */}
               <div className="relative flex items-start justify-between gap-2">
                 <span className="absolute left-[7px] -translate-x-1/2 top-1.5 h-2 w-2 rounded-full bg-[#10B981] ring-4 ring-white" />
                 <div>
@@ -868,6 +945,8 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
                   189ms
                 </span>
               </div>
+                </>
+              )}
             </div>
           </div>
         </div>

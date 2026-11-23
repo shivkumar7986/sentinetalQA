@@ -16,6 +16,9 @@ export interface FormDrawerData {
   task?: any
   taskId?: string
   nextVersion?: number
+  currentVersion?: number
+  mode?: 'create' | 'regenerate'
+  [key: string]: any
 }
 
 interface UIState {

@@ -54,6 +54,9 @@ export function GeneratePlanDrawer({
   const [isolateCookies, setIsolateCookies] = useState(true)
   const [loading, setLoading] = useState(false)
 
+  const isRegenerate = formDrawerData?.mode === 'regenerate'
+  const nextVersion = formDrawerData?.currentVersion ? formDrawerData.currentVersion + 1 : 2
+
   // Sync incoming task
   useEffect(() => {
     if (propTask) {
@@ -160,10 +163,12 @@ export function GeneratePlanDrawer({
                   className="text-[20px] font-bold text-gray-900 dark:text-white tracking-tight leading-snug flex items-center gap-2"
                 >
                   <Sparkles className="h-5 w-5 text-[#6366F1]" />
-                  Generate Test Plan
+                  {isRegenerate ? `Regenerate Test Plan (v${nextVersion})` : 'Generate Test Plan'}
                 </h2>
                 <p className="text-[13px] text-gray-500 dark:text-neutral-400 mt-0.5">
-                  Instruct the AI compiler to generate atomic, executable test cases.
+                  {isRegenerate
+                    ? 'Refine test assertions, provide compiler feedback, and generate a new version.'
+                    : 'Instruct the AI compiler to generate atomic, executable test cases.'}
                 </p>
               </div>
               <button
@@ -378,18 +383,27 @@ export function GeneratePlanDrawer({
               <div className="flex items-center justify-between">
                 <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
                   <SlidersHorizontal className="h-4 w-4 text-indigo-500" />
-                  Compiler Guidance & Refinements
+                  {isRegenerate ? 'Refinement Feedback & Directives' : 'Compiler Guidance & Refinements'}
                 </label>
-                <span className="text-[11px] text-gray-400 dark:text-neutral-500">Optional</span>
+                <span className="text-[11px] text-gray-400 dark:text-neutral-500">
+                  {isRegenerate ? 'Required for v' + nextVersion : 'Optional'}
+                </span>
               </div>
               <textarea
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
-                placeholder="e.g. Ensure all error states are checked, assert the order token header, and verify toast notification message on submit..."
+                required={isRegenerate}
+                placeholder={
+                  isRegenerate
+                    ? 'e.g. Add strict assertion for ZIP MIME type application/zip and verify session token validity before download...'
+                    : 'e.g. Ensure all error states are checked, assert the order token header, and verify toast notification message on submit...'
+                }
                 className="w-full h-24 px-3.5 py-2.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all resize-none leading-relaxed"
               />
               <p className="text-[11px] text-gray-500 dark:text-neutral-400">
-                You can specify exact DOM selectors, custom assertion strings, or mock payload values to include.
+                {isRegenerate
+                  ? 'AI compiler will incorporate these directives into updated assertions and version diff.'
+                  : 'You can specify exact DOM selectors, custom assertion strings, or mock payload values to include.'}
               </p>
             </div>
 
@@ -450,12 +464,12 @@ export function GeneratePlanDrawer({
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Compiling Plan...</span>
+                  <span>{isRegenerate ? 'Compiling New Version...' : 'Compiling Plan...'}</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="h-4 w-4" />
-                  <span>✦ Compile & Generate Plan</span>
+                  <span>{isRegenerate ? `✦ Compile New Version (v${nextVersion})` : '✦ Generate Test Plan'}</span>
                 </>
               )}
             </button>

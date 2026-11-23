@@ -29,6 +29,7 @@ export function CreateTaskDrawer({
   const [selectedWebsiteId, setSelectedWebsiteId] = useState('')
   const [title, setTitle] = useState('')
   const [instruction, setInstruction] = useState('')
+  const [priority, setPriority] = useState<'P0' | 'P1' | 'P2' | 'P3'>('P1')
   const [engine, setEngine] = useState<'ollama' | 'gemini' | 'hybrid'>('ollama')
   const [role, setRole] = useState('Admin')
   const [loading, setLoading] = useState(false)
@@ -77,6 +78,7 @@ export function CreateTaskDrawer({
         title,
         instruction,
         prompt: instruction,
+        priority,
         role,
         roleName: role,
         engine,
@@ -197,6 +199,33 @@ export function CreateTaskDrawer({
                 onChange={(e) => setInstruction(e.target.value)}
                 className="w-full p-3.5 text-[13px] rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 transition-all resize-none"
               />
+            </div>
+
+            {/* Priority */}
+            <div className="space-y-1.5">
+              <label className="block text-[13px] font-medium text-gray-700 dark:text-gray-300">
+                Priority
+              </label>
+              <div className="grid grid-cols-4 gap-2">
+                {(['P0', 'P1', 'P2', 'P3'] as const).map((p) => {
+                  const isSelected = priority === p
+                  return (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setPriority(p)}
+                      className={cn(
+                        'h-9 rounded-lg text-[12px] font-mono font-semibold transition-all border',
+                        isSelected
+                          ? 'border-[#4F46E5] bg-[#4F46E5] text-white shadow-xs'
+                          : 'border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-700'
+                      )}
+                    >
+                      {p}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
 
             {/* AI Engine Selector */}

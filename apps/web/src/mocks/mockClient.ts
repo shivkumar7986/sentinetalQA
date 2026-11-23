@@ -336,6 +336,30 @@ export const mockClient = {
     if (!task) throw new Error('Task not found')
 
     const runId = `run-${Date.now()}`
+    const casesCount = plan.cases?.length || 3
+    const simulatedStepLogs: StepLog[] = (plan.cases || []).map((c, idx) => ({
+      id: `log-${Date.now()}-${idx + 1}`,
+      runId,
+      caseId: c.id,
+      stepId: c.steps?.[0]?.id || `step-${idx + 1}`,
+      caseTitle: c.title,
+      action: c.steps?.[0]?.action || c.title,
+      validationType: c.steps?.[0]?.validationType || 'route_check',
+      status: 'passed' as const,
+      startedAt: new Date().toISOString(),
+      endedAt: new Date().toISOString(),
+      durationMs: 250 + idx * 120,
+      checkPerformed: c.expectedOutcome || 'Assertion verified successfully.',
+      requestSummary: {
+        method: 'GET',
+        url: c.steps?.[0]?.target?.url || '/',
+      },
+      responseSummary: {
+        statusCode: 200,
+      },
+    }))
+    const totalDuration = simulatedStepLogs.reduce((acc, s) => acc + s.durationMs, 0) || 1420
+
     const newRun: Run = {
       id: runId,
       planId,
@@ -345,23 +369,27 @@ export const mockClient = {
       environment: 'staging',
       runNumber: Math.floor(Math.random() * 900) + 100,
       trigger: 'manual',
-      status: 'running',
+      status: 'passed',
       executor: 'http',
       startedAt: new Date().toISOString(),
-      durationMs: 0,
-      passRate: 0,
+      durationMs: totalDuration,
+      passRate: 100,
       triggeredByName: 'Current User',
-      totalCases: plan.cases.length,
-      passedCases: 0,
+      totalCases: casesCount,
+      passedCases: casesCount,
       failedCases: 0,
-      stepLogs: [],
+      stepLogs: simulatedStepLogs,
     }
 
     const runsMap = loadState(STORAGE_KEYS.runs, INITIAL_RUNS)
     runsMap[runId] = newRun
     saveState(STORAGE_KEYS.runs, runsMap)
 
-    await mockClient.updateTask(task.id, { status: 'running' })
+    await mockClient.updateTask(task.id, {
+      status: 'completed',
+      lastRunId: runId,
+      lastRunPassRate: 100,
+    })
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('testing_agent_runs_changed'))
       window.dispatchEvent(new CustomEvent('testing_agent_tasks_changed'))

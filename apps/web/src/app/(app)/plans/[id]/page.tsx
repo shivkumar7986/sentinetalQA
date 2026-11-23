@@ -352,6 +352,10 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
 
   async function handleApprove() {
     if (!plan) return
+    if (isApproved) {
+      toast.info('This plan is already approved and locked.')
+      return
+    }
     if (!canApprove) {
       toast.error('Permission Denied', {
         description: `Your active role (${meta.label}) cannot approve plans. Switch to QA Lead or Admin in the topbar.`,
@@ -474,28 +478,42 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
 
         <div className="flex items-center gap-2 flex-wrap">
           <button
-            onClick={() => openFormDrawer('generate-plan', { taskId: plan?.taskId })}
+            onClick={() =>
+              openFormDrawer('generate-plan', {
+                taskId: plan?.taskId || task?.id,
+                mode: 'regenerate',
+                currentVersion: plan?.version || 1,
+              })
+            }
             className="px-3.5 py-1.5 text-[13px] font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5 shadow-none"
           >
             ✦ Regenerate with feedback
           </button>
-          <button
-            onClick={handleReject}
-            className="px-3.5 py-1.5 text-[13px] font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50/50 transition-colors flex items-center gap-1.5 shadow-none"
-          >
-            ✕ Reject
-          </button>
-          <button
-            onClick={handleApprove}
-            className={`px-4 py-1.5 text-[13px] font-medium rounded-lg transition-colors flex items-center gap-1.5 shadow-sm ${
-              canApprove
-                ? 'text-white bg-[#4F46E5] hover:bg-[#4338CA] cursor-pointer'
-                : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed opacity-80'
-            }`}
-            title={!canApprove ? 'Plan approval requires QA Lead or Admin role' : undefined}
-          >
-            ✓ Approve & Finalize {!canApprove && '(Lead/Admin only)'}
-          </button>
+          {!isApproved && (
+            <button
+              onClick={handleReject}
+              className="px-3.5 py-1.5 text-[13px] font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50/50 transition-colors flex items-center gap-1.5 shadow-none"
+            >
+              ✕ Reject
+            </button>
+          )}
+          {isApproved ? (
+            <span className="px-4 py-1.5 text-[13px] font-medium rounded-lg flex items-center gap-1.5 bg-[#DCFCE7] text-[#16A34A] border border-[#BBF7D0] select-none shadow-xs">
+              ✓ Plan Approved & Locked
+            </span>
+          ) : (
+            <button
+              onClick={handleApprove}
+              className={`px-4 py-1.5 text-[13px] font-medium rounded-lg transition-colors flex items-center gap-1.5 shadow-sm ${
+                canApprove
+                  ? 'text-white bg-[#4F46E5] hover:bg-[#4338CA] cursor-pointer'
+                  : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed opacity-80'
+              }`}
+              title={!canApprove ? 'Plan approval requires QA Lead or Admin role' : undefined}
+            >
+              ✓ Approve & Finalize {!canApprove && '(Lead/Admin only)'}
+            </button>
+          )}
         </div>
       </div>
 

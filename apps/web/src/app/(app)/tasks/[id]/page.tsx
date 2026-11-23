@@ -346,17 +346,23 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                               'inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium',
                               r.status === 'passed'
                                 ? 'bg-[#DCFCE7] text-[#16A34A]'
+                                : r.status === 'running'
+                                ? 'bg-sky-100 text-sky-700'
                                 : 'bg-rose-100 text-rose-700'
                             )}
                           >
-                            {r.status === 'passed' ? '✓ Passed' : 'Failed'}
+                            {r.status === 'passed'
+                              ? '✓ Passed'
+                              : r.status === 'running'
+                              ? '• Running'
+                              : '✕ Failed'}
                           </span>
                         </td>
                         <td className="py-3 font-semibold text-gray-900 dark:text-white">
-                          {r.passRate || 100}%
+                          {r.passRate !== undefined ? `${r.passRate}%` : '0%'}
                         </td>
                         <td className="py-3 font-mono text-gray-600 dark:text-neutral-400">
-                          {((r.durationMs || 1420) / 1000).toFixed(2)}s
+                          {r.durationMs ? `${(r.durationMs / 1000).toFixed(2)}s` : '0.0s'}
                         </td>
                         <td className="py-3 text-right">
                           <Link

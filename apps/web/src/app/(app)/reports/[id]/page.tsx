@@ -7,10 +7,8 @@ import {
   Lock,
   ChevronDown,
   ChevronRight,
-  Play,
   Share2,
   Download,
-  ArrowLeftRight,
   ArrowUpRight,
   ExternalLink,
   Check,
@@ -139,16 +137,6 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
     const link = `https://testingagent.internal/reports/${params.id}?token=sh_${Math.random().toString(36).substring(2, 9)}`
     setShareLink(link)
     setShareOpen(true)
-  }
-
-  async function handleRerun() {
-    try {
-      const newRun = await mockClient.triggerRun(run?.planId || 'plan-1')
-      toast.success('Re-run triggered successfully!')
-      router.push(`/reports/${newRun.id}`)
-    } catch {
-      toast.error('Failed to trigger re-run')
-    }
   }
 
   if (loading) {
@@ -280,33 +268,21 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
         <div className="flex items-center gap-2 flex-wrap">
           <Link
             href={`/tasks/${targetTaskId}`}
-            className="px-3 py-1.5 text-[12px] font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5"
+            className="px-3.5 py-1.5 text-[12px] font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5 shadow-none"
           >
             <ExternalLink className="h-3.5 w-3.5 text-gray-500" /> View Task
           </Link>
-          <Link
-            href="/reports/compare"
-            className="px-3.5 py-1.5 text-[12px] font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5"
-          >
-            <ArrowLeftRight className="h-3.5 w-3.5 text-gray-500" /> Compare vs baseline
-          </Link>
           <button
             onClick={handleExport}
-            className="px-3.5 py-1.5 text-[12px] font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5"
+            className="px-3.5 py-1.5 text-[12px] font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5 shadow-none"
           >
-            <Download className="h-3.5 w-3.5 text-gray-500" /> Export
+            <Download className="h-3.5 w-3.5 text-gray-500" /> Export JSON
           </button>
           <button
             onClick={handleShare}
-            className="px-3.5 py-1.5 text-[12px] font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5"
+            className="px-3.5 py-1.5 text-[12px] font-medium text-white bg-[#4F46E5] hover:bg-[#4338CA] rounded-lg transition-colors flex items-center gap-1.5 shadow-sm"
           >
-            <Share2 className="h-3.5 w-3.5 text-gray-500" /> Share link
-          </button>
-          <button
-            onClick={handleRerun}
-            className="px-4 py-1.5 text-[12px] font-medium text-white bg-[#4F46E5] hover:bg-[#4338CA] rounded-lg transition-colors flex items-center gap-1.5 shadow-sm"
-          >
-            <Play className="h-3.5 w-3.5 fill-current" /> Re-run
+            <Share2 className="h-3.5 w-3.5 text-white" /> Share link
           </button>
         </div>
       </div>

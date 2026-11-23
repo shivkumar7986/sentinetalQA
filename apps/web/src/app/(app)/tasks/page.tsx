@@ -293,7 +293,7 @@ function TasksPageContent() {
                               asChild
                               className="h-8 px-3.5 text-[12px] font-medium border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 text-gray-700 dark:text-gray-200 rounded-[6px]"
                             >
-                              <Link href={`/plans/${task.currentPlanId || 'plan-3'}`}>
+                              <Link href={task.currentPlanId ? `/plans/${task.currentPlanId}` : `/tasks/${task.id}`}>
                                 Review plan
                               </Link>
                             </Button>

@@ -362,6 +362,10 @@ export const mockClient = {
     saveState(STORAGE_KEYS.runs, runsMap)
 
     await mockClient.updateTask(task.id, { status: 'running' })
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('testing_agent_runs_changed'))
+      window.dispatchEvent(new CustomEvent('testing_agent_tasks_changed'))
+    }
     return newRun
   },
 

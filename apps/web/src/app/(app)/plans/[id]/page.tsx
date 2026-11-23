@@ -190,6 +190,7 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
       const associatedTask = await mockClient.getTaskById(possibleTaskId)
 
       if (associatedTask) {
+        setTask(associatedTask)
         const dynamicCases: TestCase[] = [
           {
             id: `case-${Date.now()}-1`,
@@ -361,15 +362,25 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
       await mockClient.approvePlan(plan.id)
       setPlan((prev) => (prev ? { ...prev, status: 'approved' } : null))
       toast.success(`Plan v${plan.version || 2} approved and locked!`)
-      router.push(`/tasks/${plan.taskId || 'tsk-201'}`)
+      const destTaskId = plan.taskId || task?.id
+      if (destTaskId) {
+        router.push(`/tasks/${destTaskId}`)
+      } else {
+        router.push('/tasks')
+      }
     } catch {
       toast.error('Failed to approve plan')
     }
   }
 
   function handleReject() {
-    toast.error('Plan v2 rejected')
-    router.push('/tasks')
+    toast.error(`Plan v${plan?.version || 1} rejected`)
+    const destTaskId = plan?.taskId || task?.id
+    if (destTaskId) {
+      router.push(`/tasks/${destTaskId}`)
+    } else {
+      router.push('/tasks')
+    }
   }
 
   async function handleRegenerate(e: React.FormEvent) {
@@ -377,7 +388,8 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
     if (!plan) return
     setRegenerating(true)
     try {
-      const newPlan = await mockClient.generatePlan(plan.taskId || 'tsk-201', regenFeedback)
+      const destTaskId = plan.taskId || task?.id || params.id.replace('p-', '')
+      const newPlan = await mockClient.generatePlan(destTaskId, regenFeedback)
       setRegenOpen(false)
       toast.success(`Plan regenerated as v${newPlan.version}`)
       router.push(`/plans/${newPlan.id}`)

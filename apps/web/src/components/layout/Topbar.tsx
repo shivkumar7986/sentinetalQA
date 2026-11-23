@@ -7,6 +7,44 @@ import { Search, Bell, PanelLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useUIStore } from '@/stores/ui.store'
 import { UserRoleMenu } from '@/components/layout/UserRoleMenu'
+import { mockClient } from '@/mocks/mockClient'
+
+function getPlanTaskId(planId: string): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const rawPlans = localStorage.getItem('testing_agent_mock_plans') || localStorage.getItem('sentinel_mock_plans')
+    if (rawPlans) {
+      const plans = JSON.parse(rawPlans)
+      if (plans[planId]?.taskId) return plans[planId].taskId
+    }
+    const rawTasks = localStorage.getItem('testing_agent_mock_tasks') || localStorage.getItem('sentinel_mock_tasks')
+    if (rawTasks) {
+      const tasks = JSON.parse(rawTasks)
+      const found = tasks.find((t: any) => t.currentPlanId === planId || t.id === planId || t.id === planId.replace('p-', ''))
+      if (found) return found.id
+    }
+  } catch {}
+  if (planId.startsWith('p-')) return planId.replace('p-', '')
+  return null
+}
+
+function getRunTaskId(runId: string): string | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const rawRuns = localStorage.getItem('testing_agent_mock_runs') || localStorage.getItem('sentinel_mock_runs')
+    if (rawRuns) {
+      const runs = JSON.parse(rawRuns)
+      if (runs[runId]?.taskId) return runs[runId].taskId
+    }
+    const rawTasks = localStorage.getItem('testing_agent_mock_tasks') || localStorage.getItem('sentinel_mock_tasks')
+    if (rawTasks) {
+      const tasks = JSON.parse(rawTasks)
+      const found = tasks.find((t: any) => t.lastRunId === runId || t.id === runId)
+      if (found) return found.id
+    }
+  } catch {}
+  return null
+}
 
 const PATH_LABELS: Record<string, string> = {
   dashboard: 'Dashboard',
@@ -32,7 +70,7 @@ interface BreadcrumbItem {
   isId?: boolean
 }
 
-function getBreadcrumbItems(pathname: string): BreadcrumbItem[] {
+function getBreadcrumbItems(pathname: string, dynamicParentId?: string | null): BreadcrumbItem[] {
   const rootItem: BreadcrumbItem = { label: 'Workspace', href: '/dashboard' }
   const segments = pathname.split('/').filter(Boolean)
 
@@ -107,25 +145,31 @@ function getBreadcrumbItems(pathname: string): BreadcrumbItem[] {
   // Module 3: Plans (/plans/[id]) -> Workspace / Tasks / Task-id / plan-id
   if (module === 'plans' && segments[1]) {
     const planId = segments[1]
-    const taskId = 'tsk-201'
-    return [
+    const effectiveTaskId = dynamicParentId || getPlanTaskId(planId)
+    const items: BreadcrumbItem[] = [
       rootItem,
       { label: 'Tasks', href: '/tasks' },
-      { label: taskId, href: `/tasks/${taskId}`, isId: true },
-      { label: planId, isId: true },
     ]
+    if (effectiveTaskId) {
+      items.push({ label: effectiveTaskId, href: `/tasks/${effectiveTaskId}`, isId: true })
+    }
+    items.push({ label: planId, isId: true })
+    return items
   }
 
   // Module 4: Runs (/runs/[id]) -> Workspace / Tasks / Task-id / run-id
   if (module === 'runs' && segments[1]) {
     const runId = segments[1]
-    const taskId = 'tsk-201'
-    return [
+    const effectiveTaskId = dynamicParentId || getRunTaskId(runId)
+    const items: BreadcrumbItem[] = [
       rootItem,
       { label: 'Tasks', href: '/tasks' },
-      { label: taskId, href: `/tasks/${taskId}`, isId: true },
-      { label: runId, isId: true },
     ]
+    if (effectiveTaskId) {
+      items.push({ label: effectiveTaskId, href: `/tasks/${effectiveTaskId}`, isId: true })
+    }
+    items.push({ label: runId, isId: true })
+    return items
   }
 
   // Module 5: Reports (/reports, /reports/compare, /reports/[id])
@@ -185,7 +229,61 @@ function getBreadcrumbItems(pathname: string): BreadcrumbItem[] {
 export function Topbar() {
   const pathname = usePathname()
   const { toggleSidebar, setCommandMenuOpen } = useUIStore()
-  const breadcrumbs = getBreadcrumbItems(pathname)
+  const [parentTaskId, setParentTaskId] = React.useState<string | null>(() => {
+    if (typeof window === 'undefined') return null
+    const segments = pathname.split('/').filter(Boolean)
+    if (segments[0] === 'plans' && segments[1]) {
+      return getPlanTaskId(segments[1])
+    }
+    if (segments[0] === 'runs' && segments[1]) {
+      return getRunTaskId(segments[1])
+    }
+    return null
+  })
+
+  React.useEffect(() => {
+    let mounted = true
+    function resolveParent() {
+      const segments = pathname.split('/').filter(Boolean)
+      const module = segments[0]
+      const id = segments[1]
+      if (module === 'plans' && id) {
+        const found = getPlanTaskId(id)
+        if (found) {
+          if (mounted) setParentTaskId(found)
+        } else {
+          mockClient.getPlanById(id).then((p) => {
+            if (mounted && p?.taskId) setParentTaskId(p.taskId)
+          })
+        }
+      } else if (module === 'runs' && id) {
+        const found = getRunTaskId(id)
+        if (found) {
+          if (mounted) setParentTaskId(found)
+        } else {
+          mockClient.getRunById(id).then((r) => {
+            if (mounted && r?.taskId) setParentTaskId(r.taskId)
+          })
+        }
+      } else {
+        if (mounted) setParentTaskId(null)
+      }
+    }
+
+    resolveParent()
+
+    window.addEventListener('testing_agent_plans_changed', resolveParent)
+    window.addEventListener('testing_agent_tasks_changed', resolveParent)
+    window.addEventListener('testing_agent_runs_changed', resolveParent)
+    return () => {
+      mounted = false
+      window.removeEventListener('testing_agent_plans_changed', resolveParent)
+      window.removeEventListener('testing_agent_tasks_changed', resolveParent)
+      window.removeEventListener('testing_agent_runs_changed', resolveParent)
+    }
+  }, [pathname])
+
+  const breadcrumbs = getBreadcrumbItems(pathname, parentTaskId)
 
   return (
     <header

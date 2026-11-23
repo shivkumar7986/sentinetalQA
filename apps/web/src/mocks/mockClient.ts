@@ -172,24 +172,30 @@ export const mockClient = {
     const task = await mockClient.getTaskById(taskId)
     if (!task) throw new Error('Task not found')
 
+    const allPlans = loadState<Record<string, TestPlan>>(STORAGE_KEYS.plans, INITIAL_PLANS)
+    const existingForTask = Object.values(allPlans).filter((p) => p.taskId === taskId)
+    const nextVersion = existingForTask.length + 1
+
     const planId = `plan-${Date.now()}`
     const newPlan: TestPlan = {
       id: planId,
       taskId,
-      version: 1,
+      version: nextVersion,
       status: 'in_review',
       generatedBy: 'ai',
-      engine: task.providerKind === 'gemini' ? 'gemini' : 'ollama',
+      engine: (task.providerKind === 'gemini' ? 'gemini' : 'ollama') as 'gemini' | 'ollama',
       model: task.model || 'ollama/qwen2.5:14b',
       tokensUsed: 1250,
       createdAt: new Date().toISOString(),
-      summary: `AI generated 4 atomic test cases for testing goal: "${task.title}". Includes authentication, navigation, and rule assertions.`,
+      summary: feedback
+        ? `Refined Plan v${nextVersion}: ${feedback.slice(0, 100)}... Includes automated route checks and assertion rules.`
+        : `AI compiled Plan v${nextVersion} with 3 atomic test cases for: "${task.title}".`,
       cases: [
         {
           id: `case-${Date.now()}-1`,
           position: 1,
-          title: 'Verify endpoint connectivity and status',
-          objective: 'Ensure target route returns HTTP 200 without loop',
+          title: `Verify ${task.websiteName || 'Application'} Entry Point`,
+          objective: 'Ensure target route is accessible and loads HTTP 200 without loop',
           expectedOutcome: 'Target page loads with 200 OK.',
           isOptional: false,
           steps: [
@@ -198,6 +204,7 @@ export const mockClient = {
               position: 1,
               action: 'Open target application page',
               validationType: 'route_check',
+              target: { url: '/' },
               expected: { status: 200 },
             },
           ],
@@ -205,15 +212,15 @@ export const mockClient = {
         {
           id: `case-${Date.now()}-2`,
           position: 2,
-          title: 'Validate UI controls and form inputs',
-          objective: 'Ensure all required fields exist and accept input',
-          expectedOutcome: 'Form controls are interactable.',
+          title: `Validate Input Controls and Persona State (${task.roleName || task.role || 'User'})`,
+          objective: 'Ensure all required fields exist, are interactable, and accept inputs',
+          expectedOutcome: 'Form controls are interactable and input state persists.',
           isOptional: false,
           steps: [
             {
               id: `step-${Date.now()}-2`,
               position: 1,
-              action: 'Check for essential input elements',
+              action: 'Check for essential input elements and form structure',
               validationType: 'form_structure',
               expected: { formPresent: true },
             },
@@ -222,15 +229,15 @@ export const mockClient = {
         {
           id: `case-${Date.now()}-3`,
           position: 3,
-          title: 'Execute authentication / action sequence',
-          objective: 'Simulate workflow according to configured rules',
-          expectedOutcome: 'Action completes and issues valid state response.',
+          title: `Execute Goal Action: ${task.title}`,
+          objective: task.prompt || task.instruction || 'Execute workflow according to configured requirements',
+          expectedOutcome: 'Action completes cleanly and issues valid response.',
           isOptional: false,
           steps: [
             {
               id: `step-${Date.now()}-3`,
               position: 1,
-              action: 'Execute action payload',
+              action: 'Execute payload and verify assertion invariants',
               validationType: 'custom',
               expected: { success: true },
             },
@@ -239,12 +246,19 @@ export const mockClient = {
       ],
     }
 
-    const allPlans = loadState(STORAGE_KEYS.plans, INITIAL_PLANS)
     allPlans[planId] = newPlan
     saveState(STORAGE_KEYS.plans, allPlans)
 
-    // Update task
-    await mockClient.updateTask(taskId, { status: 'plan_generated', currentPlanId: planId })
+    // Update task status and current plan
+    await mockClient.updateTask(taskId, {
+      status: 'plan_generated',
+      currentPlanId: planId,
+    })
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('testing_agent_plans_changed'))
+      window.dispatchEvent(new CustomEvent('testing_agent_tasks_changed'))
+    }
 
     return newPlan
   },

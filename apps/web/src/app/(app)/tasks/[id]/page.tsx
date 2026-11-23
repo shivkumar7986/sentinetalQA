@@ -9,29 +9,29 @@ import type { Task } from '@/mocks/data/tasks.mock'
 import type { TestPlan } from '@/mocks/data/plans.mock'
 import type { Run } from '@/mocks/data/runs.mock'
 import { toast } from 'sonner'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+import { useUIStore } from '@/stores/ui.store'
 import { cn } from '@/lib/utils'
 
 export default function TaskDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter()
+  const { openFormDrawer } = useUIStore()
   const [task, setTask] = useState<Task | null>(null)
   const [plans, setPlans] = useState<TestPlan[]>([])
   const [runs, setRuns] = useState<Run[]>([])
   const [loading, setLoading] = useState(true)
-  const [generateModalOpen, setGenerateModalOpen] = useState(false)
-  const [feedbackInput, setFeedbackInput] = useState('')
-  const [generating, setGenerating] = useState(false)
 
   useEffect(() => {
     loadData()
+
+    function handleUpdate() {
+      loadData()
+    }
+    window.addEventListener('testing_agent_plans_changed', handleUpdate)
+    window.addEventListener('testing_agent_tasks_changed', handleUpdate)
+    return () => {
+      window.removeEventListener('testing_agent_plans_changed', handleUpdate)
+      window.removeEventListener('testing_agent_tasks_changed', handleUpdate)
+    }
   }, [params.id])
 
   async function loadData() {
@@ -60,7 +60,7 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
       toast.error('No test plan found', {
         description: 'Please generate a test plan first before running.',
       })
-      setGenerateModalOpen(true)
+      openFormDrawer('generate-plan', { task })
       return
     }
 
@@ -71,24 +71,6 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
       router.push(`/runs/${newRun.id}`)
     } catch {
       toast.error('Failed to trigger run')
-    }
-  }
-
-  async function handleGeneratePlan(e: React.FormEvent) {
-    e.preventDefault()
-    if (!task) return
-    setGenerating(true)
-    try {
-      const newPlan = await mockClient.generatePlan(task.id, feedbackInput)
-      setGenerateModalOpen(false)
-      setFeedbackInput('')
-      toast.success(`Generated Plan v${newPlan.version}`)
-      await loadData()
-      router.push(`/plans/${newPlan.id}`)
-    } catch {
-      toast.error('Failed to generate plan')
-    } finally {
-      setGenerating(false)
     }
   }
 
@@ -197,7 +179,7 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
             Clone
           </button>
           <button
-            onClick={() => setGenerateModalOpen(true)}
+            onClick={() => openFormDrawer('generate-plan', { task })}
             className="px-3.5 py-1.5 text-[13px] font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors flex items-center gap-1.5 shadow-none"
           >
             <Sparkles className="h-3.5 w-3.5 text-indigo-500" /> Generate plan
@@ -263,7 +245,7 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                 <span className="text-[12px] text-gray-400 font-mono">({plans.length})</span>
               </div>
               <button
-                onClick={() => setGenerateModalOpen(true)}
+                onClick={() => openFormDrawer('generate-plan', { task })}
                 className="px-2.5 py-1 text-[12px] font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-md hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
               >
                 + New version
@@ -322,7 +304,7 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                   Click below to compile this natural-language prompt into executable test cases.
                 </p>
                 <button
-                  onClick={() => setGenerateModalOpen(true)}
+                  onClick={() => openFormDrawer('generate-plan', { task })}
                   className="mt-3.5 px-3.5 py-1.5 text-[12px] font-medium text-white bg-[#4F46E5] hover:bg-[#4338CA] rounded-lg transition-colors inline-flex items-center gap-1.5 shadow-sm"
                 >
                   <Sparkles className="h-3.5 w-3.5" /> Generate First Plan Version
@@ -450,52 +432,6 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
           </div>
         </div>
       </div>
-
-      {/* Generate Plan Modal */}
-      <Dialog open={generateModalOpen} onOpenChange={setGenerateModalOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Generate New Plan Version</DialogTitle>
-            <DialogDescription>
-              Submit feedback or instructions for the AI engine to generate an updated plan for this
-              task.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleGeneratePlan} className="space-y-4 pt-2">
-            <div>
-              <label className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1">
-                Refinement Feedback (Optional)
-              </label>
-              <textarea
-                value={feedbackInput}
-                onChange={(e) => setFeedbackInput(e.target.value)}
-                placeholder="e.g. Ensure all error states are checked and add tracking heading assertion."
-                className="w-full text-xs border border-gray-200 dark:border-neutral-700 rounded-lg p-2.5 bg-white dark:bg-neutral-800 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                rows={3}
-              />
-            </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => setGenerateModalOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                size="sm"
-                disabled={generating}
-                className="bg-[#4F46E5] hover:bg-[#4338CA] text-white"
-              >
-                {generating ? 'Generating...' : '✦ Generate Plan'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

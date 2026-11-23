@@ -9,6 +9,7 @@ import { CreateTaskDrawer } from '@/components/forms/CreateTaskDrawer'
 import { AddUserDrawer } from '@/components/forms/AddUserDrawer'
 import { EditUserDrawer } from '@/components/forms/EditUserDrawer'
 import { DeleteUserModal } from '@/components/forms/DeleteUserModal'
+import { GeneratePlanDrawer } from '@/components/forms/GeneratePlanDrawer'
 import { useUIStore } from '@/stores/ui.store'
 import { cn } from '@/lib/utils'
 
@@ -46,6 +47,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <CreateTaskDrawer />
       <AddUserDrawer />
       <EditUserDrawer />
+      <GeneratePlanDrawer />
       <DeleteUserModal />
     </div>
   )

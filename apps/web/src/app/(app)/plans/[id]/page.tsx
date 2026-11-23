@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { usePermissions } from '@/lib/permissions'
+import { useUIStore } from '@/stores/ui.store'
 
 const DEFAULT_CASES: TestCase[] = [
   {
@@ -138,6 +139,7 @@ const DEFAULT_CASES: TestCase[] = [
 
 export default function PlanReviewPage({ params }: { params: { id: string } }) {
   const router = useRouter()
+  const { openFormDrawer } = useUIStore()
   const { can, meta } = usePermissions()
   const canApprove = can('plan.approve')
   const [plan, setPlan] = useState<TestPlan | null>(null)
@@ -445,7 +447,7 @@ export default function PlanReviewPage({ params }: { params: { id: string } }) {
 
         <div className="flex items-center gap-2 flex-wrap">
           <button
-            onClick={() => setRegenOpen(true)}
+            onClick={() => openFormDrawer('generate-plan', { taskId: plan?.taskId })}
             className="px-3.5 py-1.5 text-[13px] font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5 shadow-none"
           >
             ✦ Regenerate with feedback

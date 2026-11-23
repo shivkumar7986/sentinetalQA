@@ -86,10 +86,6 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
     setLoading(false)
   }
 
-  function handleSelectSample(sampleId: string) {
-    router.push(`/reports/${sampleId}`)
-  }
-
   function toggleCase(caseNumber: string) {
     setExpandedCases((prev) => ({
       ...prev,
@@ -188,21 +184,6 @@ export default function ReportDetailPage({ params }: { params: { id: string } })
               <ArrowUpRight className="h-3 w-3" />
             </Link>
           </span>
-        </div>
-
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <span className="text-[12px] text-gray-400">Preview sample:</span>
-          <select
-            value={currentRunId}
-            onChange={(e) => handleSelectSample(e.target.value)}
-            className="h-8 px-2.5 text-[12px] font-mono font-medium bg-white border border-gray-200 rounded-md text-gray-800 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-          >
-            <option value="run-940">run-940 (Failed - tsk-201)</option>
-            <option value="run-941">run-941 (Passed - tsk-200)</option>
-            <option value="run-939">run-939 (Passed - tsk-199)</option>
-            <option value="run-937">run-937 (Passed - tsk-201)</option>
-            <option value="run-936">run-936 (Error - tsk-198)</option>
-          </select>
         </div>
       </div>
 
